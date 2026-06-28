@@ -118,27 +118,27 @@ export function Chat({
   return (
     <div className="flex-1 flex flex-col h-full bg-[#f8f9ff] overflow-hidden">
       {/* Quick Entry Section */}
-      <section className="px-5 py-4 bg-white border-b border-gray-100 z-10 relative shadow-sm">
-        <div className="relative w-full max-w-2xl mx-auto flex items-center">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <IconCircleArrowUp className="w-5 h-5 text-[#006a61]" />
-          </div>
-          <input
-            className="w-full pl-12 pr-12 py-3 bg-[#eff4ff] border border-gray-200 rounded-full font-sans text-sm text-[#0b1c30] placeholder-gray-400 focus:outline-none focus:border-[#006a61] focus:ring-1 focus:ring-[#006a61] transition-all"
-            placeholder="Introduce gasto rápido (ej: $4.50 Café en Starbucks)"
-            type="text"
-            value={quickExpenseText}
-            onChange={(e) => setQuickExpenseText(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleQuickExpenseSubmit()}
-          />
-          <button
-            onClick={handleQuickExpenseSubmit}
-            className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#006a61] hover:text-teal-700 transition-colors"
-          >
-            <IconSend className="w-5 h-5 fill-current" />
-          </button>
-        </div>
-      </section>
+
+      {/*   <div className="relative w-full max-w-2xl mx-auto flex items-center"> */}
+      {/*     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"> */}
+      {/*       <IconCircleArrowUp className="w-5 h-5 text-[#006a61]" /> */}
+      {/*     </div> */}
+      {/*     <input */}
+      {/*       className="w-full pl-12 pr-12 py-3 bg-[#eff4ff] border border-gray-200 rounded-full font-sans text-sm text-[#0b1c30] placeholder-gray-400 focus:outline-none focus:border-[#006a61] focus:ring-1 focus:ring-[#006a61] transition-all" */}
+      {/*       placeholder="Introduce gasto rápido (ej: $4.50 Café en Starbucks)" */}
+      {/*       type="text" */}
+      {/*       value={quickExpenseText} */}
+      {/*       onChange={(e) => setQuickExpenseText(e.target.value)} */}
+      {/*       onKeyDown={(e) => e.key === "Enter" && handleQuickExpenseSubmit()} */}
+      {/*     /> */}
+      {/*     <button */}
+      {/*       onClick={handleQuickExpenseSubmit} */}
+      {/*       className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#006a61] hover:text-teal-700 transition-colors" */}
+      {/*     > */}
+      {/*       <IconSend className="w-5 h-5 fill-current" /> */}
+      {/*     </button> */}
+      {/*   </div> */}
+      {/* </section> */}
 
       <section className="flex-1 overflow-y-auto no-scrollbar p-5 space-y-6 flex flex-col relative">
         {chatHistory.map((msg) => (

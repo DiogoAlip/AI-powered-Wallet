@@ -62,12 +62,12 @@ const router = createBrowserRouter([
           />
         ),
       },
-      { path: "limits", element: <Limits /> },
+      { path: "limits", element: <Limits budgets={INITIAL_BUDGETS} /> },
       {
         path: "history",
         element: <History transactions={INITIAL_TRANSACTIONS} />,
       },
-      { path: "goals", element: <Goals /> },
+      { path: "goals", element: <Goals savings={INITIAL_SAVINGS} /> },
     ],
   },
 ]);
