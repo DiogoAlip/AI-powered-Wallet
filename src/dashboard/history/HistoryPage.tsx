@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
   IconSearch,
-  IconFilter,
+  //IconFilter,
   IconPlus,
   IconTrash,
   IconCalendarWeek,
@@ -12,19 +12,19 @@ import {
   IconX,
   IconCheck,
 } from "@tabler/icons-react";
-import type { Transaction } from "../types/ChatTypes";
-import { getCategoryIcon } from "./chat.route.tsx";
+import type { Transaction } from "../types/ChatTypes.ts";
+import { getCategoryIcon } from "../helpers/getCategoryIcon.tsx";
 
 interface HistoryProps {
   transactions: Transaction[];
-  onAddTransaction: (tx: Omit<Transaction, "id">) => void;
-  onDeleteTransaction: (id: string) => void;
+  // onAddTransaction: (tx: Omit<Transaction, "id">) => void;
+  // onDeleteTransaction: (id: string) => void;
 }
 
 export function History({
   transactions,
-  onAddTransaction,
-  onDeleteTransaction,
+  // onAddTransaction,
+  // onDeleteTransaction,
 }: HistoryProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -64,14 +64,14 @@ export function History({
     e.preventDefault();
     if (!merchant.trim() || !amount) return;
 
-    onAddTransaction({
-      merchant,
-      category: type === "income" ? "Income" : category,
-      amount: parseFloat(amount),
-      date: "Hoy",
-      account,
-      type,
-    });
+    // onAddTransaction({
+    //   merchant,
+    //   category: type === "income" ? "Income" : category,
+    //   amount: parseFloat(amount),
+    //   date: "Hoy",
+    //   account,
+    //   type,
+    // });
 
     // Reset Form
     setMerchant("");
@@ -235,7 +235,7 @@ export function History({
                 className="p-4 sm:px-6 flex items-center justify-between hover:bg-gray-50/50 transition-colors group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-[#f8f9ff] border border-gray-100 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-[#f8f9ff] border border-gray-100 flex items-center justify-center shrink-0">
                     {getCategoryIcon(tx.category)}
                   </div>
                   <div>
@@ -266,7 +266,7 @@ export function History({
                     {tx.type === "expense" ? "-" : "+"}${tx.amount.toFixed(2)}
                   </span>
                   <button
-                    onClick={() => onDeleteTransaction(tx.id)}
+                    // onClick={() => onDeleteTransaction(tx.id)}
                     className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all md:opacity-0 group-hover:opacity-100 focus:opacity-100"
                     title="Eliminar registro"
                   >
@@ -281,7 +281,7 @@ export function History({
 
       {/* Manual Add Transaction Overlay Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-[100] flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-100 flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden border border-gray-100">
             <div className="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-[#f8f9ff]">
               <h3 className="font-sans font-bold text-[#0b1c30] text-sm">

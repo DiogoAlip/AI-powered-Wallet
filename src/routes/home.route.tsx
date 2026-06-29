@@ -1,5 +1,5 @@
-import LandingPage from "../home/routes/home.route";
+import HomePage from "../home/HomePage/HomePage.tsx";
 
 export const Home = () => {
-  return <LandingPage />;
+  return <HomePage />;
 };

@@ -10,7 +10,7 @@ import {
   IconCalendarWeek,
 } from "@tabler/icons-react";
 import type { Budget } from "../types/ChatTypes.ts";
-import { getCategoryIcon } from "./chat.route.tsx";
+import { getCategoryIcon } from "../helpers/getCategoryIcon.tsx";
 
 interface BudgetsTabProps {
   budgets: Budget[];

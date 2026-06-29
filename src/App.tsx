@@ -1,15 +1,14 @@
 import { createBrowserRouter, Navigate } from "react-router";
 import { RouterProvider } from "react-router/dom";
-import { Login } from "./routes/login.route";
-import { Register } from "./routes/register.route";
-import { Pricing } from "./routes/pricing.route";
-import { Home } from "./routes/home.route";
+import { LoginPage } from "./auth/LoginPage/LoginPage.tsx";
+import { RegisterPage } from "./auth/RegisterPage/RegisterPage.tsx";
+import { HomePage } from "./home/HomePage/HomePage.tsx";
 import { AuthLayout } from "./auth/auth.layout";
 import { DashboardLayout } from "./dashboard/layouts/dashboard.layout";
-import { Chat } from "./dashboard/routes/chat.route";
-import { Limits } from "./dashboard/routes/limits.route";
-import { History } from "./dashboard/routes/history.route";
-import { Goals } from "./dashboard/routes/goals.route";
+import { Chat } from "./dashboard/chat/ChatPage.tsx";
+import { Limits } from "./dashboard/limits/LimitsPage.tsx";
+import { History } from "./dashboard/history/HistoryPage.tsx";
+import { Goals } from "./dashboard/goals/GoalsPage.tsx";
 import {
   INITIAL_TRANSACTIONS,
   INITIAL_BUDGETS,
@@ -20,10 +19,7 @@ import {
 const router = createBrowserRouter([
   {
     path: "/",
-    children: [
-      { index: true, element: <Home /> },
-      { path: "pricing", element: <Pricing /> },
-    ],
+    children: [{ index: true, element: <HomePage /> }],
   },
   {
     path: "auth",
@@ -35,11 +31,11 @@ const router = createBrowserRouter([
       },
       {
         path: "login",
-        element: <Login />,
+        element: <LoginPage />,
       },
       {
         path: "register",
-        element: <Register />,
+        element: <RegisterPage />,
       },
     ],
   },
@@ -51,16 +47,7 @@ const router = createBrowserRouter([
       { path: "user", element: <div>User</div> },
       {
         path: "chat",
-        element: (
-          <Chat
-            chatHistory={INITIAL_CHAT_HISTORY}
-            budgets={INITIAL_BUDGETS}
-            savings={INITIAL_SAVINGS}
-            onSendMessage={() => console.log("Send message")}
-            onApplyAction={() => console.log("Apply action")}
-            isGenerating={() => console.log("Is generating")}
-          />
-        ),
+        element: <Chat chatHistory={INITIAL_CHAT_HISTORY} />,
       },
       { path: "limits", element: <Limits budgets={INITIAL_BUDGETS} /> },
       {
@@ -73,7 +60,7 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  return <RouterProvider router={router}></RouterProvider>;
+  return <RouterProvider router={router} />;
 }
 
 export default App;

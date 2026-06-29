@@ -12,7 +12,7 @@ import {
   IconHeartHandshake,
 } from "@tabler/icons-react";
 
-export default function LandingPage() {
+export function HomePage() {
   return (
     <div className="bg-[#f8f9ff] text-[#0b1c30] font-sans min-h-screen flex flex-col selection:bg-teal-200">
       {/* Landing Header */}
@@ -613,30 +613,6 @@ export default function LandingPage() {
               SpendWise AI
             </span>
           </div>
-
-          <nav className="flex flex-wrap justify-center gap-6 text-xs text-gray-500">
-            <a
-              href="#features"
-              className="hover:text-teal-700 transition-colors"
-            >
-              Features
-            </a>
-            <a
-              href="#how-it-works"
-              className="hover:text-teal-700 transition-colors"
-            >
-              Security
-            </a>
-            <a
-              href="#pricing"
-              className="hover:text-teal-700 transition-colors"
-            >
-              Pricing
-            </a>
-            <span className="hover:text-teal-700 transition-colors cursor-pointer">
-              Privacy Policy
-            </span>
-          </nav>
 
           <span className="text-[11px] text-gray-400">
             © 2026 SpendWise AI. Intelligent Wealth Management.
