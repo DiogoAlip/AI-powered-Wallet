@@ -33,9 +33,9 @@ export function History({
 
   // New Transaction Form State
   const [merchant, setMerchant] = useState("");
-  const [category, setCategory] = useState("Dining Out");
+  const [category, setCategory] = useState("Comida fuera");
   const [amount, setAmount] = useState("");
-  const [account, setAccount] = useState("Personal Card");
+  const [account, setAccount] = useState("Tarjeta Personal");
   const [type, setType] = useState<"expense" | "income">("expense");
 
   // Calculated Metrics
@@ -76,19 +76,19 @@ export function History({
     // Reset Form
     setMerchant("");
     setAmount("");
-    setCategory("Dining Out");
+    setCategory("Comida fuera");
     setType("expense");
     setIsModalOpen(false);
   };
 
   const categories = [
     "All",
-    "Dining Out",
-    "Transport",
-    "Groceries",
-    "Bills",
-    "Shopping",
-    "Other",
+    "Comida fuera",
+    "Transporte",
+    "Supermercado",
+    "Facturas",
+    "Compras",
+    "Otros",
   ];
 
   return (
@@ -365,14 +365,12 @@ export function History({
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                   >
-                    <option value="Dining Out">
-                      Dining Out (Comida fuera)
-                    </option>
-                    <option value="Transport">Transport (Transporte)</option>
-                    <option value="Groceries">Groceries (Supermercado)</option>
-                    <option value="Bills">Bills (Facturas/Servicios)</option>
-                    <option value="Shopping">Shopping (Compras)</option>
-                    <option value="Other">Other (Otros)</option>
+                    <option value="Comida fuera">Comida fuera</option>
+                    <option value="Transporte">Transporte</option>
+                    <option value="Supermercado">Supermercado</option>
+                    <option value="Facturas">Facturas</option>
+                    <option value="Compras">Compras</option>
+                    <option value="Otros">Otros</option>
                   </select>
                 </div>
               )}
@@ -387,10 +385,10 @@ export function History({
                   value={account}
                   onChange={(e) => setAccount(e.target.value)}
                 >
-                  <option value="Personal Card">Personal Card</option>
-                  <option value="Credit Card">Credit Card</option>
-                  <option value="Cash">Efectivo</option>
-                  <option value="Direct Deposit">Depósito Directo</option>
+                  <option value="Tarjeta Personal">Tarjeta Personal</option>
+                  <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
+                  <option value="Efectivo">Efectivo</option>
+                  <option value="Depósito Directo">Depósito Directo</option>
                 </select>
               </div>
 

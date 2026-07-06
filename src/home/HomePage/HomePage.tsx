@@ -29,13 +29,13 @@ export function HomePage() {
             to="auth/login"
             className="hidden sm:inline-block text-sm font-semibold text-gray-600 hover:text-[#0b1c30] transition-colors"
           >
-            Log In
+            Iniciar Sesión
           </Link>
           <Link
             to="dashboard/chat"
             className="bg-[#0b1c30] hover:bg-black text-white font-sans text-xs font-bold px-4 py-2 rounded-full shadow-sm transition-all transform hover:scale-105"
           >
-            Get Started
+            Comenzar
           </Link>
         </div>
       </header>
@@ -50,19 +50,19 @@ export function HomePage() {
           <div className="inline-flex items-center gap-1.5 bg-[#86f2e4]/30 border border-teal-200 px-3 py-1 rounded-full">
             <IconSparkles className="w-3.5 h-3.5 text-teal-700 fill-teal-700" />
             <span className="font-sans text-[11px] font-bold text-teal-800 tracking-wide uppercase">
-              AI-Powered Precision
+              Precisión Impulsada por IA
             </span>
           </div>
 
           <h2 className="font-display font-extrabold text-3xl md:text-5xl lg:text-6xl text-[#0b1c30] leading-tight tracking-tight">
-            Master Your Money with{" "}
-            <span className="text-[#006a61]">AI Intelligence.</span>
+            Domina tu Dinero con{" "}
+            <span className="text-[#006a61]">Inteligencia de IA.</span>
           </h2>
 
           <p className="font-sans text-sm md:text-base text-gray-500 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-            Take control of your finances with proactive insights, automated
-            tracking, and natural language expense logging. Built for the modern
-            professional.
+            Toma el control de tus finanzas con información proactiva, seguimiento
+            automatizado y registro de gastos en lenguaje natural. Creado para el
+            profesional moderno.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
@@ -70,7 +70,7 @@ export function HomePage() {
               to="dashboard/chat"
               className="w-full sm:w-auto px-8 py-3.5 bg-[#131b2e] hover:bg-black text-white font-sans text-sm font-bold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
             >
-              Get Started Free
+              Comenzar Gratis
               <IconArrowNarrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -81,19 +81,19 @@ export function HomePage() {
               <img
                 className="w-8 h-8 rounded-full border-2 border-white object-cover"
                 src="https://lh3.googleusercontent.com/aida/AP1WRLtk8gk9Zx8Q3SULN3nwj9jdV3tialt8H8Scjq5j7X2SLeODxAEEyn91_jipoiXPUsaBNo_w0LrgRMv1J1o7LO4gQuc1B-GSyMWhVSW046PHTShJJk1UUJ5s5hwHvwuJ0k7VcfCEkmhiAXidI0kovPfm2I4ylR337t84TNUbxRekw_p7IVxip2YnAmge16lvifke3mvIu_rqzG6_zdOucxF7ns22yi2xOEGdRyia6K79JJmSf9KspPlC3UHX"
-                alt="User 1"
+                alt="Usuario 1"
               />
               <img
                 className="w-8 h-8 rounded-full border-2 border-white object-cover"
                 src="https://lh3.googleusercontent.com/aida/AP1WRLuVWt9aMFIpZnT3dpAS2GUACCv3EdKElxOTEmdOSj8BKzidsXxYX-DcfyPCqZpAYiETcbbS2xOtBcBbysMU2zKTU8SIulvDdkFMejqHVaeu7h4WC0gldMnw9TQLnT8pgm6yPOnwKx-H82s4H7-Bn_K9bzrRUZ4rJn2_52mXsTJLTDYai5SMbqHUyzQBxh-pPFd3r5idfjyH1_O1xecHMZOqQ38E9AI_rJ_07W6BGsRBbbGZzBPObxyYUHA"
-                alt="User 2"
+                alt="Usuario 2"
               />
               <div className="w-8 h-8 rounded-full border-2 border-white bg-teal-100 flex items-center justify-center text-[10px] font-bold text-teal-800 font-sans">
                 +10k
               </div>
             </div>
             <p className="font-sans text-xs text-gray-500 font-medium">
-              Joined by 10k+ active wealth builders
+              Únete a más de 10k creadores de riqueza activos
             </p>
           </div>
         </div>
@@ -104,10 +104,10 @@ export function HomePage() {
             <div className="flex justify-between items-center border-b border-gray-50 pb-4">
               <div>
                 <span className="text-xs text-gray-400 font-semibold block uppercase">
-                  Daily Spending
+                  Gasto Diario
                 </span>
                 <span className="text-xs text-gray-400 block font-medium">
-                  Today, Oct 24
+                  Hoy, 24 de Oct
                 </span>
               </div>
               <span className="font-display font-extrabold text-xl text-[#0b1c30]">
@@ -124,10 +124,10 @@ export function HomePage() {
                   </div>
                   <div>
                     <span className="text-xs font-bold text-[#0b1c30] block">
-                      Artisan Coffee & Lunch
+                      Café Artesanal y Almuerzo
                     </span>
                     <span className="text-[10px] text-gray-400 block">
-                      12:45 PM • Dining Out
+                      12:45 PM • Comer Fuera
                     </span>
                   </div>
                 </div>
@@ -139,14 +139,14 @@ export function HomePage() {
                 <div className="flex items-center gap-1.5 text-[#006a61]">
                   <IconSparkles className="w-3.5 h-3.5 fill-current" />
                   <span className="text-[11px] font-extrabold uppercase tracking-wider">
-                    AI Insight
+                    Perspectiva de IA
                   </span>
                 </div>
                 <p className="text-xs text-gray-600 leading-relaxed">
-                  Your coffee spending is up{" "}
-                  <strong className="text-teal-800">12%</strong> this week. We
-                  found a subscription that could save you{" "}
-                  <strong className="text-teal-800">$40/month</strong>.
+                  Tu gasto en café ha subido un{" "}
+                  <strong className="text-teal-800">12%</strong> esta semana.
+                  Encontramos una suscripción que podría ahorrarte{" "}
+                  <strong className="text-teal-800">$40/mes</strong>.
                 </p>
               </div>
             </div>
@@ -154,9 +154,9 @@ export function HomePage() {
             {/* Simulated progress tracker */}
             <div className="space-y-1.5 pt-2">
               <div className="flex justify-between text-[11px] text-gray-400 font-semibold">
-                <span>Budget pacing</span>
+                <span>Progreso del presupuesto</span>
                 <span className="text-emerald-600 font-bold">
-                  25% under typical Friday
+                  25% por debajo del viernes típico
                 </span>
               </div>
               <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
@@ -178,11 +178,11 @@ export function HomePage() {
         <div className="max-w-6xl mx-auto space-y-12">
           <div className="text-center space-y-3">
             <h3 className="font-display font-extrabold text-2xl md:text-4xl text-[#0b1c30]">
-              Effortless Control
+              Control sin Esfuerzo
             </h3>
             <p className="font-sans text-sm md:text-base text-gray-500 max-w-xl mx-auto">
-              SpendWise AI removes the friction from financial management with a
-              streamlined three-step workflow.
+              SpendWise AI elimina la fricción de la gestión financiera con un
+              flujo de trabajo simplificado de tres pasos.
             </p>
           </div>
 
@@ -190,18 +190,18 @@ export function HomePage() {
             {[
               {
                 num: "1",
-                title: "Connect Your Accounts",
-                desc: "Securely sync your banks and cards with bank-grade encryption in seconds. No complex setup.",
+                title: "Conecta tus Cuentas",
+                desc: "Sincroniza de forma segura tus bancos y tarjetas con encriptación de nivel bancario en segundos. Sin configuraciones complejas.",
               },
               {
                 num: "2",
-                title: "Log Expenses via Chat",
-                desc: 'Simply text "Dinner for $45 at Green Cafe" or voice-note your coffee purchase. AI handles the rest.',
+                title: "Registra Gastos por Chat",
+                desc: 'Simplemente escribe "Cena de $45 en Green Cafe" o envía una nota de voz de tu compra de café. La IA se encarga del resto.',
               },
               {
                 num: "3",
-                title: "Get AI Insights",
-                desc: "Receive personalized suggestions on where to save, optimize bills and how to reach savings goals.",
+                title: "Obtén Perspectivas de IA",
+                desc: "Recibe sugerencias personalizadas sobre dónde ahorrar, cómo optimizar facturas y cómo alcanzar tus metas de ahorro.",
               },
             ].map((step) => (
               <div
@@ -231,15 +231,15 @@ export function HomePage() {
         <div className="text-center md:text-left space-y-3 max-w-xl">
           <div className="inline-flex items-center gap-1.5 bg-teal-50 border border-teal-100 px-2.5 py-0.5 rounded-full">
             <span className="font-sans text-[10px] font-bold text-teal-800 tracking-wide uppercase">
-              Intelligent Features
+              Funciones Inteligentes
             </span>
           </div>
           <h3 className="font-display font-extrabold text-2xl md:text-4xl text-[#0b1c30]">
-            Advanced AI built for your financial health.
+            IA avanzada diseñada para tu salud financiera.
           </h3>
           <p className="font-sans text-sm text-gray-500">
-            Powerful tools engineered for elite personal wealth management,
-            forecasting, and expense triage.
+            Potentes herramientas diseñadas para la gestión de riqueza personal de élite,
+            previsiones y clasificación de gastos.
           </p>
         </div>
 
@@ -252,22 +252,22 @@ export function HomePage() {
                 <IconSparkles className="w-6 h-6" />
               </div>
               <h4 className="font-sans font-bold text-lg text-[#0b1c30]">
-                Smart Categorization
+                Categorización Inteligente
               </h4>
               <p className="font-sans text-xs text-gray-500 leading-relaxed">
-                Our neural network learns your spending habits over time and
-                automatically tags every transaction with 99% accuracy. No more
-                manual sorting.
+                Nuestra red neuronal aprende tus hábitos de gasto con el tiempo y
+                etiqueta automáticamente cada transacción con un 99% de precisión. Se acabó
+                la clasificación manual.
               </p>
             </div>
 
             <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-between">
               <span className="font-mono text-[10px] text-gray-400 font-semibold bg-gray-200/50 px-2 py-1 rounded-full uppercase">
-                COFFEE → FOOD & DRINK
+                CAFÉ → COMIDA Y BEBIDA
               </span>
               <span className="text-xs font-semibold text-teal-800 flex items-center gap-1">
                 <IconCircleCheck className="w-3.5 h-3.5" />
-                Categorized
+                Categorizado
               </span>
             </div>
           </div>
@@ -280,11 +280,11 @@ export function HomePage() {
                   <IconDeviceMobile className="w-5 h-5" />
                 </div>
                 <h4 className="font-sans font-bold text-sm text-[#0b1c30]">
-                  Natural Language
+                  Lenguaje Natural
                 </h4>
                 <p className="font-sans text-xs text-gray-500 leading-relaxed">
-                  Talk to your budget helper like a close friend. Input expenses
-                  using quick, raw text, and let the assistant parse details.
+                  Habla con tu asistente de presupuesto como con un amigo cercano. Registra
+                  gastos usando texto rápido y simple, y deja que el asistente procese los detalles.
                 </p>
               </div>
             </div>
@@ -295,11 +295,11 @@ export function HomePage() {
                   <IconBolt className="w-5 h-5" />
                 </div>
                 <h4 className="font-sans font-bold text-sm text-[#0b1c30]">
-                  Proactive Savings
+                  Ahorros Proactivos
                 </h4>
                 <p className="font-sans text-xs text-gray-500 leading-relaxed">
-                  We predict upcoming weekly expenses and notify you before you
-                  exceed category budgets, helping you save.
+                  Predecimos los próximos gastos semanales y te notificamos antes de que
+                  superes los presupuestos de cada categoría, ayudándote a ahorrar.
                 </p>
               </div>
             </div>
@@ -309,15 +309,15 @@ export function HomePage() {
                 <div className="space-y-1.5">
                   <h4 className="font-sans font-bold text-sm text-[#0b1c30] flex items-center gap-1.5">
                     <IconLock className="w-4 h-4 text-[#006a61]" />
-                    256-bit AES Security
+                    Seguridad AES de 256 bits
                   </h4>
                   <p className="font-sans text-xs text-gray-500">
-                    We secure your data with the same grade of encryption used
-                    by leading financial organizations.
+                    Protegemos tus datos con el mismo nivel de encriptación utilizado
+                    por las organizaciones financieras líderes.
                   </p>
                 </div>
                 <span className="text-[11px] font-bold text-teal-800 bg-teal-100/50 border border-teal-200 px-3 py-1 rounded-full self-start sm:self-center">
-                  Bank-Grade Lock
+                  Bloqueo de Nivel Bancario
                 </span>
               </div>
             </div>
@@ -341,23 +341,23 @@ export function HomePage() {
           </div>
 
           <blockquote className="font-display font-extrabold text-xl md:text-3xl lg:text-4xl text-gray-100 leading-relaxed">
-            "SpendWise AI transformed my relationship with money. The AI
-            insights identified $200 in monthly leaks I never knew existed. It's
-            like having a financial advisor in my pocket 24/7."
+            "SpendWise AI transformó mi relación con el dinero. Las perspectivas de la IA
+            identificaron $200 en fugas mensuales que no sabía que existían. Es como
+            tener un asesor financiero en el bolsillo las 24 horas, los 7 días de la semana."
           </blockquote>
 
           <div className="flex flex-col items-center gap-2 pt-4">
             <img
               className="w-14 h-14 rounded-full border-2 border-teal-400 object-cover shadow-md"
               src="https://lh3.googleusercontent.com/aida/AP1WRLuVWt9aMFIpZnT3dpAS2GUACCv3EdKElxOTEmdOSj8BKzidsXxYX-DcfyPCqZpAYiETcbbS2xOtBcBbysMU2zKTU8SIulvDdkFMejqHVaeu7h4WC0gldMnw9TQLnT8pgm6yPOnwKx-H82s4H7-Bn_K9bzrRUZ4rJn2_52mXsTJLTDYai5SMbqHUyzQBxh-pPFd3r5idfjyH1_O1xecHMZOqQ38E9AI_rJ_07W6BGsRBbbGZzBPObxyYUHA"
-              alt="Sarah Jenkins profile"
+              alt="Perfil de Sarah Jenkins"
             />
             <div>
               <span className="font-sans font-bold text-sm block text-teal-300">
                 Sarah Jenkins
               </span>
               <span className="font-sans text-xs text-gray-400 block">
-                Senior Designer, Techflow
+                Diseñadora Senior, Techflow
               </span>
             </div>
           </div>
@@ -371,12 +371,11 @@ export function HomePage() {
       >
         <div className="bg-[#eff4ff] border border-blue-100 p-8 md:p-12 rounded-3xl text-center space-y-6 shadow-sm">
           <h3 className="font-display font-extrabold text-2xl md:text-4xl text-[#0b1c30]">
-            Ready for Smarter Wealth?
+            ¿Listo para una Riqueza más Inteligente?
           </h3>
           <p className="font-sans text-sm text-gray-500 max-w-lg mx-auto leading-relaxed">
-            Join thousands of users who have mastered their expenses and
-            automated their saving pacing with the power of artificial
-            intelligence.
+            Únete a miles de usuarios que han dominado sus gastos y automatizado su
+            ritmo de ahorro con el poder de la inteligencia artificial.
           </p>
 
           <div className="pt-2">
@@ -384,13 +383,13 @@ export function HomePage() {
               to="dashboard/chat"
               className="w-full sm:w-auto px-8 py-4 bg-black hover:bg-gray-900 text-white font-sans text-sm font-bold rounded-xl shadow-md transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 mx-auto"
             >
-              Get Started Free
+              Comenzar Gratis
               <IconArrowNarrowRight className="w-4 h-4 text-teal-400" />
             </Link>
           </div>
 
           <span className="text-[11px] text-gray-400 font-medium block">
-            No credit card required • Secure data syncing
+            No se requiere tarjeta de crédito • Sincronización segura de datos
           </span>
         </div>
       </section>
@@ -400,23 +399,23 @@ export function HomePage() {
         {/* Header Section */}
         <div className="text-center mb-12 max-w-md">
           <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] sm:text-4xl">
-            Simple, Transparent Pricing
+            Precios Simples y Transparentes
           </h2>
           <p className="mt-4 text-lg text-gray-400">
-            Choose the plan that fits your financial journey.
+            Elige el plan que se adapte a tu camino financiero.
           </p>
         </div>
 
         <div className="w-full flex flex-row justify-center gap-6 flex-wrap">
           <div className="bg-white w-100 rounded-2xl p-8 shadow-sm border border-slate-100 flex flex-col">
             <div className="mb-6">
-              <h3 className="text-xl font-bold text-gray-800">Free Plan</h3>
+              <h3 className="text-xl font-bold text-gray-800">Plan Gratuito</h3>
               <div className="mt-4 flex items-baseline">
                 <span className="text-4xl font-bold tracking-tight text-gray-800">
                   $0
                 </span>
                 <span className="ml-1 text-lg font-medium text-gray-400">
-                  /mo
+                  /mes
                 </span>
               </div>
             </div>
@@ -437,7 +436,7 @@ export function HomePage() {
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <span>Basic Expense Tracking</span>
+                <span>Seguimiento Básico de Gastos</span>
               </li>
               <li className="flex items-start gap-3 text-base text-gray-800">
                 <svg
@@ -453,7 +452,7 @@ export function HomePage() {
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <span>AI Chat (50 messages/mo)</span>
+                <span>Chat de IA (50 mensajes/mes)</span>
               </li>
               <li className="flex items-start gap-3 text-base text-gray-400">
                 <svg
@@ -469,7 +468,7 @@ export function HomePage() {
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <span>Weekly Insights</span>
+                <span>Análisis Semanales</span>
               </li>
               <li className="flex items-start gap-3 text-base text-gray-800">
                 <svg
@@ -485,12 +484,12 @@ export function HomePage() {
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <span>Standard Security</span>
+                <span>Seguridad Estándar</span>
               </li>
             </ul>
 
             <button className="w-full py-3 px-4 rounded-xl border-2 border-gray-800 text-base font-semibold text-[#1e293b] bg-white hover:bg-slate-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">
-              Get Started
+              Comenzar
             </button>
           </div>
 
@@ -498,17 +497,17 @@ export function HomePage() {
           <div className="w-100 bg-white rounded-2xl p-8 border-2 border-teal-600 flex flex-col shadow-sm">
             {/* Badge */}
             <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#2b7a6d] text-white text-xs font-bold tracking-wider uppercase px-4 py-1.5 rounded-full shadow-sm">
-              Most Popular
+              Más Popular
             </div>
 
             <div className="mb-6 mt-2">
-              <h3 className="text-xl font-bold text-gray-800">Premium Plan</h3>
+              <h3 className="text-xl font-bold text-gray-800">Plan Premium</h3>
               <div className="mt-4 flex items-baseline">
                 <span className="text-4xl font-bold tracking-tight text-gray-800">
                   $12
                 </span>
                 <span className="ml-1 text-lg font-medium text-gray-400">
-                  /mo
+                  /mes
                 </span>
               </div>
             </div>
@@ -529,7 +528,7 @@ export function HomePage() {
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <span>Unlimited AI Chat</span>
+                <span>Chat de IA Ilimitado</span>
               </li>
               <li className="flex items-start gap-3 text-base text-gray-800">
                 <svg
@@ -545,7 +544,7 @@ export function HomePage() {
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <span>Real-time Bank Sync</span>
+                <span>Sincronización Bancaria en Tiempo Real</span>
               </li>
               <li className="flex items-start gap-3 text-base text-[#475569]">
                 <svg
@@ -561,7 +560,7 @@ export function HomePage() {
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <span>Advanced Tax Planner</span>
+                <span>Planificador de Impuestos Avanzado</span>
               </li>
               <li className="flex items-start gap-3 text-base text-gray-400">
                 <svg
@@ -577,7 +576,7 @@ export function HomePage() {
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <span>Priority AI Insights</span>
+                <span>Perspectivas de IA Prioritarias</span>
               </li>
               <li className="flex items-start gap-3 text-base text-[#475569]">
                 <svg
@@ -593,12 +592,12 @@ export function HomePage() {
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <span>256-bit AES Security</span>
+                <span>Seguridad AES de 256 bits</span>
               </li>
             </ul>
 
             <button className="w-full py-3 px-4 rounded-xl text-base font-semibold text-white bg-black hover:bg-neutral-800 transition-colors duration-200 shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-900">
-              Go Pro
+              Obtener Pro
             </button>
           </div>
         </div>
@@ -615,7 +614,7 @@ export function HomePage() {
           </div>
 
           <span className="text-[11px] text-gray-400">
-            © 2026 SpendWise AI. Intelligent Wealth Management.
+            © 2026 SpendWise AI. Gestión Inteligente de la Riqueza.
           </span>
         </div>
       </footer>
