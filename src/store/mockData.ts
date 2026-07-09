@@ -3,7 +3,7 @@ import type {
   Budget,
   ChatMessage,
   SavingsGoal,
-} from "./types/ChatTypes.ts";
+} from "../dashboard/types/ChatTypes.ts";
 
 export const INITIAL_TRANSACTIONS: Transaction[] = [
   {

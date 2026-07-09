@@ -5,7 +5,8 @@ import { RegisterPage } from "./auth/RegisterPage/RegisterPage.tsx";
 import { HomePage } from "./home/HomePage/HomePage.tsx";
 import { AuthLayout } from "./auth/auth.layout";
 import { DashboardLayout } from "./dashboard/layouts/dashboard.layout";
-import { Chat } from "./dashboard/chat/ChatPage.tsx";
+import { Chat } from "./dashboard/chat/pages/ChatPage.tsx";
+import { NewChat } from "./dashboard/chat/pages/NewChatPage.tsx";
 import { Limits } from "./dashboard/limits/LimitsPage.tsx";
 import { History } from "./dashboard/history/HistoryPage.tsx";
 import { Goals } from "./dashboard/goals/GoalsPage.tsx";
@@ -40,8 +41,12 @@ const router = createBrowserRouter([
       { index: true, element: <Navigate to="/dashboard/chat" /> },
       { path: "user", element: <div>User</div> },
       {
-        path: "chat",
+        path: "chat/:id",
         element: <Chat />,
+      },
+      {
+        path: "chat",
+        element: <NewChat />,
       },
       { path: "limits", element: <Limits /> },
       {
