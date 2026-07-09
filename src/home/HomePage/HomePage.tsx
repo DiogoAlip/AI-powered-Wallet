@@ -2,14 +2,12 @@ import { Link } from "react-router";
 import {
   IconRobot,
   IconArrowNarrowRight,
-  IconShield,
   IconCircleCheck,
   IconDeviceMobile,
   IconBolt,
   IconSparkles,
   IconStar,
   IconLock,
-  IconHeartHandshake,
 } from "@tabler/icons-react";
 
 export function HomePage() {

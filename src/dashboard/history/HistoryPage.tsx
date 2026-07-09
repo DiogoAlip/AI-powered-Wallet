@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   IconSearch,
-  //IconFilter,
   IconPlus,
   IconTrash,
   IconCalendarWeek,
@@ -12,20 +11,11 @@ import {
   IconX,
   IconCheck,
 } from "@tabler/icons-react";
-import type { Transaction } from "../types/ChatTypes.ts";
 import { getCategoryIcon } from "../helpers/getCategoryIcon.tsx";
+import { useWalletStore } from "../../store/wallet.store.ts";
 
-interface HistoryProps {
-  transactions: Transaction[];
-  // onAddTransaction: (tx: Omit<Transaction, "id">) => void;
-  // onDeleteTransaction: (id: string) => void;
-}
-
-export function History({
-  transactions,
-  // onAddTransaction,
-  // onDeleteTransaction,
-}: HistoryProps) {
+export function History() {
+  const { transactions, addTransaction, deleteTransaction } = useWalletStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedType, setSelectedType] = useState("All");
@@ -64,14 +54,13 @@ export function History({
     e.preventDefault();
     if (!merchant.trim() || !amount) return;
 
-    // onAddTransaction({
-    //   merchant,
-    //   category: type === "income" ? "Income" : category,
-    //   amount: parseFloat(amount),
-    //   date: "Hoy",
-    //   account,
-    //   type,
-    // });
+    addTransaction({
+      merchant,
+      category: type === "income" ? "Ingresos" : category,
+      amount: parseFloat(amount),
+      account,
+      type,
+    });
 
     // Reset Form
     setMerchant("");
@@ -266,7 +255,7 @@ export function History({
                     {tx.type === "expense" ? "-" : "+"}${tx.amount.toFixed(2)}
                   </span>
                   <button
-                    // onClick={() => onDeleteTransaction(tx.id)}
+                    onClick={() => deleteTransaction(tx.id)}
                     className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all md:opacity-0 group-hover:opacity-100 focus:opacity-100"
                     title="Eliminar registro"
                   >

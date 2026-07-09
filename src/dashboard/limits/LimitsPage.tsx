@@ -6,17 +6,14 @@ import {
   IconPencil,
   IconCheck,
   IconX,
-  IconPig,
   IconCalendarWeek,
 } from "@tabler/icons-react";
-import type { Budget } from "../types/ChatTypes.ts";
 import { getCategoryIcon } from "../helpers/getCategoryIcon.tsx";
+import { useWalletStore } from "../../store/wallet.store.ts";
+import type { Budget } from "../types/ChatTypes.ts";
 
-interface BudgetsTabProps {
-  budgets: Budget[];
-}
-
-export function Limits({ budgets }: BudgetsTabProps) {
+export function Limits() {
+  const { budgets, updateBudgetLimit } = useWalletStore();
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [newLimitValue, setNewLimitValue] = useState("");
 
@@ -28,7 +25,7 @@ export function Limits({ budgets }: BudgetsTabProps) {
   const handleSaveEdit = (category: string) => {
     const val = parseFloat(newLimitValue);
     if (!isNaN(val) && val >= 0) {
-      // onUpdateBudgetLimit(category, val);
+      updateBudgetLimit(category, val);
     }
     setEditingCategory(null);
   };

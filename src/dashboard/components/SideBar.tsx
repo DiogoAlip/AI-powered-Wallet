@@ -13,7 +13,7 @@ interface SideBar {
 }
 
 const routes = [
-  { id: "chat", label: "Asistente de IA", icon: IconRobot },
+  { id: "chat", label: "Nuevo Chat", icon: IconRobot },
   {
     id: "limits",
     label: "Estadísticas y Límites",

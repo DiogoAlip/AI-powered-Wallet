@@ -2,54 +2,29 @@ import React, { useState, useRef, useEffect } from "react";
 import { getCategoryIcon } from "../helpers/getCategoryIcon.tsx";
 import {
   IconRobot,
-  // IconSend,
   IconPaperclip,
   IconMicrophone,
-  // IconCircleArrowUp,
   IconArrowNarrowUp,
   IconInfoCircle,
-  // IconSparkles,
-  IconToolsKitchen2,
-  IconCar,
-  IconShoppingBag,
-  IconReceipt2,
-  IconTag,
-  IconHelp,
-  // IconCheck,
 } from "@tabler/icons-react";
-import type {
-  ChatMessage,
-  // Transaction,
-  // Budget,
-  // SavingsGoal,
-} from "../types/ChatTypes.ts";
+import { useWalletStore } from "../../store/wallet.store.ts";
 
-interface ChatTabProps {
-  chatHistory: ChatMessage[];
-  // onSendMessage: (text: string) => Promise<void>;
-  // onApplyAction: (actionId: string, messageId: string) => void;
-  // isGenerating: boolean;
-}
-
-export function Chat({
-  chatHistory,
-  // onSendMessage,
-  // onApplyAction,
-  // isGenerating,
-}: ChatTabProps) {
+export function Chat() {
+  const { chatHistory, sendMessage, applyAction, isGenerating } =
+    useWalletStore();
   const [inputText, setInputText] = useState("");
   // const [quickExpenseText, setQuickExpenseText] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // useEffect(() => {
-  //   chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  // }, [chatHistory, isGenerating]);
-  //
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatHistory, isGenerating]);
+
   const handleSend = async () => {
     if (!inputText.trim()) return;
-    // const textToSend = inputText;
+    const textToSend = inputText;
     setInputText("");
-    // await onSendMessage(textToSend);
+    await sendMessage(textToSend);
   };
   //
   // const handleQuickExpenseSubmit = async () => {
@@ -150,9 +125,10 @@ export function Chat({
                     {msg.actionChips.map((chip) => (
                       <button
                         key={chip.actionId}
-                        // onClick={() => onApplyAction(chip.actionId, msg.id)}
+                        onClick={() => applyAction(chip.actionId, msg.id)}
                         className={`font-sans text-xs font-semibold px-4 py-2 rounded-full border transition-all ${
-                          chip.actionId === "move_to_savings"
+                          chip.actionId === "move_to_savings" ||
+                          chip.actionId === "move_to_savings_quick"
                             ? "text-teal-700 bg-teal-50 border-teal-200 hover:bg-teal-100"
                             : "text-gray-600 border-gray-200 hover:bg-gray-50"
                         }`}
@@ -167,35 +143,32 @@ export function Chat({
           </div>
         ))}
 
-        {
-          //isGenerating
-          true && (
-            <div className="flex items-start gap-3 self-start max-w-3xl">
-              <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center shrink-0 border border-teal-200 animate-pulse">
-                <IconRobot className="w-5 h-5 text-teal-700" />
-              </div>
-              <div className="flex flex-col gap-1">
-                <span className="font-sans text-xs text-gray-500 px-1">
-                  SpendWise AI está pensando...
-                </span>
-                <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-none p-4 shadow-sm flex items-center gap-2">
-                  <span
-                    className="w-2 h-2 bg-teal-600 rounded-full animate-bounce"
-                    style={{ animationDelay: "0ms" }}
-                  ></span>
-                  <span
-                    className="w-2 h-2 bg-teal-600 rounded-full animate-bounce"
-                    style={{ animationDelay: "150ms" }}
-                  ></span>
-                  <span
-                    className="w-2 h-2 bg-teal-600 rounded-full animate-bounce"
-                    style={{ animationDelay: "300ms" }}
-                  ></span>
-                </div>
+        {isGenerating && (
+          <div className="flex items-start gap-3 self-start max-w-3xl">
+            <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center shrink-0 border border-teal-200 animate-pulse">
+              <IconRobot className="w-5 h-5 text-teal-700" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="font-sans text-xs text-gray-500 px-1">
+                SpendWise AI está pensando...
+              </span>
+              <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-none p-4 shadow-sm flex items-center gap-2">
+                <span
+                  className="w-2 h-2 bg-teal-600 rounded-full animate-bounce"
+                  style={{ animationDelay: "0ms" }}
+                ></span>
+                <span
+                  className="w-2 h-2 bg-teal-600 rounded-full animate-bounce"
+                  style={{ animationDelay: "150ms" }}
+                ></span>
+                <span
+                  className="w-2 h-2 bg-teal-600 rounded-full animate-bounce"
+                  style={{ animationDelay: "300ms" }}
+                ></span>
               </div>
             </div>
-          )
-        }
+          </div>
+        )}
 
         <div ref={chatEndRef} />
       </section>
@@ -223,7 +196,7 @@ export function Chat({
 
           <button
             onClick={handleSend}
-            // disabled={isGenerating || !inputText.trim()}
+            disabled={isGenerating || !inputText.trim()}
             className="bg-[#006a61] text-white hover:bg-teal-700 disabled:opacity-50 disabled:hover:bg-[#006a61] p-3 rounded-full transition-all shrink-0 flex items-center justify-center h-12 w-12 shadow-md"
           >
             <IconArrowNarrowUp className="w-5 h-5" />

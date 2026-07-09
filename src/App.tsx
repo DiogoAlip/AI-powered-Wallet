@@ -9,12 +9,6 @@ import { Chat } from "./dashboard/chat/ChatPage.tsx";
 import { Limits } from "./dashboard/limits/LimitsPage.tsx";
 import { History } from "./dashboard/history/HistoryPage.tsx";
 import { Goals } from "./dashboard/goals/GoalsPage.tsx";
-import {
-  INITIAL_TRANSACTIONS,
-  INITIAL_BUDGETS,
-  INITIAL_SAVINGS,
-  INITIAL_CHAT_HISTORY,
-} from "./dashboard/mockData.ts";
 
 const router = createBrowserRouter([
   {
@@ -47,14 +41,14 @@ const router = createBrowserRouter([
       { path: "user", element: <div>User</div> },
       {
         path: "chat",
-        element: <Chat chatHistory={INITIAL_CHAT_HISTORY} />,
+        element: <Chat />,
       },
-      { path: "limits", element: <Limits budgets={INITIAL_BUDGETS} /> },
+      { path: "limits", element: <Limits /> },
       {
         path: "history",
-        element: <History transactions={INITIAL_TRANSACTIONS} />,
+        element: <History />,
       },
-      { path: "goals", element: <Goals savings={INITIAL_SAVINGS} /> },
+      { path: "goals", element: <Goals /> },
     ],
   },
 ]);

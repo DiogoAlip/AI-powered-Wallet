@@ -1,28 +1,9 @@
 import { useState } from "react";
-import {
-  IconPig,
-  // User,
-  IconCheck,
-  // Bell,
-  // Sparkles,
-  IconShield,
-  // CreditCard,
-  // ChevronRight,
-  // HelpCircle,
-} from "@tabler/icons-react";
-import type { SavingsGoal } from "../mockData.ts";
+import { IconPig, IconCheck, IconShield } from "@tabler/icons-react";
+import { useWalletStore } from "../../store/wallet.store";
 
-interface AccountTabProps {
-  savings: SavingsGoal;
-  // onDepositSavings: (amount: number) => void;
-  // onResetSavings: () => void;
-}
-
-export function Goals({
-  savings,
-  // onDepositSavings,
-  // onResetSavings,
-}: AccountTabProps) {
+export function Goals() {
+  const { savings, depositSavings, resetSavings } = useWalletStore();
   const [depositAmount, setDepositAmount] = useState("100");
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -36,7 +17,7 @@ export function Goals({
   const handleDeposit = () => {
     const amount = parseFloat(depositAmount);
     if (!isNaN(amount) && amount > 0) {
-      // onDepositSavings(amount);
+      depositSavings(amount);
       setSuccessMessage(`¡Has depositado $${amount.toFixed(2)} con éxito!`);
       setTimeout(() => setSuccessMessage(null), 3000);
     }
@@ -135,7 +116,7 @@ export function Goals({
             Depositar en Ahorros
           </button>
           <button
-            // onClick={onResetSavings}
+            onClick={resetSavings}
             className="w-full sm:w-auto px-4 py-2.5 border border-gray-200 text-gray-500 hover:text-gray-700 hover:bg-gray-50 font-sans text-xs font-semibold rounded-xl transition-colors"
           >
             Reiniciar Meta
