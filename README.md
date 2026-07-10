@@ -1,6 +1,6 @@
-# SpendWise AI — Billetera Inteligente con Inteligencia Artificial
+# FinancIA! — Sistema de Gestión Financiera con Inteligencia Artificial
 
-SpendWise AI es una plataforma moderna e inteligente para la gestión de finanzas personales. Diseñada para profesionales y usuarios que buscan optimizar su salud financiera, la aplicación combina el registro de transacciones con un asistente conversacional inteligente impulsado por IA, control presupuestario y seguimiento de metas de ahorro.
+FinancIA! es una plataforma moderna e inteligente para la gestión de finanzas personales. Diseñada para profesionales y usuarios que buscan optimizar su salud financiera, la aplicación combina el registro de transacciones con un asistente conversacional inteligente impulsado por IA, control presupuestario y seguimiento de metas de ahorro.
 
 ---
 
@@ -57,7 +57,7 @@ La consola te proporcionará una URL local (comúnmente `http://localhost:5173`)
 
 ### 1. Iniciar el Uso
 
-- **Página de Inicio:** Al abrir la aplicación, verás la pantalla de presentación de SpendWise AI. Haz clic en **Comenzar** o **Comenzar Gratis** para ingresar a la interfaz del Dashboard.
+- **Página de Inicio:** Al abrir la aplicación, verás la pantalla de presentación de FinancIA!. Haz clic en **Comenzar** o **Comenzar Gratis** para ingresar a la interfaz del Dashboard.
 - **Menú Lateral (Sidebar):** Permite cambiar de sección rápidamente entre:
   - **Chat con IA:** Para chatear con el asistente y registrar gastos rápidamente.
   - **Movimientos:** Para ver la lista completa de tus transacciones y balances.

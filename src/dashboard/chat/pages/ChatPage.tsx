@@ -29,9 +29,8 @@ export function Chat() {
         {chatHistory.map((msg) => (
           <div
             key={msg.id}
-            className={`flex items-start gap-3 max-w-3xl ${
-              msg.sender === "user" ? "self-end flex-row-reverse" : "self-start"
-            }`}
+            className={`flex items-start gap-3 max-w-3xl ${msg.sender === "user" ? "self-end flex-row-reverse" : "self-start"
+              }`}
           >
             {/* Avatar */}
             {msg.sender === "ai" ? (
@@ -42,7 +41,7 @@ export function Chat() {
               <img
                 alt="User profile avatar"
                 className="w-10 h-10 rounded-full object-cover shrink-0 border border-gray-200"
-                src="https://lh3.googleusercontent.com/aida/AP1WRLtk8gk9Zx8Q3SULN3nwj9jdV3tialt8H8Scjq5j7X2SLeODxAEEyn91_jipoiXPUsaBNo_w0LrgRMv1J1o7LO4gQuc1B-GSyMWhVSW046PHTShJJk1UUJ5s5hwHvwuJ0k7VcfCEkmhiAXidI0kovPfm2I4ylR337t84TNUbxRekw_p7IVxip2YnAmge16lvifke3mvIu_rqzG6_zdOucxF7ns22yi2xOEGdRyia6K79JJmSf9KspPlC3UHX"
+                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80"
               />
             )}
 
@@ -50,15 +49,14 @@ export function Chat() {
               className={`flex flex-col gap-1 ${msg.sender === "user" ? "items-end" : "items-start"}`}
             >
               <span className="font-sans text-xs text-gray-500 px-1">
-                {msg.sender === "ai" ? "SpendWise AI" : "Tú"} • {msg.timestamp}
+                {msg.sender === "ai" ? "FinancIA!" : "Tú"} • {msg.timestamp}
               </span>
 
               <div
-                className={`rounded-2xl p-4 shadow-sm relative overflow-hidden max-w-full ${
-                  msg.sender === "ai"
-                    ? "bg-white border border-gray-100 rounded-tl-none"
-                    : "bg-[#131b2e] text-white rounded-tr-none"
-                }`}
+                className={`rounded-2xl p-4 shadow-sm relative overflow-hidden max-w-full ${msg.sender === "ai"
+                  ? "bg-white border border-gray-100 rounded-tl-none"
+                  : "bg-[#131b2e] text-white rounded-tr-none"
+                  }`}
               >
                 <p className="font-sans text-sm leading-relaxed">{msg.text}</p>
 
@@ -79,14 +77,13 @@ export function Chat() {
                       </div>
                     </div>
                     <span
-                      className={`font-sans font-bold text-sm ${
-                        msg.transactionDetail.type === "expense"
-                          ? "text-red-600"
-                          : "text-emerald-600"
-                      }`}
+                      className={`font-sans font-bold text-sm ${msg.transactionDetail.type === "expense"
+                        ? "text-red-600"
+                        : "text-emerald-600"
+                        }`}
                     >
                       {msg.transactionDetail.type === "expense" ? "-" : "+"}$
-                      {msg.transactionDetail.amount.toFixed(2)}
+                      {msg.transactionDetail.amount.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   </div>
                 )}
@@ -106,12 +103,11 @@ export function Chat() {
                       <button
                         key={chip.actionId}
                         onClick={() => applyAction(chip.actionId, msg.id)}
-                        className={`font-sans text-xs font-semibold px-4 py-2 rounded-full border transition-all ${
-                          chip.actionId === "move_to_savings" ||
+                        className={`font-sans text-xs font-semibold px-4 py-2 rounded-full border transition-all ${chip.actionId === "move_to_savings" ||
                           chip.actionId === "move_to_savings_quick"
-                            ? "text-teal-700 bg-teal-50 border-teal-200 hover:bg-teal-100"
-                            : "text-gray-600 border-gray-200 hover:bg-gray-50"
-                        }`}
+                          ? "text-teal-700 bg-teal-50 border-teal-200 hover:bg-teal-100"
+                          : "text-gray-600 border-gray-200 hover:bg-gray-50"
+                          }`}
                       >
                         {chip.text}
                       </button>
@@ -130,7 +126,7 @@ export function Chat() {
             </div>
             <div className="flex flex-col gap-1">
               <span className="font-sans text-xs text-gray-500 px-1">
-                SpendWise AI está pensando...
+                FinancIA! está pensando...
               </span>
               <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-none p-4 shadow-sm flex items-center gap-2">
                 <span

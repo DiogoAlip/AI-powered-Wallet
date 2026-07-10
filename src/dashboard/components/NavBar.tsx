@@ -23,7 +23,7 @@ export const NavBar = ({ toggleSideBar }: NavBarProps) => {
                 to="/"
                 className="font-display font-bold text-lg md:text-xl text-[#0b1c30]"
               >
-                SpendWise AI
+                FinancIA!
               </Link>
               <span className="text-[10px] bg-teal-50 border border-teal-200 text-teal-800 font-semibold px-2 py-0.5 rounded-full hidden sm:inline-block">
                 Inteligente

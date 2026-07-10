@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import {
   IconEye,
   IconEyeOff,
@@ -10,16 +10,27 @@ import {
   IconLock,
   IconMail,
 } from "@tabler/icons-react";
+import { useAuthStore } from "../../store/auth.store";
 
 export const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const login = useAuthStore((state) => state.login);
+  const navigate = useNavigate();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    login(email);
+    navigate("/dashboard/chat");
+  };
   return (
     <div className="flex flex-col md:flex-row flex-1">
       {/* Left Side: Branding & Marketing */}
       <div className="w-full md:w-3/5 bg-[#0d1527] p-8 md:p-16 flex flex-col justify-between min-h-125 md:min-h-0">
         {/* Logo Top */}
         <div>
-          <h2 className="text-xl font-bold tracking-tight">SpendWise AI</h2>
+          <h2 className="text-xl font-bold tracking-tight">FinancIA!</h2>
         </div>
 
         {/* Hero Content */}
@@ -29,7 +40,7 @@ export const LoginPage = () => {
           </h1>
           <p className="text-gray-400 text-lg leading-relaxed mb-8">
             Our AI-driven insights help you track, plan, and optimize your
-            financial future with precision and enterprise-grade security.
+            FinancIA!l future with precision and enterprise-grade security.
           </p>
 
           {/* Badges */}
@@ -88,7 +99,7 @@ export const LoginPage = () => {
           {/* Social Logins */}
 
           {/* Form */}
-          <form onSubmit={(e) => e.preventDefault()} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-xs font-semibold text-gray-700 mb-2">
                 Email Address
@@ -99,6 +110,9 @@ export const LoginPage = () => {
                   type="email"
                   placeholder="name@company.com"
                   className="w-full py-2 focus:outline-none"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                 />
               </div>
             </div>

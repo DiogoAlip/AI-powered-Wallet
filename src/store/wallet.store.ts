@@ -227,11 +227,11 @@ export const useWalletStore = create<UseWalletState>((set, get) => ({
           type: "expense",
         };
 
-        aiText = `He registrado el gasto de $${amountVal.toFixed(2)} en '${categoryVal}'. ¡Transacción añadida con éxito!`;
+        aiText = `He registrado el gasto de $${amountVal.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} en '${categoryVal}'. ¡Transacción añadida con éxito!`;
         infoText =
           remaining >= 0
-            ? `Te quedan $${remaining.toFixed(2)} de tu presupuesto para '${categoryVal}'.`
-            : `¡Alerta! Has excedido el presupuesto de '${categoryVal}' por $${Math.abs(remaining).toFixed(2)}.`;
+            ? `Te quedan $${remaining.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} de tu presupuesto para '${categoryVal}'.`
+            : `¡Alerta! Has excedido el presupuesto de '${categoryVal}' por $${Math.abs(remaining).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}.`;
       } else {
         aiText =
           "Parece que quieres registrar un gasto, pero no he podido entender la cantidad. Por favor indícame el monto, por ejemplo: 'gasté 25 en transporte'.";
@@ -246,8 +246,8 @@ export const useWalletStore = create<UseWalletState>((set, get) => ({
         get().depositSavings(amountVal);
         const savings = get().savings;
 
-        aiText = `¡Estupendo! He añadido $${amountVal.toFixed(2)} a tu meta '${savings.name}'.`;
-        infoText = `Tu ahorro total en '${savings.name}' ahora es de $${savings.current.toFixed(2)} de un objetivo de $${savings.target.toFixed(2)}.`;
+        aiText = `¡Estupendo! He añadido $${amountVal.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} a tu meta '${savings.name}'.`;
+        infoText = `Tu ahorro total en '${savings.name}' ahora es de $${savings.current.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} de un objetivo de $${savings.target.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}.`;
       } else {
         aiText =
           "Entendido, quieres guardar dinero en tus ahorros. ¿Cuánto te gustaría depositar? Ej: 'ahorrar 50'.";
@@ -261,7 +261,7 @@ export const useWalletStore = create<UseWalletState>((set, get) => ({
       lowerText.includes("hello")
     ) {
       aiText =
-        "¡Hola! Soy SpendWise AI, tu asistente financiero. Puedo ayudarte a registrar gastos, gestionar tus presupuestos, o seguir tus metas de ahorro. ¿Qué te gustaría hacer hoy?";
+        "¡Hola! Soy FinancIA!, tu asistente financiero. Puedo ayudarte a registrar gastos, gestionar tus presupuestos, o seguir tus metas de ahorro. ¿Qué te gustaría hacer hoy?";
       actionChips = [
         { text: "Registrar Gasto", actionId: "ask_record_expense" },
         { text: "Ver mis límites", actionId: "ask_view_limits" },
@@ -326,7 +326,7 @@ export const useWalletStore = create<UseWalletState>((set, get) => ({
             hour: "2-digit",
             minute: "2-digit",
           }),
-          text: `¡Listo! He transferido $${transferAmount.toFixed(2)} a tu ahorro '${state.savings.name}'.`,
+          text: `¡Listo! He transferido $${transferAmount.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} a tu ahorro '${state.savings.name}'.`,
         };
 
         return {

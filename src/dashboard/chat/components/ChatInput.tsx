@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router";
 import {
   IconPaperclip,
   IconMicrophone,
@@ -9,7 +10,7 @@ import { useWalletStore } from "../../../store/wallet.store.ts";
 export function ChatInput({ newChat }: { newChat?: boolean }) {
   const { chatHistory, sendMessage, isGenerating } = useWalletStore();
   const [inputText, setInputText] = useState("");
-  // const [quickExpenseText, setQuickExpenseText] = useState("");
+  const navigate = useNavigate();
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -21,6 +22,9 @@ export function ChatInput({ newChat }: { newChat?: boolean }) {
     const textToSend = inputText;
     setInputText("");
     await sendMessage(textToSend);
+    if (newChat) {
+      navigate("/dashboard/chat/active");
+    }
   };
   //
   // const handleQuickExpenseSubmit = async () => {
@@ -52,7 +56,7 @@ export function ChatInput({ newChat }: { newChat?: boolean }) {
           <div className="flex-1 bg-white border border-gray-200 rounded-2xl flex items-end min-h-12 shadow-sm focus-within:border-[#006a61] focus-within:ring-1 focus-within:ring-[#006a61] transition-all">
             <textarea
               className="w-full bg-transparent border-none focus:ring-0 resize-none py-3 px-4 font-sans text-sm text-[#0b1c30] max-h-32 overflow-y-auto no-scrollbar outline-none"
-              placeholder="Mensaje a SpendWise AI..."
+              placeholder="Mensaje a FinancIA!..."
               rows={1}
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}

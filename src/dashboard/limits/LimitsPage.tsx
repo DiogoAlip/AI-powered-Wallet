@@ -168,14 +168,14 @@ export function Limits() {
                 <div className="mt-4 flex justify-between items-baseline">
                   <div>
                     <span className="font-display font-bold text-lg text-[#0b1c30]">
-                      ${budget.spent.toFixed(2)}
+                      ${budget.spent.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                     <span className="font-sans text-xs text-gray-400 ml-1">
-                      consumidos de ${budget.limit.toFixed(2)}
+                      consumidos de ${budget.limit.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   </div>
                   <span className={`font-sans text-xs font-bold ${textColor}`}>
-                    {percent.toFixed(0)}%
+                    {percent.toLocaleString("es-ES", { maximumFractionDigits: 0 })}%
                   </span>
                 </div>
 
@@ -198,7 +198,7 @@ export function Limits() {
                     <span className="font-sans text-xs text-red-800">
                       ¡Has superado el límite por{" "}
                       <strong>
-                        ${(budget.spent - budget.limit).toFixed(2)}
+                        ${(budget.spent - budget.limit).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </strong>
                       !
                     </span>
@@ -216,7 +216,7 @@ export function Limits() {
                     <span className="font-sans text-xs text-teal-800">
                       Excelente ritmo. Te quedan{" "}
                       <strong>
-                        ${(budget.limit - budget.spent).toFixed(2)}
+                        ${(budget.limit - budget.spent).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </strong>
                       .
                     </span>

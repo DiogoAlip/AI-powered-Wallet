@@ -4,8 +4,10 @@ import {
   IconWallet,
   IconSettings,
   IconX,
+  IconLogout,
 } from "@tabler/icons-react";
-import { NavLink, useLocation } from "react-router";
+import { NavLink, useLocation, useNavigate } from "react-router";
+import { useAuthStore } from "../../store/auth.store";
 
 interface SideBar {
   isOpen: boolean;
@@ -26,22 +28,28 @@ const routes = [
 export function SideBar({ isOpen, toggleSideBar }: SideBar) {
   const location = useLocation();
   const actualPath = location.pathname.toLocaleLowerCase();
+  const logout = useAuthStore((state) => state.logout);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    toggleSideBar();
+    navigate("/");
+  };
 
   return (
     <>
       <div
-        className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-55 transition-opacity duration-300 ${
-          isOpen
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-55 transition-opacity duration-300 ${isOpen
+          ? "opacity-100 pointer-events-auto"
+          : "opacity-0 pointer-events-none"
+          }`}
         onClick={toggleSideBar}
       />
 
       <aside
-        className={`fixed inset-y-0 left-0 z-60 flex flex-col bg-[#eff4ff] h-full w-72 rounded-r-2xl shadow-xl transition-transform duration-300 ease-in-out ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-60 flex flex-col bg-[#eff4ff] h-full w-72 rounded-r-2xl shadow-xl transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="p-5 flex items-center justify-between border-b border-gray-200">
           <div className="flex items-center gap-3">
@@ -50,7 +58,7 @@ export function SideBar({ isOpen, toggleSideBar }: SideBar) {
             </div>
             <div>
               <h3 className="font-sans font-bold text-sm text-[#0b1c30]">
-                SpendWise Pro
+                FinancIA! Pro
               </h3>
               <p className="font-sans text-xs text-gray-500">
                 Inteligencia Activa
@@ -75,11 +83,10 @@ export function SideBar({ isOpen, toggleSideBar }: SideBar) {
                     onClick={() => {
                       toggleSideBar();
                     }}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                      actualPath.includes(item.id)
-                        ? "bg-[#dce9ff] text-[#0b1c30] font-semibold"
-                        : "text-gray-600 hover:bg-[#dce9ff]/50"
-                    }`}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${actualPath.includes(item.id)
+                      ? "bg-[#dce9ff] text-[#0b1c30] font-semibold"
+                      : "text-gray-600 hover:bg-[#dce9ff]/50"
+                      }`}
                   >
                     <item.icon
                       className={`w-5 h-5 ${actualPath.includes(item.id) ? "text-teal-700" : "text-gray-500"}`}
@@ -89,6 +96,15 @@ export function SideBar({ isOpen, toggleSideBar }: SideBar) {
                 </li>
               );
             })}
+            <li className="pt-4 border-t border-gray-200/50 mt-4 mx-2">
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-red-600 hover:bg-red-50 cursor-pointer"
+              >
+                <IconLogout className="w-5 h-5 text-red-500" />
+                <span className="font-sans text-sm font-semibold">Cerrar Sesión</span>
+              </button>
+            </li>
           </ul>
         </nav>
 

@@ -18,7 +18,7 @@ export function HomePage() {
         <div className="flex items-center gap-2">
           <IconRobot className="w-6 h-6 text-[#006a61]" />
           <span className="font-display font-extrabold text-lg text-[#0b1c30] tracking-tight">
-            SpendWise AI
+            FinancIA!
           </span>
         </div>
 
@@ -30,7 +30,7 @@ export function HomePage() {
             Iniciar Sesión
           </Link>
           <Link
-            to="dashboard/chat"
+            to="auth/login"
             className="bg-[#0b1c30] hover:bg-black text-white font-sans text-xs font-bold px-4 py-2 rounded-full shadow-sm transition-all transform hover:scale-105"
           >
             Comenzar
@@ -65,7 +65,7 @@ export function HomePage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
             <Link
-              to="dashboard/chat"
+              to="auth/register"
               className="w-full sm:w-auto px-8 py-3.5 bg-[#131b2e] hover:bg-black text-white font-sans text-sm font-bold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
             >
               Comenzar Gratis
@@ -78,12 +78,12 @@ export function HomePage() {
             <div className="flex -space-x-2">
               <img
                 className="w-8 h-8 rounded-full border-2 border-white object-cover"
-                src="https://lh3.googleusercontent.com/aida/AP1WRLtk8gk9Zx8Q3SULN3nwj9jdV3tialt8H8Scjq5j7X2SLeODxAEEyn91_jipoiXPUsaBNo_w0LrgRMv1J1o7LO4gQuc1B-GSyMWhVSW046PHTShJJk1UUJ5s5hwHvwuJ0k7VcfCEkmhiAXidI0kovPfm2I4ylR337t84TNUbxRekw_p7IVxip2YnAmge16lvifke3mvIu_rqzG6_zdOucxF7ns22yi2xOEGdRyia6K79JJmSf9KspPlC3UHX"
+                src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&h=150&q=80"
                 alt="Usuario 1"
               />
               <img
                 className="w-8 h-8 rounded-full border-2 border-white object-cover"
-                src="https://lh3.googleusercontent.com/aida/AP1WRLuVWt9aMFIpZnT3dpAS2GUACCv3EdKElxOTEmdOSj8BKzidsXxYX-DcfyPCqZpAYiETcbbS2xOtBcBbysMU2zKTU8SIulvDdkFMejqHVaeu7h4WC0gldMnw9TQLnT8pgm6yPOnwKx-H82s4H7-Bn_K9bzrRUZ4rJn2_52mXsTJLTDYai5SMbqHUyzQBxh-pPFd3r5idfjyH1_O1xecHMZOqQ38E9AI_rJ_07W6BGsRBbbGZzBPObxyYUHA"
+                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80"
                 alt="Usuario 2"
               />
               <div className="w-8 h-8 rounded-full border-2 border-white bg-teal-100 flex items-center justify-center text-[10px] font-bold text-teal-800 font-sans">
@@ -179,7 +179,7 @@ export function HomePage() {
               Control sin Esfuerzo
             </h3>
             <p className="font-sans text-sm md:text-base text-gray-500 max-w-xl mx-auto">
-              SpendWise AI elimina la fricción de la gestión financiera con un
+              FinancIA! elimina la fricción de la gestión financiera con un
               flujo de trabajo simplificado de tres pasos.
             </p>
           </div>
@@ -339,7 +339,7 @@ export function HomePage() {
           </div>
 
           <blockquote className="font-display font-extrabold text-xl md:text-3xl lg:text-4xl text-gray-100 leading-relaxed">
-            "SpendWise AI transformó mi relación con el dinero. Las perspectivas de la IA
+            "FinancIA! transformó mi relación con el dinero. Las perspectivas de la IA
             identificaron $200 en fugas mensuales que no sabía que existían. Es como
             tener un asesor financiero en el bolsillo las 24 horas, los 7 días de la semana."
           </blockquote>
@@ -347,7 +347,7 @@ export function HomePage() {
           <div className="flex flex-col items-center gap-2 pt-4">
             <img
               className="w-14 h-14 rounded-full border-2 border-teal-400 object-cover shadow-md"
-              src="https://lh3.googleusercontent.com/aida/AP1WRLuVWt9aMFIpZnT3dpAS2GUACCv3EdKElxOTEmdOSj8BKzidsXxYX-DcfyPCqZpAYiETcbbS2xOtBcBbysMU2zKTU8SIulvDdkFMejqHVaeu7h4WC0gldMnw9TQLnT8pgm6yPOnwKx-H82s4H7-Bn_K9bzrRUZ4rJn2_52mXsTJLTDYai5SMbqHUyzQBxh-pPFd3r5idfjyH1_O1xecHMZOqQ38E9AI_rJ_07W6BGsRBbbGZzBPObxyYUHA"
+              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80"
               alt="Perfil de Sarah Jenkins"
             />
             <div>
@@ -378,7 +378,7 @@ export function HomePage() {
 
           <div className="pt-2">
             <Link
-              to="dashboard/chat"
+              to="auth/register"
               className="w-full sm:w-auto px-8 py-4 bg-black hover:bg-gray-900 text-white font-sans text-sm font-bold rounded-xl shadow-md transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 mx-auto"
             >
               Comenzar Gratis
@@ -607,12 +607,12 @@ export function HomePage() {
           <div className="flex items-center gap-2">
             <IconRobot className="w-5 h-5 text-teal-600" />
             <span className="font-display font-extrabold text-sm text-[#0b1c30]">
-              SpendWise AI
+              FinancIA!
             </span>
           </div>
 
           <span className="text-[11px] text-gray-400">
-            © 2026 SpendWise AI. Gestión Inteligente de la Riqueza.
+            © 2026 FinancIA!. Gestión Inteligente de la Riqueza.
           </span>
         </div>
       </footer>

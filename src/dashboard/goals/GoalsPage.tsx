@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { IconPig, IconCheck, IconShield } from "@tabler/icons-react";
 import { useWalletStore } from "../../store/wallet.store";
+import { useAuthStore } from "../../store/auth.store";
 
 export function Goals() {
   const { savings, depositSavings, resetSavings } = useWalletStore();
-  const [depositAmount, setDepositAmount] = useState("100");
+  const user = useAuthStore((state) => state.user);
+  const [depositAmount, setDepositAmount] = useState("");
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Toggles simulation
@@ -18,7 +20,8 @@ export function Goals() {
     const amount = parseFloat(depositAmount);
     if (!isNaN(amount) && amount > 0) {
       depositSavings(amount);
-      setSuccessMessage(`¡Has depositado $${amount.toFixed(2)} con éxito!`);
+      setSuccessMessage(`¡Has depositado $${amount.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} con éxito!`);
+      setDepositAmount("");
       setTimeout(() => setSuccessMessage(null), 3000);
     }
   };
@@ -30,19 +33,19 @@ export function Goals() {
         <img
           alt="Professional headshot avatar"
           className="w-20 h-20 rounded-full object-cover border-4 border-teal-500 shadow-sm shrink-0"
-          src="https://lh3.googleusercontent.com/aida/AP1WRLuVWt9aMFIpZnT3dpAS2GUACCv3EdKElxOTEmdOSj8BKzidsXxYX-DcfyPCqZpAYiETcbbS2xOtBcBbysMU2zKTU8SIulvDdkFMejqHVaeu7h4WC0gldMnw9TQLnT8pgm6yPOnwKx-H82s4H7-Bn_K9bzrRUZ4rJn2_52mXsTJLTDYai5SMbqHUyzQBxh-pPFd3r5idfjyH1_O1xecHMZOqQ38E9AI_rJ_07W6BGsRBbbGZzBPObxyYUHA"
+          src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80"
         />
         <div className="text-center sm:text-left flex-1 space-y-1">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 justify-center sm:justify-start">
             <h3 className="font-display font-bold text-[#0b1c30] text-xl">
-              Socio SpendWise Pro
+              {user?.name || "Socio FinancIA! Pro"}
             </h3>
             <span className="text-[10px] font-bold tracking-wider uppercase bg-[#86f2e4]/30 text-[#006f66] px-2 py-0.5 rounded-full self-center">
               IA Activa
             </span>
           </div>
           <p className="font-sans text-xs text-gray-500">
-            diogoalipazaga@gmail.com
+            {user?.email || "diogoalipazaga@gmail.com"}
           </p>
           <p className="font-sans text-xs font-semibold text-gray-400 mt-2 block">
             Planificador financiero premium conectado de forma segura.
@@ -107,6 +110,7 @@ export function Goals() {
               className="bg-transparent border-none outline-none font-sans font-bold text-sm text-[#0b1c30] w-20 p-0"
               value={depositAmount}
               onChange={(e) => setDepositAmount(e.target.value)}
+              placeholder="100"
             />
           </div>
           <button
@@ -151,14 +155,12 @@ export function Goals() {
             </div>
             <button
               onClick={() => setNotifications(!notifications)}
-              className={`w-11 h-6 rounded-full transition-colors relative flex items-center ${
-                notifications ? "bg-[#006a61]" : "bg-gray-200"
-              }`}
+              className={`w-11 h-6 rounded-full transition-colors relative flex items-center ${notifications ? "bg-[#006a61]" : "bg-gray-200"
+                }`}
             >
               <div
-                className={`w-4 h-4 rounded-full bg-white transition-transform shadow-xs absolute ${
-                  notifications ? "translate-x-6" : "translate-x-1"
-                }`}
+                className={`w-4 h-4 rounded-full bg-white transition-transform shadow-xs absolute ${notifications ? "translate-x-6" : "translate-x-1"
+                  }`}
               />
             </button>
           </div>
@@ -175,14 +177,12 @@ export function Goals() {
             </div>
             <button
               onClick={() => setWeeklyReport(!weeklyReport)}
-              className={`w-11 h-6 rounded-full transition-colors relative flex items-center ${
-                weeklyReport ? "bg-[#006a61]" : "bg-gray-200"
-              }`}
+              className={`w-11 h-6 rounded-full transition-colors relative flex items-center ${weeklyReport ? "bg-[#006a61]" : "bg-gray-200"
+                }`}
             >
               <div
-                className={`w-4 h-4 rounded-full bg-white transition-transform shadow-xs absolute ${
-                  weeklyReport ? "translate-x-6" : "translate-x-1"
-                }`}
+                className={`w-4 h-4 rounded-full bg-white transition-transform shadow-xs absolute ${weeklyReport ? "translate-x-6" : "translate-x-1"
+                  }`}
               />
             </button>
           </div>
@@ -191,7 +191,7 @@ export function Goals() {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <span className="text-xs font-bold text-[#0b1c30] block">
-                IA Proactiva de SpendWise
+                IA Proactiva de FinancIA!
               </span>
               <span className="text-[11px] text-gray-400 block">
                 Permite sugerencias automatizadas de transferencias de
@@ -200,14 +200,12 @@ export function Goals() {
             </div>
             <button
               onClick={() => setAiProactive(!aiProactive)}
-              className={`w-11 h-6 rounded-full transition-colors relative flex items-center ${
-                aiProactive ? "bg-[#006a61]" : "bg-gray-200"
-              }`}
+              className={`w-11 h-6 rounded-full transition-colors relative flex items-center ${aiProactive ? "bg-[#006a61]" : "bg-gray-200"
+                }`}
             >
               <div
-                className={`w-4 h-4 rounded-full bg-white transition-transform shadow-xs absolute ${
-                  aiProactive ? "translate-x-6" : "translate-x-1"
-                }`}
+                className={`w-4 h-4 rounded-full bg-white transition-transform shadow-xs absolute ${aiProactive ? "translate-x-6" : "translate-x-1"
+                  }`}
               />
             </button>
           </div>
@@ -219,7 +217,7 @@ export function Goals() {
         <div className="flex items-center gap-2">
           <IconShield className="w-4 h-4 text-teal-600" />
           <h5 className="text-xs font-bold text-[#0b1c30]">
-            Canal Segura de SpendWise AI
+            Canal Seguro de FinancIA!
           </h5>
         </div>
         <p className="font-sans text-xs text-gray-500 leading-relaxed">
@@ -227,7 +225,7 @@ export function Goals() {
           recomendado para aplicaciones de pila completa (Full-stack). Tu clave
           de API se puede configurar cómodamente en el panel **Settings &gt;
           Secrets** para gozar de respuestas inteligentes inmediatas. En
-          ausencia de la clave, SpendWise funciona mediante un motor inteligente
+          ausencia de la clave, FinancIA! funciona mediante un motor inteligente
           local.
         </p>
       </div>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import {
   IconEye,
   IconEyeOff,
@@ -11,16 +11,28 @@ import {
   IconMail,
   IconUser,
 } from "@tabler/icons-react";
+import { useAuthStore } from "../../store/auth.store";
 
 export const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const register = useAuthStore((state) => state.register);
+  const navigate = useNavigate();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !email.trim()) return;
+    register(name, email);
+    navigate("/dashboard/chat");
+  };
   return (
     <div className="flex flex-col md:flex-row flex-1">
       {/* Left Side: Branding & Marketing */}
       <div className="w-full md:w-3/5 bg-[#0d1527] p-8 md:p-16 flex flex-col justify-between min-h-125 md:min-h-0">
         {/* Logo Top */}
         <div>
-          <h2 className="text-xl font-bold tracking-tight">SpendWise AI</h2>
+          <h2 className="text-xl font-bold tracking-tight">FinancIA!</h2>
         </div>
 
         {/* Hero Content */}
@@ -32,7 +44,7 @@ export const RegisterPage = () => {
           <p className="text-gray-400 text-lg leading-relaxed mb-8">
             Experience the next generation of wealth management. Our AI doesn't
             just track spending; it predicts opportunities and secures your
-            financial legacy.
+            FinancIA!l legacy.
           </p>
 
           {/* Badges */}
@@ -85,13 +97,13 @@ export const RegisterPage = () => {
             Create Account
           </h2>
           <p className="text-gray-500 text-sm mb-8">
-            Join SpendWise AI and start your journey today.
+            Join FinancIA! and start your journey today.
           </p>
 
           {/* Social Logins */}
 
           {/* Form */}
-          <form onSubmit={(e) => e.preventDefault()} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-xs font-semibold text-gray-700 mb-2">
                 Full Name
@@ -102,6 +114,9 @@ export const RegisterPage = () => {
                   type="text"
                   placeholder="John Doe"
                   className="w-full py-2 focus:outline-none"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
                 />
               </div>
             </div>
@@ -116,6 +131,9 @@ export const RegisterPage = () => {
                   type="email"
                   placeholder="name@company.com"
                   className="w-full py-2 focus:outline-none"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                 />
               </div>
             </div>
@@ -172,7 +190,7 @@ export const RegisterPage = () => {
                 I agree to the{" "}
                 <span className="text-teal-700">Terms of Service</span> and{" "}
                 <span className="text-teal-700">Privacy Policy</span>, including
-                the processing of my financial data by AI.
+                the processing of my FinancIA!l data by AI.
               </label>
             </div>
 
@@ -225,7 +243,7 @@ export const RegisterPage = () => {
 
           {/* Signup Link */}
           <p className="text-center text-xs text-gray-500 mt-8">
-            Already have an accoun?{" "}
+            Already have an account?{" "}
             <Link
               to="/auth/login"
               className="font-semibold text-teal-600 hover:underline"

@@ -252,7 +252,7 @@ export function History() {
                   <span
                     className={`font-sans font-bold text-sm ${tx.type === "expense" ? "text-red-600" : "text-emerald-600"}`}
                   >
-                    {tx.type === "expense" ? "-" : "+"}${tx.amount.toFixed(2)}
+                    {tx.type === "expense" ? "-" : "+"}${tx.amount.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
                   <button
                     onClick={() => deleteTransaction(tx.id)}
@@ -270,8 +270,8 @@ export function History() {
 
       {/* Manual Add Transaction Overlay Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-100 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden border border-gray-100">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-100 flex items-center justify-center p-4 animate-fade-in overflow-y-auto">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden border border-gray-100 max-h-[95vh] flex flex-col">
             <div className="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-[#f8f9ff]">
               <h3 className="font-sans font-bold text-[#0b1c30] text-sm">
                 Nuevo Registro Financiero
@@ -284,7 +284,7 @@ export function History() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-5 space-y-4">
+            <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto">
               {/* Type selector tabs */}
               <div className="grid grid-cols-2 gap-2 bg-[#f8f9ff] p-1 rounded-xl">
                 <button
