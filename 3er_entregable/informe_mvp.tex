@@ -1,7 +1,6 @@
 \documentclass[12pt]{article}
 
 % --- Paquetes Requeridos para Estilo APA y Formato ---
-\usepackage[utf8]{inputenc}
 \usepackage[spanish,es-tabla]{babel} % Configuración para idioma español y etiquetas de tablas
 \usepackage{geometry}
 \geometry{
@@ -11,7 +10,8 @@
 
 \usepackage{setspace}
 \doublespacing % Espaciado doble requerido por APA
-\usepackage{times} % Tipografía Times New Roman
+\usepackage{fontspec} % Requerido en LuaLaTeX para fuentes tipográficas
+\setmainfont{Times New Roman} % Configura Times New Roman de forma nativa para LuaLaTeX (corrige negritas)
 \usepackage{indentfirst} % Indentación en el primer párrafo de cada sección
 \usepackage{titlesec}
 \usepackage{graphicx}
@@ -31,10 +31,10 @@
 \lhead{}
 \renewcommand{\headrulewidth}{0pt} % Elimina la línea horizontal del encabezado
 
-% --- Configuración de Títulos estilo APA 7 con Numeración Romana Solicitada ---
-\titleformat{\section}{\normalfont\normalsize\bfseries\centering}{\thesection}{1em}{}
-\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{1em}{}
-\titleformat{\subsubsection}{\normalfont\normalsize\bfseries\itshape}{\thesubsubsection}{1em}{}
+% --- Configuración de Títulos estilo APA 7 (Evita duplicidad de numeración) ---
+\titleformat{\section}{\normalfont\normalsize\bfseries\centering}{}{0pt}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{}{0pt}{}
+\titleformat{\subsubsection}{\normalfont\normalsize\bfseries\itshape}{}{0pt}{}
 
 % Ajustes de sangría de párrafos (0.5 pulgadas)
 \setlength{\parindent}{0.5in}
@@ -126,9 +126,9 @@ Los principales afectados son los jóvenes profesionales, trabajadores independi
 \subsection{Evidencias obtenidas durante la validación}
 Para validar la existencia y magnitud del problema, se aplicó una encuesta diagnóstica a un grupo muestra de 14 usuarios representativos. La muestra presentó una edad promedio de 26.3 años (rango entre 20 y 46 años, con un 85.7\% de los participantes concentrado entre los 20 y 29 años) y una distribución por sexo de 71.4\% hombres y 28.6\% mujeres. Los resultados revelaron las siguientes evidencias críticas:
 \begin{itemize}
-    \item \textbf{Uso y control actual:} El 64.3\% (9 de 14 usuarios) utiliza alguna aplicación móvil o banca digital para el seguimiento financiero (principalmente BCP, Yape y Banco de la Nación), mientras que el 35.7\% (5 de 14) no lleva ningún control global sobre sus movimientos.
-    \item \textbf{Frustraciones críticas:} Entre los usuarios que utilizan plataformas tradicionales, el 44.4\% (4 de 9) reportó serias frustraciones relacionadas con la lentitud e ineficiencia del inicio de sesión y registro (``no es rápido y toma tiempo usarlo'', ``a veces demora más de lo usual'') o con caídas recurrentes del sistema.
-    \item \textbf{Falta de centralización bancaria:} Un 22.2\% (2 de 9) destacó como principal frustración que las aplicaciones de banca móvil son cerradas y no registran de forma integrada los movimientos de otras entidades bancarias, obligándolos a realizar registros manuales separados.
+    \item \textbf{Uso y control actual:} El 64.3\% utiliza alguna aplicación móvil o banca digital para el seguimiento financiero, mientras que el 35.7\% no lleva ningún control global sobre sus movimientos.
+    \item \textbf{Frustraciones críticas:} Entre los usuarios que utilizan plataformas tradicionales, el 44.4\% reportó serias frustraciones relacionadas con la lentitud e ineficiencia del inicio de sesión y registro (``no es rápido y toma tiempo usarlo'', ``a veces demora más de lo usual'') o con caídas recurrentes del sistema.
+    \item \textbf{Falta de centralización bancaria:} Un 22.2\% destacó como principal frustración que las aplicaciones de banca móvil son cerradas y no registran de forma integrada los movimientos de otras entidades bancarias, obligándolos a realizar registros manuales separados.
     \item \textbf{Demanda de automatización con IA:} Ante la propuesta del uso de inteligencia artificial controlada por comandos de voz o texto, se obtuvo una aceptación promedio de 6.29/10. Asimismo, la posibilidad de automatizar registros mediante la lectura de actividad del celular (chats y notificaciones) recibió una puntuación de 6.21/10, evidenciando el interés en reducir el esfuerzo humano de digitación.
 \end{itemize}
 
