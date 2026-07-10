@@ -159,42 +159,7 @@ El alcance de este MVP se centra en el desarrollo de la interfaz de usuario web 
 \newpage
 
 \subsection{Evidencias Gráficas del MVP}
-
-\begin{figure}[H]
-    \centering
-    % Descomente y reemplace con su archivo de imagen correspondiente:
-    \includegraphics[width=0.85\textwidth]{chat_screenshot.png}
-    %\framebox{\parbox{0.85\textwidth}{\centering\vspace{2.5cm} \textbf{[Captura 1: Módulo de Chat con IA]} \\ \vspace{0.3cm} Muestra la conversación interactiva donde el usuario ingresa un gasto en lenguaje natural y la IA devuelve la tarjeta confirmando el registro de la transacción. \vspace{2.5cm}}}
-    \caption{Interfaz del Chat con Asistente de IA para el Registro Conversacional.}
-    \label{fig:chat_ia}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    % Descomente y reemplace con su archivo de imagen correspondiente:
-     \includegraphics[width=0.85\textwidth]{movimientos_screenshot.png}
-    %\framebox{\parbox{0.85\textwidth}{\centering\vspace{2.5cm} \textbf{[Captura 2: Historial de Movimientos]} \\ \vspace{0.3cm} Muestra los paneles de Balance Neto, Ingresos, Gastos Totales, la tabla de transacciones históricas con filtros y el botón de creación manual. \vspace{2.5cm}}}
-    \caption{Historial de Movimientos y Visualizador de Balances Generales.}
-    \label{fig:movimientos}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    % Descomente y reemplace con su archivo de imagen correspondiente:
-    \includegraphics[width=0.85\textwidth]{limites_screenshot.png}
-    %\framebox{\parbox{0.85\textwidth}{\centering\vspace{2.5cm} \textbf{[Captura 3: Límites de Presupuesto]} \\ \vspace{0.3cm} Visualización de las barras de progreso por categoría (comida, transporte, etc.) y la línea de paso de presupuesto semanal. \vspace{2.5cm}}}
-    \caption{Panel de Control de Presupuestos y Progreso Semanal.}
-    \label{fig:limites}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    % Descomente y reemplace con su archivo de imagen correspondiente:
-    \includegraphics[width=0.85\textwidth]{ahorros_screenshot.png}
-    %\framebox{\parbox{0.85\textwidth}{\centering\vspace{2.5cm} \textbf{[Captura 4: Metas de Ahorro]} \\ \vspace{0.3cm} Visualiza la meta de Fondo de Emergencia, los botones del simulador de depósito rápido y los interruptores de notificaciones proactivas. \vspace{2.5cm}}}
-    \caption{Módulo de Metas de Ahorro y Configuración de Alertas.}
-    \label{fig:ahorros}
-\end{figure}
+Las capturas de pantalla de la interfaz gráfica y los módulos del MVP (Chat con Asistente de IA, Historial de Movimientos, Límites de Presupuesto y Metas de Ahorro) se han organizado detalladamente en la sección de \textbf{Anexos} al final del documento (ver Figuras 1, 2, 3 y 4 en el Anexo A).
 
 \newpage
 
@@ -207,21 +172,22 @@ De acuerdo con las especificaciones del diseño del proyecto, en la Tabla 1 se p
 
 \begin{table}[H]
 \centering
+\singlespacing
 \caption{Perfil y Justificación de los Early Adopters del MVP}
 \label{tab:early_adopters}
-\begin{tabular}{p{3.2cm}p{5.8cm}p{6cm}}
+\begin{tabular}{p{3.5cm}p{5.7cm}p{6cm}}
 \toprule
 \textbf{Usuario} & \textbf{Perfil} & \textbf{Justificación} \\
 \midrule
-Usuario 1 \newline \textbf{José L. Mariño} \newline (Estudiante, 22 años) & Estudiante de pregrado. Usuario de BCP y Yape. Experimenta frustración debido a la falta de categorización automática y a la necesidad de realizar sumas manuales para transacciones pequeñas del día a día. & Representa al segmento estudiantil nativo digital que maneja múltiples microgastos diarios. Útil para validar la categorización inteligente y la reducción de fricción al ingresar transacciones. \\
+Usuario 1 \newline José L. Mariño & Estudiante de pregrado (22 años, M). Usuario de BCP y Yape. Experimenta frustración por la falta de categorización inteligente y por realizar sumas manuales de microgastos cotidianos. & Representa al segmento estudiantil nativo digital que maneja múltiples microgastos diarios. Útil para validar la categorización inteligente y la reducción de fricción al registrar datos. \\
 \addlinespace
-Usuario 2 \newline \textbf{Jean P. Pinedo} \newline (Freelancer, 22 años) & Trabajador independiente. Combina apps bancarias con un Excel manual. Frustrado por el excesivo tiempo que le consume registrar transacciones y por la lentitud de sincronización de saldos en apps de bancos. & Representa a trabajadores independientes que requieren optimizar su tiempo diario. Permite evaluar la fluidez, rapidez y centralización de balances financieros inmediatos. \\
+Usuario 2 \newline Jean P. Pinedo & Trabajador independiente / Freelancer (22 años, M). Combina apps bancarias con Excel manual. Frustrado por el tiempo que quita el registro manual y la lentitud de balance de cuentas. & Representa a trabajadores independientes que requieren optimizar su tiempo diario. Permite evaluar la rapidez y centralización de balances financieros inmediatos. \\
 \addlinespace
-Usuario 3 \newline \textbf{Frank H. Bustillos} \newline (Estudiante, 23 años) & Estudiante de pregrado. Usuario de Yape. Frustrado por el control financiero fragmentado al no poder consolidar movimientos de múltiples tarjetas asociadas a otros bancos. & Clave para validar la necesidad de centralización de balances generales y probar la usabilidad de la interfaz conversacional para consolidar gastos diversos. \\
+Usuario 3 \newline Frank H. Bustillos & Estudiante de pregrado (23 años, M). Usuario de Yape. Frustrado por la gestión fragmentada al no poder consolidar movimientos de múltiples tarjetas de otros bancos. & Clave para validar la necesidad de centralización de balances generales y probar la usabilidad de la interfaz conversacional para consolidar gastos diversos. \\
 \addlinespace
-Usuario 4 \newline \textbf{Augusto Arias} \newline (Estudiante, 22 años) & Estudiante de pregrado. No utiliza ninguna aplicación de control financiero por considerarlas sumamente lentas, tediosas y con formularios extensos y complejos. & Representa al perfil escéptico que rechaza las herramientas financieras tradicionales. Permite evaluar si el canal conversacional con IA elimina la barrera de adopción y simplifica el registro. \\
+Usuario 4 \newline Augusto Arias & Estudiante de pregrado (22 años, M). No utiliza ninguna aplicación de control financiero por considerarlas sumamente lentas, tediosas y con formularios extensos y complejos. & Representa al perfil escéptico que rechaza las herramientas financieras tradicionales. Permite evaluar si el canal conversacional con IA elimina la barrera de adopción. \\
 \addlinespace
-Usuario 5 \newline \textbf{Jennifer Esquivel} \newline (Emprendedora, 38 años) & Emprendedora y comerciante. Usuaria de la app de Banco de la Nación. Frustrada por la interfaz obsoleta, lentitud de acceso y carencia de gráficos dinámicos para sus metas de ahorro. & Aporta la perspectiva de un perfil de mayor edad y orientación comercial que busca planificar metas específicas de ahorro y demanda una visualización interactiva y estimulante. \\
+Usuario 5 \newline Jennifer Esquivel & Emprendedora / Comerciante (38 años, F). Usuaria de la app de Banco de la Nación. Frustrada por la interfaz obsoleta, inicio lento y falta de gráficos para sus metas de ahorro. & Aporta la perspectiva de un perfil de mayor edad y orientación comercial que busca planificar metas específicas de ahorro y demanda una visualización interactiva y estimulante. \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -275,7 +241,7 @@ Probabilidad de adoptar la app como herramienta principal (0-10) & Puntuación p
 \end{table}
 
 \subsection{Evidencias de Validación}
-Como soporte de las pruebas de validación realizadas, las respuestas individuales fueron consolidadas y registradas digitalmente. Se puede acceder al formulario de recolección y su estructura a través del siguiente enlace: \url{https://forms.cloud.microsoft/Pages/DesignPageV2.aspx?subpage=design&FormId=hRKP4i9nlEifTkQnO7tnaoRl3E9-FVFFs-pVqsR7SJlUQTRZNUM1V00yWVM4V1hDRzkyOUhNWEVLNy4u&Token=b98f512aea074831abc82839cd40fbc1}. Asimismo, el detalle individualizado de las respuestas cualitativas de cada evaluador se encuentra organizado en las bitácoras de respuestas del entregable.
+Como soporte de las pruebas de validación realizadas, las respuestas individuales fueron consolidadas y registradas digitalmente. El diseño del cuestionario de validación y el acceso al formulario de recolección oficial se encuentran referenciados detalladamente en el \textbf{Anexo B} de este informe. Asimismo, el detalle individualizado de las respuestas cualitativas de cada evaluador se encuentra organizado en las bitácoras de respuestas del entregable.
 
 \newpage
 
@@ -288,21 +254,22 @@ En la Tabla 3 se detallan los datos recolectados de cada uno de los cinco early 
 
 \begin{table}[H]
 \centering
+\singlespacing
 \caption{Retroalimentación de Usuarios y Propuestas de Mejora del MVP}
 \label{tab:retroalimentacion_mejoras}
-\begin{tabular}{p{2.8cm}p{6.0cm}p{6.2cm}}
+\begin{tabular}{p{3.5cm}p{5.8cm}p{5.9cm}}
 \toprule
 \textbf{Early Adopter} & \textbf{Observación Realizada} & \textbf{Mejora Propuesta} \\
 \midrule
-Usuario 1 & Observó que las categorías de presupuesto predefinidas son fijas. Desea agrupar gastos de fotocopias o libros en una categoría específica de ``Educación''. & Permitir la creación y edición de categorías de gasto personalizadas a través de comandos de chat o en la interfaz de Límites. \\
+Usuario 1 \newline José L. Mariño & Observó que las categorías de presupuesto predefinidas son fijas. Desea agrupar gastos de fotocopias o libros en una categoría específica de ``Educación''. & Permitir la creación y edición de categorías de gasto personalizadas a través de comandos de chat o en la interfaz de Límites. \\
 \addlinespace
-Usuario 2 & La interfaz de chat es rápida y cómoda, pero desearía un recordatorio semanal proactivo sobre el estado del presupuesto sin tener que ingresar a la app. & Diseñar un sistema de notificaciones externas de la IA (vía Telegram o correo electrónico) con resúmenes de rendimiento. \\
+Usuario 2 \newline Jean P. Pinedo & La interfaz de chat es rápida y cómoda, pero desearía un recordatorio semanal proactivo sobre el estado del presupuesto sin tener que ingresar a la app. & Diseñar un sistema de notificaciones externas de la IA (vía Telegram o correo electrónico) con resúmenes de rendimiento. \\
 \addlinespace
-Usuario 3 & Al cometer un error de escritura en el chat (ej. poner un cero de más), no pudo corregirlo directamente en la ventana de conversación. & Implementar un botón de ``Deshacer'' (\textit{Undo}) o edición rápida en la misma tarjeta generada por el chat. \\
+Usuario 3 \newline Frank H. Bustillos & Al cometer un error de escritura en el chat (ej. poner un cero de más), no pudo corregirlo directamente en la ventana de conversación. & Implementar un botón de ``Deshacer'' (\textit{Undo}) o edición rápida en la misma tarjeta generada por el chat. \\
 \addlinespace
-Usuario 4 & Registrar manualmente o por chat cada gasto del negocio resulta demandante. Considera vital la sincronización bancaria automática. & Desarrollar integraciones con APIs de banca abierta (\textit{Open Banking}) para sincronización de saldos y movimientos bancarios. \\
+Usuario 4 \newline Augusto Arias & Registrar manualmente o por chat cada gasto del negocio resulta demandante. Considera vital la sincronización bancaria automática. & Desarrollar integraciones con APIs de banca abierta (\textit{Open Banking}) para sincronización de saldos y movimientos bancarios. \\
 \addlinespace
-Usuario 5 & El simulador de ahorros incrementa el total acumulado, pero se pierde el registro cronológico de los depósitos ficticios ingresados. & Crear una pestaña de ``Historial de Depósitos'' en el módulo de Ahorros para listar montos y fechas de aportaciones a metas. \\
+Usuario 5 \newline Jennifer Esquivel & El simulador de ahorros incrementa el total acumulado, pero se pierde el registro cronológico de los depósitos ficticios ingresados. & Crear una pestaña de ``Historial de Depósitos'' en el módulo de Ahorros para listar montos y fechas de aportaciones a metas. \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -319,5 +286,57 @@ Usuario 5 & El simulador de ahorros incrementa el total acumulado, pero se pierd
     \item \textbf{Conclusión 2:} La incorporación de elementos visuales dinámicos de semaforización presupuestaria y barras de progreso gamificadas para el ahorro promueve el autocontrol del gasto y facilita una lectura rápida del estado financiero, logrando una excelente aceptación por parte del grupo de early adopters.
     \item \textbf{Conclusión 3:} La retroalimentación detallada provista por los usuarios constituye una guía clara de prioridades de desarrollo para futuras iteraciones de producto, destacando la necesidad de incorporar flujos de corrección ágiles, categorías configurables y la automatización mediante la conexión a cuentas bancarias del usuario.
 \end{itemize}
+
+\newpage
+
+% ==========================================
+% VIII. ANEXOS
+% ==========================================
+\section{VIII. ANEXOS}
+
+\subsection{Anexo A: Evidencias Gráficas del MVP}
+En esta sección se presentan las capturas de pantalla de la interfaz de usuario web interactiva desarrollada para el MVP del sistema FinancIA!:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{chat_screenshot.png}
+    \caption{Interfaz del Chat con Asistente de IA para el Registro Conversacional.}
+    \label{fig:chat_ia}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{movimientos_screenshot.png}
+    \caption{Historial de Movimientos y Visualizador de Balances Generales.}
+    \label{fig:movimientos}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{limites_screenshot.png}
+    \caption{Panel de Control de Presupuestos y Progreso Semanal.}
+    \label{fig:limites}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{ahorros_screenshot.png}
+    \caption{Módulo de Metas de Ahorro y Configuración de Alertas.}
+    \label{fig:ahorros}
+\end{figure}
+
+\newpage
+
+\subsection{Anexo B: Enlaces de Acceso y Recursos del Proyecto}
+
+\textbf{Diseño y Estructura del Formulario de Validación:} \\
+El cuestionario de validación utilizado para evaluar y recopilar la retroalimentación de los \textit{early adopters} puede ser consultado en el siguiente enlace oficial de Microsoft Forms: \\
+\url{https://forms.cloud.microsoft/Pages/DesignPageV2.aspx?subpage=design&FormId=hRKP4i9nlEifTkQnO7tnaoRl3E9-FVFFs-pVqsR7SJlUQTRZNUM1V00yWVM4V1hDRzkyOUhNWEVLNy4u&Token=b98f512aea074831abc82839cd40fbc1}
+
+\vspace{0.8cm}
+
+\textbf{Repositorio de Código Fuente del MVP (GitHub):} \\
+El código fuente de la aplicación, que incluye la implementación interactiva en React, TypeScript y estilos, está alojado públicamente en el siguiente repositorio de GitHub: \\
+\url{https://github.com/DiogoAlip/AI-powered-Wallet}
 
 \end{document}
