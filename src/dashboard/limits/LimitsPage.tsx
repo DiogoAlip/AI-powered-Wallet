@@ -9,11 +9,11 @@ import {
   IconCalendarWeek,
 } from "@tabler/icons-react";
 import { getCategoryIcon } from "../helpers/getCategoryIcon.tsx";
-import { useWalletStore } from "../../store/wallet.store.ts";
+import { useFinancesStore } from "../../store/finances.store.ts";
 import type { Budget } from "../types/ChatTypes.ts";
 
 export function Limits() {
-  const { budgets, updateBudgetLimit } = useWalletStore();
+  const { budgets, updateBudgetLimit } = useFinancesStore();
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [newLimitValue, setNewLimitValue] = useState("");
 

@@ -5,10 +5,10 @@ import {
   IconMicrophone,
   IconArrowNarrowUp,
 } from "@tabler/icons-react";
-import { useWalletStore } from "../../../store/wallet.store.ts";
+import { useFinancesStore } from "../../../store/finances.store.ts";
 
 export function ChatInput({ newChat }: { newChat?: boolean }) {
-  const { chatHistory, sendMessage, isGenerating } = useWalletStore();
+  const { chatHistory, sendMessage, isGenerating } = useFinancesStore();
   const [inputText, setInputText] = useState("");
   const navigate = useNavigate();
   const chatEndRef = useRef<HTMLDivElement>(null);

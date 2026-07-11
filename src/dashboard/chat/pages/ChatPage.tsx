@@ -1,11 +1,11 @@
 import { useRef, useEffect } from "react";
 import { getCategoryIcon } from "../../helpers/getCategoryIcon.tsx";
 import { IconRobot, IconInfoCircle } from "@tabler/icons-react";
-import { useWalletStore } from "../../../store/wallet.store.ts";
+import { useFinancesStore } from "../../../store/finances.store.ts";
 import { ChatInput } from "../components/ChatInput.tsx";
 
 export function Chat() {
-  const { chatHistory, applyAction, isGenerating } = useWalletStore();
+  const { chatHistory, applyAction, isGenerating } = useFinancesStore();
   // const [quickExpenseText, setQuickExpenseText] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
 

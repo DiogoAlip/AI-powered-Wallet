@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { IconPig, IconCheck, IconShield } from "@tabler/icons-react";
-import { useWalletStore } from "../../store/wallet.store";
+import { useFinancesStore } from "../../store/finances.store";
 import { useAuthStore } from "../../store/auth.store";
 
 export function Goals() {
-  const { savings, depositSavings, resetSavings } = useWalletStore();
+  const { savings, depositSavings, resetSavings } = useFinancesStore();
   const user = useAuthStore((state) => state.user);
   const [depositAmount, setDepositAmount] = useState("");
   const [successMessage, setSuccessMessage] = useState<string | null>(null);

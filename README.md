@@ -32,7 +32,7 @@ Sigue estos pasos para levantar el entorno local:
 Accede a la carpeta raíz del proyecto y ejecuta:
 
 ```bash
-git clone https://github.com/DiogoAlip/AI-powered-Wallet.git
+git clone https://github.com/DiogoAlip/AI-powered-finances.git
 
 npm install
 # o si usas pnpm:

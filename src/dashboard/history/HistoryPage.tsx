@@ -12,10 +12,10 @@ import {
   IconCheck,
 } from "@tabler/icons-react";
 import { getCategoryIcon } from "../helpers/getCategoryIcon.tsx";
-import { useWalletStore } from "../../store/wallet.store.ts";
+import { useFinancesStore } from "../../store/finances.store.ts";
 
 export function History() {
-  const { transactions, addTransaction, deleteTransaction } = useWalletStore();
+  const { transactions, addTransaction, deleteTransaction } = useFinancesStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedType, setSelectedType] = useState("All");

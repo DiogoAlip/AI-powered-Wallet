@@ -13,7 +13,7 @@ import {
 } from "./mockData";
 import { GeminiService } from "../dashboard/chat/helper/gemini.service.ts";
 
-export interface UseWalletState {
+export interface UseFinancesState {
   transactions: Transaction[];
   budgets: Budget[];
   savings: SavingsGoal;
@@ -33,7 +33,7 @@ export interface UseWalletState {
   applyAction: (actionId: string, messageId: string) => void;
 }
 
-export const useWalletStore = create<UseWalletState>((set, get) => ({
+export const useFinancesStore = create<UseFinancesState>((set, get) => ({
   transactions: INITIAL_TRANSACTIONS,
   budgets: INITIAL_BUDGETS,
   savings: INITIAL_SAVINGS,
