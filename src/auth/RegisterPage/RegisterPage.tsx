@@ -38,24 +38,22 @@ export const RegisterPage = () => {
         {/* Hero Content */}
         <div className="max-w-xl my-auto py-12">
           <h1 className="text-4xl md:text-5xl font-semibold tracking-tight leading-tight text-white mb-6">
-            Secure Your Future with{" "}
-            <span className="text-teal-400">Intelligence</span>
+            Asegura tu futuro con{" "}
+            <span className="text-teal-400">inteligencia</span>
           </h1>
           <p className="text-gray-400 text-lg leading-relaxed mb-8">
-            Experience the next generation of wealth management. Our AI doesn't
-            just track spending; it predicts opportunities and secures your
-            FinancIA!l legacy.
+            Experimenta la próxima generación en gestión de patrimonio. Nuestra IA no solo hace seguimiento de tus gastos; predice oportunidades y asegura tu legado financiero.
           </p>
 
           {/* Badges */}
           <div className="flex flex-wrap gap-3">
             <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/10 text-gray-200 text-sm border border-white/10 backdrop-blur-sm">
               <IconSparkles2 className="w-4 h-4 text-teal-400" />
-              Potential Saving Identified
+              Ahorro Potencial Identificado
             </span>
             <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/10 text-gray-200 text-sm border border-white/10 backdrop-blur-sm">
               <IconShield className="w-4 h-4 text-teal-400" />
-              Bank-Grade Encryption
+              Cifrado de Nivel Bancario
             </span>
           </div>
         </div>
@@ -80,11 +78,11 @@ export const RegisterPage = () => {
             />
           </div>
           <p className="text-xs text-gray-400">
-            Joined by{" "}
+            Más de{" "}
             <span className="text-gray-300 font-medium">
-              10k+ wealth builders
+              10k personas
             </span>{" "}
-            this month
+            gestionando su dinero este mes
           </p>
         </div>
       </div>
@@ -94,10 +92,10 @@ export const RegisterPage = () => {
         <div className="w-full max-w-md mx-auto">
           {/* Heading */}
           <h2 className="text-3xl font-semibold tracking-tight text-gray-900 mb-2">
-            Create Account
+            Crear cuenta
           </h2>
           <p className="text-gray-500 text-sm mb-8">
-            Join FinancIA! and start your journey today.
+            Únete a FinancIA! y comienza tu camino hoy.
           </p>
 
           {/* Social Logins */}
@@ -106,13 +104,13 @@ export const RegisterPage = () => {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-xs font-semibold text-gray-700 mb-2">
-                Full Name
+                Nombre Completo
               </label>
               <div className="w-full flex gap-2 px-2 items-center border border-gray-200 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-800 tracking-widest text-gray-900">
                 <IconUser className="text-gray-600" />
                 <input
                   type="text"
-                  placeholder="John Doe"
+                  placeholder="Juan Pérez"
                   className="w-full py-2 focus:outline-none"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -123,13 +121,13 @@ export const RegisterPage = () => {
 
             <div>
               <label className="block text-xs font-semibold text-gray-700 mb-2">
-                Email Address
+                Dirección de Correo Electrónico
               </label>
               <div className="w-full flex gap-2 px-2 items-center border border-gray-200 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-800 tracking-widest text-gray-900">
                 <IconMail className="text-gray-600" />
                 <input
                   type="email"
-                  placeholder="name@company.com"
+                  placeholder="nombre@empresa.com"
                   className="w-full py-2 focus:outline-none"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -141,13 +139,13 @@ export const RegisterPage = () => {
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="block text-xs font-semibold text-gray-700">
-                  Password
+                  Contraseña
                 </label>
                 <a
                   href="#"
                   className="text-xs font-semibold text-teal-600 hover:underline"
                 >
-                  Forgot Password?
+                  ¿Olvidaste tu contraseña?
                 </a>
               </div>
               <div className="relative">
@@ -172,7 +170,7 @@ export const RegisterPage = () => {
                 </button>
               </div>
               <label className="block text-xs text-gray-700 my-1">
-                Must at Least 8 characters.
+                Debe tener al menos 8 caracteres.
               </label>
             </div>
 
@@ -187,10 +185,10 @@ export const RegisterPage = () => {
                 htmlFor="remember"
                 className="ml-2 block text-xs text-gray-600"
               >
-                I agree to the{" "}
-                <span className="text-teal-700">Terms of Service</span> and{" "}
-                <span className="text-teal-700">Privacy Policy</span>, including
-                the processing of my FinancIA!l data by AI.
+                Acepto los{" "}
+                <span className="text-teal-700">Términos de Servicio</span> y la{" "}
+                <span className="text-teal-700">Política de Privacidad</span>, incluyendo
+                el procesamiento de mis datos financieros por la IA.
               </label>
             </div>
 
@@ -199,7 +197,7 @@ export const RegisterPage = () => {
               type="submit"
               className="w-full flex items-center justify-center gap-2 bg-[#0d1527] text-white py-3 px-4 rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors mt-2"
             >
-              Create Account
+              Crear cuenta
               <IconArrowNarrowRight className="w-4 h-4" />
             </button>
           </form>
@@ -208,7 +206,7 @@ export const RegisterPage = () => {
           <div className="relative flex py-4 items-center m-6">
             <div className="grow border-t border-gray-200"></div>
             <span className="shrink mx-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-              Or register with email
+              O registrarse con
             </span>
             <div className="grow border-t border-gray-200"></div>
           </div>
@@ -243,12 +241,12 @@ export const RegisterPage = () => {
 
           {/* Signup Link */}
           <p className="text-center text-xs text-gray-500 mt-8">
-            Already have an account?{" "}
+            ¿Ya tienes una cuenta?{" "}
             <Link
               to="/auth/login"
               className="font-semibold text-teal-600 hover:underline"
             >
-              Log In
+              Iniciar sesión
             </Link>
           </p>
         </div>

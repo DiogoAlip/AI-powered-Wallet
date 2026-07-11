@@ -5,20 +5,20 @@ export const AuthFooter = () => {
         <span className="text-sm font-bold text-white tracking-tight">
           FinancIA!
         </span>
-        <p>© 2024 FinancIA!. All rights reserved.</p>
+        <p>© 2024 FinancIA!. Todos los derechos reservados.</p>
       </div>
       <div className="flex flex-wrap justify-center gap-6 text-gray-400">
         <a href="#" className="hover:text-white transition-colors">
-          Privacy Policy
+          Política de Privacidad
         </a>
         <a href="#" className="hover:text-white transition-colors">
-          Terms of Service
+          Términos de Servicio
         </a>
         <a href="#" className="hover:text-white transition-colors">
-          Security
+          Seguridad
         </a>
         <a href="#" className="hover:text-white transition-colors">
-          Contact Us
+          Contáctanos
         </a>
       </div>
     </footer>

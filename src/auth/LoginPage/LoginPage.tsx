@@ -36,22 +36,21 @@ export const LoginPage = () => {
         {/* Hero Content */}
         <div className="max-w-xl my-auto py-12">
           <h1 className="text-4xl md:text-5xl font-semibold tracking-tight leading-tight text-white mb-6">
-            Intelligent wealth management, simplified.
+            Gestión financiera inteligente, simplificada.
           </h1>
           <p className="text-gray-400 text-lg leading-relaxed mb-8">
-            Our AI-driven insights help you track, plan, and optimize your
-            FinancIA!l future with precision and enterprise-grade security.
+            Nuestros análisis basados en IA te ayudan a realizar el seguimiento, planificar y optimizar tu futuro financiero con precisión y seguridad de nivel empresarial.
           </p>
 
           {/* Badges */}
           <div className="flex flex-wrap gap-3">
             <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/10 text-gray-200 text-sm border border-white/10 backdrop-blur-sm">
               <IconSparkles2 className="w-4 h-4 text-teal-400" />
-              Potential Saving Identified
+              Ahorro Potencial Identificado
             </span>
             <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/10 text-gray-200 text-sm border border-white/10 backdrop-blur-sm">
               <IconShield className="w-4 h-4 text-teal-400" />
-              Bank-Grade Encryption
+              Cifrado de Nivel Bancario
             </span>
           </div>
         </div>
@@ -76,11 +75,11 @@ export const LoginPage = () => {
             />
           </div>
           <p className="text-xs text-gray-400">
-            Joined by{" "}
+            Más de{" "}
             <span className="text-gray-300 font-medium">
-              10k+ wealth builders
+              10k personas
             </span>{" "}
-            this month
+            gestionando su dinero este mes
           </p>
         </div>
       </div>
@@ -90,10 +89,10 @@ export const LoginPage = () => {
         <div className="w-full max-w-md mx-auto">
           {/* Heading */}
           <h2 className="text-3xl font-semibold tracking-tight text-gray-900 mb-2">
-            Welcome back
+            Bienvenido de nuevo
           </h2>
           <p className="text-gray-500 text-sm mb-8">
-            Log in to manage your smart portfolio.
+            Inicia sesión para gestionar tu cartera inteligente.
           </p>
 
           {/* Social Logins */}
@@ -102,13 +101,13 @@ export const LoginPage = () => {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-xs font-semibold text-gray-700 mb-2">
-                Email Address
+                Dirección de Correo Electrónico
               </label>
               <div className="w-full flex gap-2 px-2 items-center border border-gray-200 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-800 tracking-widest text-gray-900">
                 <IconMail className="text-gray-600" />
                 <input
                   type="email"
-                  placeholder="name@company.com"
+                  placeholder="nombre@empresa.com"
                   className="w-full py-2 focus:outline-none"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -120,13 +119,13 @@ export const LoginPage = () => {
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="block text-xs font-semibold text-gray-700">
-                  Password
+                  Contraseña
                 </label>
                 <a
                   href="#"
                   className="text-xs font-semibold text-teal-600 hover:underline"
                 >
-                  Forgot Password?
+                  ¿Olvidaste tu contraseña?
                 </a>
               </div>
               <div className="relative">
@@ -163,7 +162,7 @@ export const LoginPage = () => {
                 htmlFor="remember"
                 className="ml-2 block text-xs text-gray-600 font-medium"
               >
-                Keep me logged in for 30 days
+                Mantener mi sesión iniciada por 30 días
               </label>
             </div>
 
@@ -172,7 +171,7 @@ export const LoginPage = () => {
               type="submit"
               className="w-full flex items-center justify-center gap-2 bg-[#0d1527] text-white py-3 px-4 rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors mt-2"
             >
-              Log In
+              Iniciar Sesión
               <IconArrowNarrowRight className="w-4 h-4" />
             </button>
           </form>
@@ -181,7 +180,7 @@ export const LoginPage = () => {
           <div className="relative flex py-4 items-center m-6">
             <div className="grow border-t border-gray-200"></div>
             <span className="shrink mx-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-              Or continue with email
+              O continuar con
             </span>
             <div className="grow border-t border-gray-200"></div>
           </div>
@@ -216,12 +215,12 @@ export const LoginPage = () => {
 
           {/* Signup Link */}
           <p className="text-center text-xs text-gray-500 mt-8">
-            Don't have an account?{" "}
+            ¿No tienes una cuenta?{" "}
             <Link
               to="/auth/register"
               className="font-semibold text-teal-600 hover:underline"
             >
-              Get Started
+              Comenzar
             </Link>
           </p>
         </div>
