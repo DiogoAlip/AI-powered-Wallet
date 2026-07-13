@@ -52,7 +52,13 @@ class DatabaseManager {
         "Socio FinancIA!",
         1,
       ]);
-      this.seedDefaultData(email);
+      
+      const demoEmails = ["demo@financia.com", "ejemplo@financia.com"];
+      if (demoEmails.includes(email.toLowerCase())) {
+        this.seedDefaultData(email);
+      } else {
+        this.seedEmptyData(email);
+      }
       await this.save();
     }
 
@@ -164,6 +170,33 @@ class DatabaseManager {
         ]
       );
     }
+  }
+
+  private seedEmptyData(email: string) {
+    const db = this.activeDb!;
+    for (const b of INITIAL_BUDGETS) {
+      db.run(
+        "INSERT INTO budgets (user_email, category, spent, limit_val, icon, color) VALUES (?, ?, ?, ?, ?, ?)",
+        [email, b.category, 0, 0, b.icon, b.color]
+      );
+    }
+    db.run(
+      "INSERT INTO savings (user_email, name, target, current) VALUES (?, ?, ?, ?)",
+      [email, "Fondo de Emergencia", 5000.0, 0.0]
+    );
+    db.run(
+      "INSERT INTO chat_messages (id, user_email, sender, timestamp, text, transaction_detail, action_chips, info_text) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        "welcome-message",
+        email,
+        "ai",
+        "Ahora",
+        "¡Hola! Soy tu asistente financiero FinancIA!. He preparado tu base de datos segura y local en tu navegador. ¿Quieres registrar algún gasto o presupuesto?",
+        null,
+        null,
+        null,
+      ]
+    );
   }
 
   getTransactions(): Transaction[] {
