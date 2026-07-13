@@ -22,15 +22,16 @@ export function Chat() {
   // };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#f8f9ff] overflow-hidden">
+    <div className="flex flex-col min-h-[calc(100vh-64px)] h-full bg-gray-50 overflow-hidden">
       {/* Quick Entry Section */}
 
       <section className="flex-1 overflow-y-auto no-scrollbar p-5 space-y-6 flex flex-col relative">
         {chatHistory.map((msg) => (
           <div
             key={msg.id}
-            className={`flex items-start gap-3 max-w-3xl ${msg.sender === "user" ? "self-end flex-row-reverse" : "self-start"
-              }`}
+            className={`flex items-start gap-3 max-w-3xl ${
+              msg.sender === "user" ? "self-end flex-row-reverse" : "self-start"
+            }`}
           >
             {/* Avatar */}
             {msg.sender === "ai" ? (
@@ -53,10 +54,11 @@ export function Chat() {
               </span>
 
               <div
-                className={`rounded-2xl p-4 shadow-sm relative overflow-hidden max-w-full ${msg.sender === "ai"
-                  ? "bg-white border border-gray-100 rounded-tl-none"
-                  : "bg-[#131b2e] text-white rounded-tr-none"
-                  }`}
+                className={`rounded-2xl p-4 shadow-sm relative overflow-hidden max-w-full ${
+                  msg.sender === "ai"
+                    ? "bg-white border border-gray-100 rounded-tl-none"
+                    : "bg-[#131b2e] text-white rounded-tr-none"
+                }`}
               >
                 <p className="font-sans text-sm leading-relaxed">{msg.text}</p>
 
@@ -77,13 +79,17 @@ export function Chat() {
                       </div>
                     </div>
                     <span
-                      className={`font-sans font-bold text-sm ${msg.transactionDetail.type === "expense"
-                        ? "text-red-600"
-                        : "text-emerald-600"
-                        }`}
+                      className={`font-sans font-bold text-sm ${
+                        msg.transactionDetail.type === "expense"
+                          ? "text-red-600"
+                          : "text-emerald-600"
+                      }`}
                     >
                       {msg.transactionDetail.type === "expense" ? "-" : "+"}$
-                      {msg.transactionDetail.amount.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {msg.transactionDetail.amount.toLocaleString("es-ES", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
                     </span>
                   </div>
                 )}
@@ -103,11 +109,12 @@ export function Chat() {
                       <button
                         key={chip.actionId}
                         onClick={() => applyAction(chip.actionId, msg.id)}
-                        className={`font-sans text-xs font-semibold px-4 py-2 rounded-full border transition-all ${chip.actionId === "move_to_savings" ||
+                        className={`font-sans text-xs font-semibold px-4 py-2 rounded-full border transition-all ${
+                          chip.actionId === "move_to_savings" ||
                           chip.actionId === "move_to_savings_quick"
-                          ? "text-teal-700 bg-teal-50 border-teal-200 hover:bg-teal-100"
-                          : "text-gray-600 border-gray-200 hover:bg-gray-50"
-                          }`}
+                            ? "text-teal-700 bg-teal-50 border-teal-200 hover:bg-teal-100"
+                            : "text-gray-600 border-gray-200 hover:bg-gray-50"
+                        }`}
                       >
                         {chip.text}
                       </button>

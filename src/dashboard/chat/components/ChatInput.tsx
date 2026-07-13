@@ -44,7 +44,7 @@ export function ChatInput({ newChat }: { newChat?: boolean }) {
   return (
     <>
       <section
-        className={` ${newChat ? "flex justify-center" : "fixed bottom-0 border-t border-gray-200/50"} w-full bg-white px-5 py-4`}
+        className={` ${newChat ? "flex justify-center" : "fixed bottom-0 border-t border-gray-200/50 flex-1"} w-full bg-white px-5 py-4`}
       >
         <div
           className={`flex items-end gap-3  mx-auto ${newChat ? "rounded-full bg-grayteal-100 px-6 py-5 w-lg" : "max-w-4xl"}`}
