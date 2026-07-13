@@ -1,7 +1,5 @@
 import { create } from "zustand";
-import initSqlJs from "sql.js";
-import type { Database } from "sql.js";
-import { indexedDbStorage } from "./indexedDbStorage";
+import { databaseManager } from "./database.manager";
 import type {
   Transaction,
   Budget,
@@ -15,235 +13,6 @@ import {
   INITIAL_CHAT_HISTORY,
 } from "./mockData";
 import { GeminiService } from "../dashboard/chat/helper/gemini.service.ts";
-
-let SQL: any = null;
-let activeDb: Database | null = null;
-let activeUserEmail: string | null = null;
-
-const saveDatabaseToIndexedDB = async (email: string) => {
-  if (!activeDb) return;
-  const binaryArray = activeDb.export();
-  await indexedDbStorage.set(`sqlite_db_${email}`, binaryArray);
-};
-
-const initializeSchema = () => {
-  if (!activeDb) return;
-
-  activeDb.run(`
-    CREATE TABLE IF NOT EXISTS users (
-      email TEXT PRIMARY KEY,
-      name TEXT,
-      initialized INTEGER DEFAULT 0
-    );
-  `);
-
-  activeDb.run(`
-    CREATE TABLE IF NOT EXISTS transactions (
-      id TEXT PRIMARY KEY,
-      user_email TEXT,
-      merchant TEXT,
-      category TEXT,
-      amount REAL,
-      date TEXT,
-      account TEXT,
-      type TEXT,
-      FOREIGN KEY(user_email) REFERENCES users(email) ON DELETE CASCADE
-    );
-  `);
-
-  activeDb.run(`
-    CREATE TABLE IF NOT EXISTS budgets (
-      user_email TEXT,
-      category TEXT,
-      spent REAL,
-      limit_val REAL,
-      icon TEXT,
-      color TEXT,
-      PRIMARY KEY(user_email, category),
-      FOREIGN KEY(user_email) REFERENCES users(email) ON DELETE CASCADE
-    );
-  `);
-
-  activeDb.run(`
-    CREATE TABLE IF NOT EXISTS savings (
-      user_email TEXT PRIMARY KEY,
-      name TEXT,
-      target REAL,
-      current REAL,
-      FOREIGN KEY(user_email) REFERENCES users(email) ON DELETE CASCADE
-    );
-  `);
-
-  activeDb.run(`
-    CREATE TABLE IF NOT EXISTS chat_messages (
-      id TEXT PRIMARY KEY,
-      user_email TEXT,
-      sender TEXT,
-      timestamp TEXT,
-      text TEXT,
-      transaction_detail TEXT,
-      action_chips TEXT,
-      info_text TEXT,
-      FOREIGN KEY(user_email) REFERENCES users(email) ON DELETE CASCADE
-    );
-  `);
-};
-
-const seedDefaultData = (email: string) => {
-  if (!activeDb) return;
-
-  for (const tx of INITIAL_TRANSACTIONS) {
-    activeDb.run(
-      "INSERT INTO transactions (id, user_email, merchant, category, amount, date, account, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      [
-        tx.id,
-        email,
-        tx.merchant,
-        tx.category,
-        tx.amount,
-        tx.date,
-        tx.account,
-        tx.type,
-      ]
-    );
-  }
-
-  for (const b of INITIAL_BUDGETS) {
-    activeDb.run(
-      "INSERT INTO budgets (user_email, category, spent, limit_val, icon, color) VALUES (?, ?, ?, ?, ?, ?)",
-      [email, b.category, b.spent, b.limit, b.icon, b.color]
-    );
-  }
-
-  activeDb.run(
-    "INSERT INTO savings (user_email, name, target, current) VALUES (?, ?, ?, ?)",
-    [email, INITIAL_SAVINGS.name, INITIAL_SAVINGS.target, INITIAL_SAVINGS.current]
-  );
-
-  for (const chat of INITIAL_CHAT_HISTORY) {
-    activeDb.run(
-      "INSERT INTO chat_messages (id, user_email, sender, timestamp, text, transaction_detail, action_chips, info_text) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      [
-        chat.id,
-        email,
-        chat.sender,
-        chat.timestamp,
-        chat.text,
-        chat.transactionDetail ? JSON.stringify(chat.transactionDetail) : null,
-        chat.actionChips ? JSON.stringify(chat.actionChips) : null,
-        chat.infoText || null,
-      ]
-    );
-  }
-};
-
-const getTransactions = (email: string): Transaction[] => {
-  if (!activeDb) return [];
-  const stmt = activeDb.prepare(
-    "SELECT id, merchant, category, amount, date, account, type FROM transactions WHERE user_email = ?"
-  );
-  stmt.bind([email]);
-  const txs: Transaction[] = [];
-  while (stmt.step()) {
-    const row = stmt.getAsObject();
-    txs.push({
-      id: row.id as string,
-      merchant: row.merchant as string,
-      category: row.category as string,
-      amount: row.amount as number,
-      date: row.date as string,
-      account: row.account as string,
-      type: row.type as "expense" | "income",
-    });
-  }
-  stmt.free();
-  return txs;
-};
-
-const getBudgets = (email: string): Budget[] => {
-  if (!activeDb) return [];
-  const stmt = activeDb.prepare(
-    "SELECT category, spent, limit_val, icon, color FROM budgets WHERE user_email = ?"
-  );
-  stmt.bind([email]);
-  const budgets: Budget[] = [];
-  while (stmt.step()) {
-    const row = stmt.getAsObject();
-    budgets.push({
-      category: row.category as string,
-      spent: row.spent as number,
-      limit: row.limit_val as number,
-      icon: row.icon as string,
-      color: row.color as string,
-    });
-  }
-  stmt.free();
-  return budgets;
-};
-
-const getSavings = (email: string): SavingsGoal => {
-  if (!activeDb) return INITIAL_SAVINGS;
-  const stmt = activeDb.prepare(
-    "SELECT name, target, current FROM savings WHERE user_email = ?"
-  );
-  stmt.bind([email]);
-  let savings: SavingsGoal = INITIAL_SAVINGS;
-  if (stmt.step()) {
-    const row = stmt.getAsObject();
-    savings = {
-      name: row.name as string,
-      target: row.target as number,
-      current: row.current as number,
-    };
-  }
-  stmt.free();
-  return savings;
-};
-
-const getChatHistory = (email: string): ChatMessage[] => {
-  if (!activeDb) return [];
-  const stmt = activeDb.prepare(
-    "SELECT id, sender, timestamp, text, transaction_detail, action_chips, info_text FROM chat_messages WHERE user_email = ? ORDER BY rowid ASC"
-  );
-  stmt.bind([email]);
-  const history: ChatMessage[] = [];
-  while (stmt.step()) {
-    const row = stmt.getAsObject();
-    history.push({
-      id: row.id as string,
-      sender: row.sender as "user" | "ai",
-      timestamp: row.timestamp as string,
-      text: row.text as string,
-      transactionDetail: row.transaction_detail
-        ? JSON.parse(row.transaction_detail as string)
-        : undefined,
-      actionChips: row.action_chips
-        ? JSON.parse(row.action_chips as string)
-        : undefined,
-      infoText: row.info_text ? (row.info_text as string) : undefined,
-    });
-  }
-  stmt.free();
-  return history;
-};
-
-const persistChatMessage = (msg: ChatMessage) => {
-  if (!activeDb || !activeUserEmail) return;
-  activeDb.run(
-    "INSERT INTO chat_messages (id, user_email, sender, timestamp, text, transaction_detail, action_chips, info_text) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-    [
-      msg.id,
-      activeUserEmail,
-      msg.sender,
-      msg.timestamp,
-      msg.text,
-      msg.transactionDetail ? JSON.stringify(msg.transactionDetail) : null,
-      msg.actionChips ? JSON.stringify(msg.actionChips) : null,
-      msg.infoText || null,
-    ]
-  );
-  saveDatabaseToIndexedDB(activeUserEmail);
-};
 
 export interface UseFinancesState {
   transactions: Transaction[];
@@ -277,56 +46,14 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
   dbReady: false,
 
   loadUserDatabase: async (email) => {
-    if (activeUserEmail === email && activeDb) {
-      set({ dbReady: true });
-      return;
-    }
-
     set({ dbReady: false });
-    activeUserEmail = email;
-
     try {
-      if (!SQL) {
-        SQL = await initSqlJs({
-          locateFile: (file) => `https://cdn.jsdelivr.net/npm/sql.js@1.12.0/dist/${file}`,
-        });
-      }
-
-      const dbData = await indexedDbStorage.get(`sqlite_db_${email}`);
-      const db = dbData ? new SQL.Database(dbData) : new SQL.Database();
-      activeDb = db;
-
-      initializeSchema();
-
-      const userStmt = db.prepare("SELECT initialized FROM users WHERE email = ?");
-      userStmt.bind([email]);
-      let initialized = false;
-      if (userStmt.step()) {
-        const row = userStmt.getAsObject();
-        initialized = row.initialized === 1;
-      }
-      userStmt.free();
-
-      if (!initialized) {
-        db.run("INSERT OR REPLACE INTO users (email, name, initialized) VALUES (?, ?, ?)", [
-          email,
-          "Socio FinancIA!",
-          1,
-        ]);
-        seedDefaultData(email);
-        await saveDatabaseToIndexedDB(email);
-      }
-
-      const transactions = getTransactions(email);
-      const budgets = getBudgets(email);
-      const savings = getSavings(email);
-      const chatHistory = getChatHistory(email);
-
+      await databaseManager.init(email);
       set({
-        transactions,
-        budgets,
-        savings,
-        chatHistory,
+        transactions: databaseManager.getTransactions(),
+        budgets: databaseManager.getBudgets(),
+        savings: databaseManager.getSavings(),
+        chatHistory: databaseManager.getChatHistory(),
         dbReady: true,
       });
     } catch (err) {
@@ -342,11 +69,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
   },
 
   clearUserDatabase: () => {
-    if (activeDb) {
-      activeDb.close();
-      activeDb = null;
-    }
-    activeUserEmail = null;
+    databaseManager.close();
     set({
       transactions: [],
       budgets: [],
@@ -363,33 +86,12 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
       date: "Hoy",
     };
 
-    if (activeDb && activeUserEmail) {
-      activeDb.run(
-        "INSERT INTO transactions (id, user_email, merchant, category, amount, date, account, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        [
-          newTx.id,
-          activeUserEmail,
-          newTx.merchant,
-          newTx.category,
-          newTx.amount,
-          newTx.date,
-          newTx.account,
-          newTx.type,
-        ]
-      );
-
-      if (tx.type === "expense") {
-        activeDb.run(
-          "UPDATE budgets SET spent = spent + ? WHERE user_email = ? AND category = ?",
-          [tx.amount, activeUserEmail, tx.category]
-        );
-      }
-
-      saveDatabaseToIndexedDB(activeUserEmail);
-
+    if (databaseManager.isActive()) {
+      databaseManager.addTransaction(newTx);
+      databaseManager.save();
       set({
-        transactions: getTransactions(activeUserEmail),
-        budgets: getBudgets(activeUserEmail),
+        transactions: databaseManager.getTransactions(),
+        budgets: databaseManager.getBudgets(),
       });
     } else {
       set((state) => {
@@ -411,30 +113,13 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
   },
 
   deleteTransaction: (id) => {
-    if (activeDb && activeUserEmail) {
-      const stmt = activeDb.prepare("SELECT type, category, amount FROM transactions WHERE id = ?");
-      stmt.bind([id]);
-      let txToDelete: any = null;
-      if (stmt.step()) {
-        txToDelete = stmt.getAsObject();
-      }
-      stmt.free();
-
-      if (txToDelete) {
-        activeDb.run("DELETE FROM transactions WHERE id = ?", [id]);
-
-        if (txToDelete.type === "expense") {
-          activeDb.run(
-            "UPDATE budgets SET spent = MAX(0, spent - ?) WHERE user_email = ? AND category = ?",
-            [txToDelete.amount, activeUserEmail, txToDelete.category]
-          );
-        }
-
-        saveDatabaseToIndexedDB(activeUserEmail);
-
+    if (databaseManager.isActive()) {
+      const txDeleted = databaseManager.deleteTransaction(id);
+      if (txDeleted) {
+        databaseManager.save();
         set({
-          transactions: getTransactions(activeUserEmail),
-          budgets: getBudgets(activeUserEmail),
+          transactions: databaseManager.getTransactions(),
+          budgets: databaseManager.getBudgets(),
         });
       }
     } else {
@@ -460,13 +145,10 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
   },
 
   updateBudgetLimit: (category, limit) => {
-    if (activeDb && activeUserEmail) {
-      activeDb.run(
-        "UPDATE budgets SET limit_val = ? WHERE user_email = ? AND category = ?",
-        [limit, activeUserEmail, category]
-      );
-      saveDatabaseToIndexedDB(activeUserEmail);
-      set({ budgets: getBudgets(activeUserEmail) });
+    if (databaseManager.isActive()) {
+      databaseManager.updateBudgetLimit(category, limit);
+      databaseManager.save();
+      set({ budgets: databaseManager.getBudgets() });
     } else {
       set((state) => ({
         budgets: state.budgets.map((b) =>
@@ -477,13 +159,10 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
   },
 
   updateBudgetSpent: (category, spent) => {
-    if (activeDb && activeUserEmail) {
-      activeDb.run(
-        "UPDATE budgets SET spent = ? WHERE user_email = ? AND category = ?",
-        [spent, activeUserEmail, category]
-      );
-      saveDatabaseToIndexedDB(activeUserEmail);
-      set({ budgets: getBudgets(activeUserEmail) });
+    if (databaseManager.isActive()) {
+      databaseManager.updateBudgetSpent(category, spent);
+      databaseManager.save();
+      set({ budgets: databaseManager.getBudgets() });
     } else {
       set((state) => ({
         budgets: state.budgets.map((b) =>
@@ -494,13 +173,10 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
   },
 
   depositSavings: (amount) => {
-    if (activeDb && activeUserEmail) {
-      activeDb.run(
-        "UPDATE savings SET current = current + ? WHERE user_email = ?",
-        [amount, activeUserEmail]
-      );
-      saveDatabaseToIndexedDB(activeUserEmail);
-      set({ savings: getSavings(activeUserEmail) });
+    if (databaseManager.isActive()) {
+      databaseManager.depositSavings(amount);
+      databaseManager.save();
+      set({ savings: databaseManager.getSavings() });
     } else {
       set((state) => ({
         savings: {
@@ -512,13 +188,10 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
   },
 
   resetSavings: () => {
-    if (activeDb && activeUserEmail) {
-      activeDb.run(
-        "UPDATE savings SET current = 0 WHERE user_email = ?",
-        [activeUserEmail]
-      );
-      saveDatabaseToIndexedDB(activeUserEmail);
-      set({ savings: getSavings(activeUserEmail) });
+    if (databaseManager.isActive()) {
+      databaseManager.resetSavings();
+      databaseManager.save();
+      set({ savings: databaseManager.getSavings() });
     } else {
       set((state) => ({
         savings: {
@@ -530,9 +203,10 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
   },
 
   addChatMessage: (msg) => {
-    if (activeDb && activeUserEmail) {
-      persistChatMessage(msg);
-      set({ chatHistory: getChatHistory(activeUserEmail) });
+    if (databaseManager.isActive()) {
+      databaseManager.persistChatMessage(msg);
+      databaseManager.save();
+      set({ chatHistory: databaseManager.getChatHistory() });
     } else {
       set((state) => ({
         chatHistory: [...state.chatHistory, msg],
@@ -541,25 +215,13 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
   },
 
   setChatHistory: (history) => {
-    if (activeDb && activeUserEmail) {
-      activeDb.run("DELETE FROM chat_messages WHERE user_email = ?", [activeUserEmail]);
+    if (databaseManager.isActive()) {
+      databaseManager.clearChatHistory();
       for (const msg of history) {
-        activeDb.run(
-          "INSERT INTO chat_messages (id, user_email, sender, timestamp, text, transaction_detail, action_chips, info_text) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-          [
-            msg.id,
-            activeUserEmail,
-            msg.sender,
-            msg.timestamp,
-            msg.text,
-            msg.transactionDetail ? JSON.stringify(msg.transactionDetail) : null,
-            msg.actionChips ? JSON.stringify(msg.actionChips) : null,
-            msg.infoText || null,
-          ]
-        );
+        databaseManager.persistChatMessage(msg);
       }
-      saveDatabaseToIndexedDB(activeUserEmail);
-      set({ chatHistory: getChatHistory(activeUserEmail) });
+      databaseManager.save();
+      set({ chatHistory: databaseManager.getChatHistory() });
     } else {
       set({ chatHistory: history });
     }
@@ -576,10 +238,11 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
       text,
     };
 
-    persistChatMessage(userMsg);
-    if (activeUserEmail && activeDb) {
+    if (databaseManager.isActive()) {
+      databaseManager.persistChatMessage(userMsg);
+      databaseManager.save();
       set({
-        chatHistory: getChatHistory(activeUserEmail),
+        chatHistory: databaseManager.getChatHistory(),
         isGenerating: true,
       });
     } else {
@@ -621,10 +284,11 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
         infoText: response.infoText,
       };
 
-      persistChatMessage(aiMsg);
-      if (activeUserEmail && activeDb) {
+      if (databaseManager.isActive()) {
+        databaseManager.persistChatMessage(aiMsg);
+        databaseManager.save();
         set({
-          chatHistory: getChatHistory(activeUserEmail),
+          chatHistory: databaseManager.getChatHistory(),
           isGenerating: false,
         });
       } else {
@@ -644,10 +308,11 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
         text: `⚠️ Error de configuración: ${error.message || error}`,
       };
 
-      persistChatMessage(errorMsg);
-      if (activeUserEmail && activeDb) {
+      if (databaseManager.isActive()) {
+        databaseManager.persistChatMessage(errorMsg);
+        databaseManager.save();
         set({
-          chatHistory: getChatHistory(activeUserEmail),
+          chatHistory: databaseManager.getChatHistory(),
           isGenerating: false,
         });
       } else {
@@ -660,22 +325,8 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
   },
 
   applyAction: (actionId, messageId) => {
-    if (activeDb && activeUserEmail) {
-      const getMsgStmt = activeDb.prepare(
-        "SELECT text, sender, timestamp, transaction_detail, info_text FROM chat_messages WHERE id = ?"
-      );
-      getMsgStmt.bind([messageId]);
-      let msgData: any = null;
-      if (getMsgStmt.step()) {
-        msgData = getMsgStmt.getAsObject();
-      }
-      getMsgStmt.free();
-
-      if (msgData) {
-        activeDb.run("UPDATE chat_messages SET action_chips = NULL WHERE id = ?", [
-          messageId,
-        ]);
-      }
+    if (databaseManager.isActive()) {
+      databaseManager.removeActionChipsFromMessage(messageId);
 
       let confirmMsg: ChatMessage | null = null;
 
@@ -684,13 +335,9 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
         actionId === "move_to_savings_quick"
       ) {
         const transferAmount = actionId === "move_to_savings" ? 120 : 50;
+        databaseManager.depositSavings(transferAmount);
 
-        activeDb.run(
-          "UPDATE savings SET current = current + ? WHERE user_email = ?",
-          [transferAmount, activeUserEmail]
-        );
-
-        const currentSavings = getSavings(activeUserEmail);
+        const currentSavings = databaseManager.getSavings();
 
         confirmMsg = {
           id: `chat-${Date.now()}`,
@@ -737,14 +384,13 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
       }
 
       if (confirmMsg) {
-        persistChatMessage(confirmMsg);
-      } else {
-        saveDatabaseToIndexedDB(activeUserEmail);
+        databaseManager.persistChatMessage(confirmMsg);
       }
+      databaseManager.save();
 
       set({
-        chatHistory: getChatHistory(activeUserEmail),
-        savings: getSavings(activeUserEmail),
+        chatHistory: databaseManager.getChatHistory(),
+        savings: databaseManager.getSavings(),
       });
     } else {
       set((state) => {

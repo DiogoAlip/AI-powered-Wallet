@@ -20,7 +20,7 @@ export const DashboardLayout = () => {
     } else {
       clearUserDatabase();
     }
-  }, [isAuthenticated, user?.email]);
+  }, [isAuthenticated, user?.email, loadUserDatabase, clearUserDatabase]);
 
   if (!isAuthenticated) {
     return <Navigate to="/auth/login" replace />;
