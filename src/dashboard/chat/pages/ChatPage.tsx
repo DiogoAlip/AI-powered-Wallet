@@ -4,6 +4,7 @@ import { getCategoryIcon } from "../../helpers/getCategoryIcon.tsx";
 import { IconRobot, IconInfoCircle } from "@tabler/icons-react";
 import { useFinancesStore } from "../../../store/finances.store.ts";
 import { ChatInput } from "../components/ChatInput.tsx";
+import { MarkdownText } from "../components/MarkdownText.tsx";
 
 export function Chat() {
   const { id: chatId } = useParams();
@@ -30,7 +31,7 @@ export function Chat() {
   // };
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-64px)] h-full bg-gray-50 overflow-hidden animate-fade-in-up">
+    <div className="flex flex-col h-[calc(100vh-64px)] bg-gray-50 overflow-hidden animate-fade-in-up">
       {/* Quick Entry Section */}
 
       <section className="flex-1 overflow-y-auto no-scrollbar p-5 space-y-6 flex flex-col relative">
@@ -68,7 +69,7 @@ export function Chat() {
                     : "bg-[#131b2e] text-white rounded-tr-none"
                 }`}
               >
-                <p className="font-sans text-sm leading-relaxed">{msg.text}</p>
+                <MarkdownText text={msg.text} />
 
                 {msg.transactionDetail && (
                   <div className="mt-3 flex items-center justify-between bg-[#eff4ff] p-3 rounded-xl border border-gray-200/50">
