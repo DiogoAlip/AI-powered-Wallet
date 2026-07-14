@@ -1,4 +1,4 @@
-import { IconSearch, IconPlus } from "@tabler/icons-react";
+import { IconSearch, IconPlus, IconFolder } from "@tabler/icons-react";
 
 interface TransactionFiltersProps {
   searchTerm: string;
@@ -9,6 +9,7 @@ interface TransactionFiltersProps {
   setSelectedType: (val: string) => void;
   categories: string[];
   onOpenModal: () => void;
+  onOpenCatModal: () => void;
 }
 
 export function TransactionFilters({
@@ -20,6 +21,7 @@ export function TransactionFilters({
   setSelectedType,
   categories,
   onOpenModal,
+  onOpenCatModal,
 }: TransactionFiltersProps) {
   return (
     <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
@@ -62,10 +64,19 @@ export function TransactionFilters({
           <option value="income">Ingresos</option>
         </select>
 
+        {/* Categories Manager Button */}
+        <button
+          onClick={onOpenCatModal}
+          className="px-4 py-2 border border-gray-200 hover:bg-gray-50 text-gray-600 font-sans text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
+        >
+          <IconFolder className="w-4 h-4 text-gray-500" />
+          Categorías
+        </button>
+
         {/* Manual Add Button */}
         <button
           onClick={onOpenModal}
-          className="px-4 py-2 bg-[#006a61] hover:bg-teal-700 text-white font-sans text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow-sm transition-colors"
+          className="px-4 py-2 bg-[#006a61] hover:bg-teal-700 text-white font-sans text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer"
         >
           <IconPlus className="w-4 h-4" />
           Nuevo Registro

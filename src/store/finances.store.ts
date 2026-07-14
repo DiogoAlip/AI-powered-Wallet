@@ -20,6 +20,7 @@ export interface UseFinancesState {
   savings: SavingsGoal;
   chatHistory: ChatMessage[];
   chatSessions: string[];
+  categories: string[];
   isGenerating: boolean;
   dbReady: boolean;
 
@@ -38,6 +39,10 @@ export interface UseFinancesState {
   applyAction: (actionId: string, messageId: string, chatId?: string) => void;
   loadChatHistory: (chatId: string) => void;
   loadChatSessions: () => void;
+  addCategory: (name: string) => void;
+  updateCategory: (oldName: string, newName: string) => void;
+  deleteCategory: (name: string) => void;
+  deleteChatMessage: (messageId: string) => void;
 }
 
 export const useFinancesStore = create<UseFinancesState>((set, get) => ({
@@ -46,6 +51,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
   savings: INITIAL_SAVINGS,
   chatHistory: INITIAL_CHAT_HISTORY,
   chatSessions: [],
+  categories: ["Comida fuera", "Transporte", "Supermercado", "Facturas", "Compras", "Otros"],
   isGenerating: false,
   dbReady: false,
 
@@ -60,6 +66,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
         savings: databaseManager.getSavings(),
         chatHistory: databaseManager.getChatHistory(activeChatId),
         chatSessions: databaseManager.getChatSessions(),
+        categories: databaseManager.getCategories(),
         dbReady: true,
       });
     } catch (err) {
@@ -70,6 +77,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
         savings: INITIAL_SAVINGS,
         chatHistory: INITIAL_CHAT_HISTORY,
         chatSessions: [],
+        categories: ["Comida fuera", "Transporte", "Supermercado", "Facturas", "Compras", "Otros"],
         dbReady: true,
       });
     }
@@ -83,6 +91,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
       savings: INITIAL_SAVINGS,
       chatHistory: [],
       chatSessions: [],
+      categories: ["Comida fuera", "Transporte", "Supermercado", "Facturas", "Compras", "Otros"],
       dbReady: false,
     });
   },
@@ -496,6 +505,62 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
   loadChatSessions: () => {
     if (databaseManager.isActive()) {
       set({ chatSessions: databaseManager.getChatSessions() });
+    }
+  },
+
+  addCategory: (name) => {
+    if (databaseManager.isActive()) {
+      databaseManager.addCategory(name);
+      databaseManager.save();
+      set({ categories: databaseManager.getCategories() });
+    }
+  },
+
+  updateCategory: (oldName, newName) => {
+    if (databaseManager.isActive()) {
+      databaseManager.updateCategory(oldName, newName);
+      databaseManager.save();
+      set({
+        categories: databaseManager.getCategories(),
+        transactions: databaseManager.getTransactions(),
+        budgets: databaseManager.getBudgets(),
+      });
+    }
+  },
+
+  deleteCategory: (name) => {
+    if (databaseManager.isActive()) {
+      databaseManager.deleteCategory(name);
+      databaseManager.save();
+      set({
+        categories: databaseManager.getCategories(),
+        transactions: databaseManager.getTransactions(),
+        budgets: databaseManager.getBudgets(),
+      });
+    }
+  },
+
+  deleteChatMessage: (messageId) => {
+    const chatHistory = get().chatHistory;
+    const msg = chatHistory.find((m) => m.id === messageId);
+    if (msg?.transactionDetail?.id) {
+      get().deleteTransaction(msg.transactionDetail.id);
+    }
+
+    if (databaseManager.isActive()) {
+      databaseManager.deleteChatMessage(messageId);
+      databaseManager.save();
+      
+      const sessions = databaseManager.getChatSessions();
+      const activeChatId = databaseManager.getLastActiveChatId();
+      set({
+        chatHistory: databaseManager.getChatHistory(activeChatId),
+        chatSessions: sessions,
+      });
+    } else {
+      set((state) => ({
+        chatHistory: state.chatHistory.filter((m) => m.id !== messageId),
+      }));
     }
   },
 }));

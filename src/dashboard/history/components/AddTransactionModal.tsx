@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { IconX, IconCheck } from "@tabler/icons-react";
+import { useFinancesStore } from "../../../store/finances.store.ts";
 
 interface AddTransactionModalProps {
   onClose: () => void;
@@ -13,8 +14,9 @@ interface AddTransactionModalProps {
 }
 
 export function AddTransactionModal({ onClose, onSubmit }: AddTransactionModalProps) {
+  const { categories } = useFinancesStore();
   const [merchant, setMerchant] = useState("");
-  const [category, setCategory] = useState("Comida fuera");
+  const [category, setCategory] = useState(categories[0] || "Otros");
   const [amount, setAmount] = useState("");
   const [account, setAccount] = useState("Tarjeta Personal");
   const [type, setType] = useState<"expense" | "income">("expense");
@@ -119,12 +121,11 @@ export function AddTransactionModal({ onClose, onSubmit }: AddTransactionModalPr
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               >
-                <option value="Comida fuera">Comida fuera</option>
-                <option value="Transporte">Transporte</option>
-                <option value="Supermercado">Supermercado</option>
-                <option value="Facturas">Facturas</option>
-                <option value="Compras">Compras</option>
-                <option value="Otros">Otros</option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
               </select>
             </div>
           )}

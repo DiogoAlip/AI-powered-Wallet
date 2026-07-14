@@ -4,13 +4,15 @@ import { HistoryKPIs } from "./components/HistoryKPIs.tsx";
 import { TransactionFilters } from "./components/TransactionFilters.tsx";
 import { TransactionList } from "./components/TransactionList.tsx";
 import { AddTransactionModal } from "./components/AddTransactionModal.tsx";
+import { CategoryManagerModal } from "../components/CategoryManagerModal.tsx";
 
 export function History() {
-  const { transactions, addTransaction, deleteTransaction } = useFinancesStore();
+  const { transactions, addTransaction, deleteTransaction, categories } = useFinancesStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedType, setSelectedType] = useState("All");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCatModalOpen, setIsCatModalOpen] = useState(false);
 
   // Calculated Metrics
   const totalExpense = transactions
@@ -34,15 +36,7 @@ export function History() {
     return matchesSearch && matchesCategory && matchesType;
   });
 
-  const categories = [
-    "All",
-    "Comida fuera",
-    "Transporte",
-    "Supermercado",
-    "Facturas",
-    "Compras",
-    "Otros",
-  ];
+  const filterCategories = ["All", ...categories];
 
   return (
     <div className="flex-1 p-5 md:p-8 overflow-y-auto no-scrollbar space-y-6 animate-fade-in-up">
@@ -59,8 +53,9 @@ export function History() {
         setSelectedCategory={setSelectedCategory}
         selectedType={selectedType}
         setSelectedType={setSelectedType}
-        categories={categories}
+        categories={filterCategories}
         onOpenModal={() => setIsModalOpen(true)}
+        onOpenCatModal={() => setIsCatModalOpen(true)}
       />
 
       <TransactionList
@@ -72,6 +67,13 @@ export function History() {
         <AddTransactionModal
           onClose={() => setIsModalOpen(false)}
           onSubmit={addTransaction}
+        />
+      )}
+
+      {isCatModalOpen && (
+        <CategoryManagerModal
+          isOpen={isCatModalOpen}
+          onClose={() => setIsCatModalOpen(false)}
         />
       )}
     </div>

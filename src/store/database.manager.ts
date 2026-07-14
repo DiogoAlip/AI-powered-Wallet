@@ -14,6 +14,15 @@ import {
   INITIAL_CHAT_HISTORY,
 } from "./mockData";
 
+const DEFAULT_CATEGORIES = [
+  "Comida fuera",
+  "Transporte",
+  "Supermercado",
+  "Facturas",
+  "Compras",
+  "Otros"
+];
+
 class DatabaseManager {
   private SQL: any = null;
   private activeDb: Database | null = null;
@@ -58,6 +67,25 @@ class DatabaseManager {
         this.seedDefaultData(email);
       } else {
         this.seedEmptyData(email);
+      }
+      await this.save();
+    }
+
+    // Auto-seed categories if categories table has 0 rows for this user
+    const catCheck = this.activeDb!.prepare("SELECT COUNT(*) as count FROM categories WHERE user_email = ?");
+    catCheck.bind([email]);
+    let hasCategories = false;
+    if (catCheck.step()) {
+      hasCategories = (catCheck.getAsObject().count as number) > 0;
+    }
+    catCheck.free();
+
+    if (!hasCategories) {
+      for (const cat of DEFAULT_CATEGORIES) {
+        this.activeDb!.run(
+          "INSERT OR IGNORE INTO categories (user_email, name) VALUES (?, ?)",
+          [email, cat]
+        );
       }
       await this.save();
     }
@@ -136,6 +164,14 @@ class DatabaseManager {
         FOREIGN KEY(user_email) REFERENCES users(email) ON DELETE CASCADE
       );
     `);
+    db.run(`
+      CREATE TABLE IF NOT EXISTS categories (
+        user_email TEXT,
+        name TEXT,
+        PRIMARY KEY(user_email, name),
+        FOREIGN KEY(user_email) REFERENCES users(email) ON DELETE CASCADE
+      );
+    `);
     try {
       db.run("ALTER TABLE chat_messages ADD COLUMN chat_id TEXT");
     } catch {
@@ -145,6 +181,12 @@ class DatabaseManager {
 
   private seedDefaultData(email: string) {
     const db = this.activeDb!;
+    for (const cat of DEFAULT_CATEGORIES) {
+      db.run(
+        "INSERT OR IGNORE INTO categories (user_email, name) VALUES (?, ?)",
+        [email, cat]
+      );
+    }
     for (const tx of INITIAL_TRANSACTIONS) {
       db.run(
         "INSERT INTO transactions (id, user_email, merchant, category, amount, date, account, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -181,6 +223,12 @@ class DatabaseManager {
 
   private seedEmptyData(email: string) {
     const db = this.activeDb!;
+    for (const cat of DEFAULT_CATEGORIES) {
+      db.run(
+        "INSERT OR IGNORE INTO categories (user_email, name) VALUES (?, ?)",
+        [email, cat]
+      );
+    }
     for (const b of INITIAL_BUDGETS) {
       db.run(
         "INSERT INTO budgets (user_email, category, spent, limit_val, icon, color) VALUES (?, ?, ?, ?, ?, ?)",
@@ -438,6 +486,77 @@ class DatabaseManager {
   removeActionChipsFromMessage(messageId: string) {
     if (!this.activeDb) return;
     this.activeDb.run("UPDATE chat_messages SET action_chips = NULL WHERE id = ?", [messageId]);
+  }
+
+  getCategories(): string[] {
+    if (!this.activeDb || !this.activeUserEmail) return [];
+    const stmt = this.activeDb.prepare(
+      "SELECT name FROM categories WHERE user_email = ? ORDER BY name ASC"
+    );
+    stmt.bind([this.activeUserEmail]);
+    const categories: string[] = [];
+    while (stmt.step()) {
+      const row = stmt.getAsObject();
+      categories.push(row.name as string);
+    }
+    stmt.free();
+
+    const filtered = categories.filter(c => c !== "Otros");
+    filtered.push("Otros");
+    return filtered;
+  }
+
+  addCategory(name: string) {
+    if (!this.activeDb || !this.activeUserEmail) return;
+    this.activeDb.run(
+      "INSERT OR IGNORE INTO categories (user_email, name) VALUES (?, ?)",
+      [this.activeUserEmail, name]
+    );
+  }
+
+  updateCategory(oldName: string, newName: string) {
+    if (!this.activeDb || !this.activeUserEmail) return;
+    if (oldName === "Otros" || newName === "Otros") return;
+
+    this.activeDb.run(
+      "UPDATE categories SET name = ? WHERE name = ? AND user_email = ?",
+      [newName, oldName, this.activeUserEmail]
+    );
+
+    this.activeDb.run(
+      "UPDATE transactions SET category = ? WHERE category = ? AND user_email = ?",
+      [newName, oldName, this.activeUserEmail]
+    );
+
+    this.activeDb.run(
+      "UPDATE budgets SET category = ? WHERE category = ? AND user_email = ?",
+      [newName, oldName, this.activeUserEmail]
+    );
+  }
+
+  deleteCategory(name: string) {
+    if (!this.activeDb || !this.activeUserEmail) return;
+    if (name === "Otros") return;
+
+    this.activeDb.run(
+      "UPDATE transactions SET category = 'Otros' WHERE category = ? AND user_email = ?",
+      [name, this.activeUserEmail]
+    );
+
+    this.activeDb.run(
+      "DELETE FROM budgets WHERE category = ? AND user_email = ?",
+      [name, this.activeUserEmail]
+    );
+
+    this.activeDb.run(
+      "DELETE FROM categories WHERE name = ? AND user_email = ?",
+      [name, this.activeUserEmail]
+    );
+  }
+
+  deleteChatMessage(messageId: string) {
+    if (!this.activeDb) return;
+    this.activeDb.run("DELETE FROM chat_messages WHERE id = ?", [messageId]);
   }
 
   isActive(): boolean {

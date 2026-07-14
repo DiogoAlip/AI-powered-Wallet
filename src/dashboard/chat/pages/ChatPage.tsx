@@ -1,16 +1,53 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { getCategoryIcon } from "../../helpers/getCategoryIcon.tsx";
-import { IconRobot, IconInfoCircle } from "@tabler/icons-react";
+import {
+  IconRobot,
+  IconInfoCircle,
+  IconCopy,
+  IconCheck,
+  IconVolume,
+  IconTrash,
+} from "@tabler/icons-react";
 import { useFinancesStore } from "../../../store/finances.store.ts";
 import { ChatInput } from "../components/ChatInput.tsx";
 import { MarkdownText } from "../components/MarkdownText.tsx";
 
 export function Chat() {
   const { id: chatId } = useParams();
-  const { chatHistory, applyAction, isGenerating, loadChatHistory } = useFinancesStore();
-  // const [quickExpenseText, setQuickExpenseText] = useState("");
+  const {
+    chatHistory,
+    applyAction,
+    isGenerating,
+    loadChatHistory,
+    deleteChatMessage,
+  } = useFinancesStore();
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Quick Action States
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      // Cancelar cualquier síntesis de voz al desmontar
+      window.speechSynthesis.cancel();
+    };
+  }, []);
+
+  const handleCopy = (id: string, text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => {
+      setCopiedId(null);
+    }, 2000);
+  };
+
+  const handleSpeak = (text: string) => {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "es-ES";
+    window.speechSynthesis.speak(utterance);
+  };
 
   useEffect(() => {
     if (chatId) {
@@ -38,7 +75,7 @@ export function Chat() {
         {chatHistory.map((msg) => (
           <div
             key={msg.id}
-            className={`flex items-start gap-3 max-w-3xl ${
+            className={`flex items-start gap-3 max-w-3xl group ${
               msg.sender === "user" ? "self-end flex-row-reverse" : "self-start"
             }`}
           >
@@ -130,6 +167,44 @@ export function Chat() {
                     ))}
                   </div>
                 )}
+              </div>
+
+              {/* Message Quick Actions (Copy, TTS, Delete) */}
+              <div
+                className={`flex items-center gap-1 mt-1 transition-opacity duration-200 opacity-100 md:opacity-0 md:group-hover:opacity-100 ${
+                  msg.sender === "user" ? "flex-row-reverse" : "flex-row"
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={() => handleCopy(msg.id, msg.text)}
+                  className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-teal-600 transition-colors cursor-pointer"
+                  title="Copiar texto"
+                >
+                  {copiedId === msg.id ? (
+                    <IconCheck className="w-3.5 h-3.5 text-green-600" />
+                  ) : (
+                    <IconCopy className="w-3.5 h-3.5" />
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleSpeak(msg.text)}
+                  className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-teal-600 transition-colors cursor-pointer"
+                  title="Escuchar mensaje"
+                >
+                  <IconVolume className="w-3.5 h-3.5" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => deleteChatMessage(msg.id)}
+                  className="p-1 rounded-md hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
+                  title="Eliminar mensaje"
+                >
+                  <IconTrash className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
           </div>
