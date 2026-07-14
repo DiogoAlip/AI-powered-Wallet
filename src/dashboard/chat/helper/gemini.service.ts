@@ -286,13 +286,8 @@ Instrucciones de comportamiento:
 
       if (!response.ok) {
         if (response.status === 404 && model === "gemini-3.5-flash") {
-          console.warn("gemini-3.5-flash no disponible. Reintentando con gemini-2.5-flash...");
-          return this.makeApiRequest("gemini-2.5-flash", apiKey, payload);
-        }
-        
-        if (response.status === 404 && model === "gemini-2.5-flash") {
-          console.warn("gemini-2.5-flash no disponible. Reintentando con gemini-1.5-flash...");
-          return this.makeApiRequest("gemini-1.5-flash", apiKey, payload);
+          console.warn("gemini-3.5-flash no disponible. Reintentando con gemini-3.1-flash...");
+          return this.makeApiRequest("gemini-3.1-flash", apiKey, payload);
         }
 
         const errorText = await response.text();

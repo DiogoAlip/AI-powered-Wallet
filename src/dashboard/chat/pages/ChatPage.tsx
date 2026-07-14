@@ -1,13 +1,21 @@
 import { useRef, useEffect } from "react";
+import { useParams } from "react-router";
 import { getCategoryIcon } from "../../helpers/getCategoryIcon.tsx";
 import { IconRobot, IconInfoCircle } from "@tabler/icons-react";
 import { useFinancesStore } from "../../../store/finances.store.ts";
 import { ChatInput } from "../components/ChatInput.tsx";
 
 export function Chat() {
-  const { chatHistory, applyAction, isGenerating } = useFinancesStore();
+  const { id: chatId } = useParams();
+  const { chatHistory, applyAction, isGenerating, loadChatHistory } = useFinancesStore();
   // const [quickExpenseText, setQuickExpenseText] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (chatId) {
+      loadChatHistory(chatId);
+    }
+  }, [chatId, loadChatHistory]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -108,7 +116,7 @@ export function Chat() {
                     {msg.actionChips.map((chip) => (
                       <button
                         key={chip.actionId}
-                        onClick={() => applyAction(chip.actionId, msg.id)}
+                        onClick={() => applyAction(chip.actionId, msg.id, chatId)}
                         className={`font-sans text-xs font-semibold px-4 py-2 rounded-full border transition-all ${
                           chip.actionId === "move_to_savings" ||
                           chip.actionId === "move_to_savings_quick"
@@ -156,7 +164,7 @@ export function Chat() {
         <div ref={chatEndRef} />
       </section>
 
-      <ChatInput />
+      <ChatInput chatId={chatId} />
     </div>
   );
 }

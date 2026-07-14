@@ -7,7 +7,7 @@ import {
 } from "@tabler/icons-react";
 import { useFinancesStore } from "../../../store/finances.store.ts";
 
-export function ChatInput({ newChat }: { newChat?: boolean }) {
+export function ChatInput({ newChat, chatId }: { newChat?: boolean; chatId?: string }) {
   const { chatHistory, sendMessage, isGenerating } = useFinancesStore();
   const [inputText, setInputText] = useState("");
   const navigate = useNavigate();
@@ -21,9 +21,12 @@ export function ChatInput({ newChat }: { newChat?: boolean }) {
     if (!inputText.trim()) return;
     const textToSend = inputText;
     setInputText("");
-    await sendMessage(textToSend);
     if (newChat) {
-      navigate("/dashboard/chat/active");
+      const newChatId = `chat-${Date.now()}`;
+      await sendMessage(textToSend, newChatId);
+      navigate(`/dashboard/chat/${newChatId}`);
+    } else {
+      await sendMessage(textToSend, chatId);
     }
   };
   //

@@ -126,6 +126,7 @@ class DatabaseManager {
       CREATE TABLE IF NOT EXISTS chat_messages (
         id TEXT PRIMARY KEY,
         user_email TEXT,
+        chat_id TEXT,
         sender TEXT,
         timestamp TEXT,
         text TEXT,
@@ -135,6 +136,11 @@ class DatabaseManager {
         FOREIGN KEY(user_email) REFERENCES users(email) ON DELETE CASCADE
       );
     `);
+    try {
+      db.run("ALTER TABLE chat_messages ADD COLUMN chat_id TEXT");
+    } catch {
+      // column already exists
+    }
   }
 
   private seedDefaultData(email: string) {
@@ -157,10 +163,11 @@ class DatabaseManager {
     );
     for (const chat of INITIAL_CHAT_HISTORY) {
       db.run(
-        "INSERT INTO chat_messages (id, user_email, sender, timestamp, text, transaction_detail, action_chips, info_text) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO chat_messages (id, user_email, chat_id, sender, timestamp, text, transaction_detail, action_chips, info_text) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           chat.id,
           email,
+          "chat-1",
           chat.sender,
           chat.timestamp,
           chat.text,
@@ -185,10 +192,11 @@ class DatabaseManager {
       [email, "Fondo de Emergencia", 5000.0, 0.0]
     );
     db.run(
-      "INSERT INTO chat_messages (id, user_email, sender, timestamp, text, transaction_detail, action_chips, info_text) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO chat_messages (id, user_email, chat_id, sender, timestamp, text, transaction_detail, action_chips, info_text) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         "welcome-message",
         email,
+        "chat-welcome",
         "ai",
         "Ahora",
         "¡Hola! Soy tu asistente financiero FinancIA!. He preparado tu base de datos segura y local en tu navegador. ¿Quieres registrar algún gasto o presupuesto?",
@@ -262,12 +270,12 @@ class DatabaseManager {
     return savings;
   }
 
-  getChatHistory(): ChatMessage[] {
+  getChatHistory(chatId: string): ChatMessage[] {
     if (!this.activeDb || !this.activeUserEmail) return [];
     const stmt = this.activeDb.prepare(
-      "SELECT id, sender, timestamp, text, transaction_detail, action_chips, info_text FROM chat_messages WHERE user_email = ? ORDER BY rowid ASC"
+      "SELECT id, sender, timestamp, text, transaction_detail, action_chips, info_text FROM chat_messages WHERE user_email = ? AND chat_id = ? ORDER BY rowid ASC"
     );
-    stmt.bind([this.activeUserEmail]);
+    stmt.bind([this.activeUserEmail, chatId]);
     const history: ChatMessage[] = [];
     while (stmt.step()) {
       const row = stmt.getAsObject();
@@ -369,13 +377,14 @@ class DatabaseManager {
     );
   }
 
-  persistChatMessage(msg: ChatMessage) {
+  persistChatMessage(msg: ChatMessage, chatId: string) {
     if (!this.activeDb || !this.activeUserEmail) return;
     this.activeDb.run(
-      "INSERT INTO chat_messages (id, user_email, sender, timestamp, text, transaction_detail, action_chips, info_text) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO chat_messages (id, user_email, chat_id, sender, timestamp, text, transaction_detail, action_chips, info_text) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         msg.id,
         this.activeUserEmail,
+        chatId,
         msg.sender,
         msg.timestamp,
         msg.text,
@@ -386,9 +395,44 @@ class DatabaseManager {
     );
   }
 
-  clearChatHistory() {
+  clearChatHistory(chatId: string) {
     if (!this.activeDb || !this.activeUserEmail) return;
-    this.activeDb.run("DELETE FROM chat_messages WHERE user_email = ?", [this.activeUserEmail]);
+    this.activeDb.run("DELETE FROM chat_messages WHERE user_email = ? AND chat_id = ?", [
+      this.activeUserEmail,
+      chatId,
+    ]);
+  }
+
+  getChatSessions(): string[] {
+    if (!this.activeDb || !this.activeUserEmail) return [];
+    const stmt = this.activeDb.prepare(
+      "SELECT DISTINCT chat_id FROM chat_messages WHERE user_email = ? AND chat_id IS NOT NULL"
+    );
+    const sessions: string[] = [];
+    while (stmt.step()) {
+      const row = stmt.getAsObject();
+      if (row.chat_id) {
+        sessions.push(row.chat_id as string);
+      }
+    }
+    stmt.free();
+    return sessions;
+  }
+
+  getLastActiveChatId(): string {
+    if (!this.activeDb || !this.activeUserEmail) return "chat-welcome";
+    const stmt = this.activeDb.prepare(
+      "SELECT chat_id FROM chat_messages WHERE user_email = ? AND chat_id IS NOT NULL ORDER BY rowid DESC LIMIT 1"
+    );
+    let chatId = "chat-welcome";
+    if (stmt.step()) {
+      const row = stmt.getAsObject();
+      if (row.chat_id) {
+        chatId = row.chat_id as string;
+      }
+    }
+    stmt.free();
+    return chatId;
   }
 
   removeActionChipsFromMessage(messageId: string) {

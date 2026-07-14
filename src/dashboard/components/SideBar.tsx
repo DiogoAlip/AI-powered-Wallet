@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   IconRobot,
   IconTrendingUp,
@@ -8,6 +9,7 @@ import {
 } from "@tabler/icons-react";
 import { NavLink, useLocation, useNavigate } from "react-router";
 import { useAuthStore } from "../../store/auth.store";
+import { useFinancesStore } from "../../store/finances.store";
 
 interface SideBar {
   isOpen: boolean;
@@ -30,6 +32,11 @@ export function SideBar({ isOpen, toggleSideBar }: SideBar) {
   const actualPath = location.pathname.toLocaleLowerCase();
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
+  const { chatSessions, loadChatSessions } = useFinancesStore();
+
+  useEffect(() => {
+    loadChatSessions();
+  }, [loadChatSessions]);
 
   const handleLogout = () => {
     logout();
@@ -83,16 +90,62 @@ export function SideBar({ isOpen, toggleSideBar }: SideBar) {
                     onClick={() => {
                       toggleSideBar();
                     }}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${actualPath.includes(item.id)
-                      ? "bg-[#dce9ff] text-[#0b1c30] font-semibold"
-                      : "text-gray-600 hover:bg-[#dce9ff]/50"
-                      }`}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                      item.id === "chat" && (location.pathname === "/dashboard/chat" || location.pathname === "/dashboard/chat/")
+                        ? "bg-[#dce9ff] text-[#0b1c30] font-semibold"
+                        : actualPath.includes(item.id) && item.id !== "chat"
+                        ? "bg-[#dce9ff] text-[#0b1c30] font-semibold"
+                        : "text-gray-600 hover:bg-[#dce9ff]/50"
+                    }`}
                   >
                     <item.icon
-                      className={`w-5 h-5 ${actualPath.includes(item.id) ? "text-teal-700" : "text-gray-500"}`}
+                      className={`w-5 h-5 ${
+                        (item.id === "chat" && (location.pathname === "/dashboard/chat" || location.pathname === "/dashboard/chat/")) ||
+                        (actualPath.includes(item.id) && item.id !== "chat")
+                          ? "text-teal-700"
+                          : "text-gray-500"
+                      }`}
                     />
                     <span className="font-sans text-sm">{item.label}</span>
                   </NavLink>
+
+                  {item.id === "chat" && chatSessions.length > 0 && (
+                    <ul className="pl-6 pr-2 mt-1.5 space-y-1.5 border-l border-gray-200/60 ml-6">
+                      {chatSessions.map((sessionId, idx) => {
+                        const isActiveSession = location.pathname === `/dashboard/chat/${sessionId}`;
+                        let displayLabel = `Conversación #${idx + 1}`;
+                        if (sessionId === "chat-1") {
+                          displayLabel = "Demostración FinancIA!";
+                        } else if (sessionId === "chat-welcome") {
+                          displayLabel = "Mensaje de Bienvenida";
+                        } else if (sessionId.startsWith("chat-")) {
+                          const ts = parseInt(sessionId.split("-")[1]);
+                          if (!isNaN(ts)) {
+                            const d = new Date(ts);
+                            displayLabel = `Chat: ${d.toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit" })} ${d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}`;
+                          }
+                        }
+
+                        return (
+                          <li key={sessionId}>
+                            <NavLink
+                              to={`/dashboard/chat/${sessionId}`}
+                              onClick={() => {
+                                toggleSideBar();
+                              }}
+                              className={`w-full block px-3 py-1.5 rounded-lg text-xs font-sans transition-all truncate ${
+                                isActiveSession
+                                  ? "bg-teal-50 text-teal-800 font-bold border-l-2 border-teal-600 pl-2"
+                                  : "text-gray-500 hover:text-[#0b1c30] hover:bg-gray-200/50"
+                              }`}
+                            >
+                              {displayLabel}
+                            </NavLink>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
                 </li>
               );
             })}

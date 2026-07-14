@@ -19,6 +19,7 @@ export interface UseFinancesState {
   budgets: Budget[];
   savings: SavingsGoal;
   chatHistory: ChatMessage[];
+  chatSessions: string[];
   isGenerating: boolean;
   dbReady: boolean;
 
@@ -33,8 +34,10 @@ export interface UseFinancesState {
   resetSavings: () => void;
   addChatMessage: (msg: ChatMessage) => void;
   setChatHistory: (history: ChatMessage[]) => void;
-  sendMessage: (text: string) => Promise<void>;
-  applyAction: (actionId: string, messageId: string) => void;
+  sendMessage: (text: string, chatId?: string) => Promise<void>;
+  applyAction: (actionId: string, messageId: string, chatId?: string) => void;
+  loadChatHistory: (chatId: string) => void;
+  loadChatSessions: () => void;
 }
 
 export const useFinancesStore = create<UseFinancesState>((set, get) => ({
@@ -42,6 +45,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
   budgets: INITIAL_BUDGETS,
   savings: INITIAL_SAVINGS,
   chatHistory: INITIAL_CHAT_HISTORY,
+  chatSessions: [],
   isGenerating: false,
   dbReady: false,
 
@@ -49,11 +53,13 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
     set({ dbReady: false });
     try {
       await databaseManager.init(email);
+      const activeChatId = databaseManager.getLastActiveChatId();
       set({
         transactions: databaseManager.getTransactions(),
         budgets: databaseManager.getBudgets(),
         savings: databaseManager.getSavings(),
-        chatHistory: databaseManager.getChatHistory(),
+        chatHistory: databaseManager.getChatHistory(activeChatId),
+        chatSessions: databaseManager.getChatSessions(),
         dbReady: true,
       });
     } catch (err) {
@@ -63,6 +69,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
         budgets: INITIAL_BUDGETS,
         savings: INITIAL_SAVINGS,
         chatHistory: INITIAL_CHAT_HISTORY,
+        chatSessions: [],
         dbReady: true,
       });
     }
@@ -75,6 +82,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
       budgets: [],
       savings: INITIAL_SAVINGS,
       chatHistory: [],
+      chatSessions: [],
       dbReady: false,
     });
   },
@@ -204,9 +212,13 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
 
   addChatMessage: (msg) => {
     if (databaseManager.isActive()) {
-      databaseManager.persistChatMessage(msg);
+      const activeChatId = databaseManager.getLastActiveChatId();
+      databaseManager.persistChatMessage(msg, activeChatId);
       databaseManager.save();
-      set({ chatHistory: databaseManager.getChatHistory() });
+      set({
+        chatHistory: databaseManager.getChatHistory(activeChatId),
+        chatSessions: databaseManager.getChatSessions(),
+      });
     } else {
       set((state) => ({
         chatHistory: [...state.chatHistory, msg],
@@ -216,18 +228,23 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
 
   setChatHistory: (history) => {
     if (databaseManager.isActive()) {
-      databaseManager.clearChatHistory();
+      const activeChatId = databaseManager.getLastActiveChatId();
+      databaseManager.clearChatHistory(activeChatId);
       for (const msg of history) {
-        databaseManager.persistChatMessage(msg);
+        databaseManager.persistChatMessage(msg, activeChatId);
       }
       databaseManager.save();
-      set({ chatHistory: databaseManager.getChatHistory() });
+      set({
+        chatHistory: databaseManager.getChatHistory(activeChatId),
+        chatSessions: databaseManager.getChatSessions(),
+      });
     } else {
       set({ chatHistory: history });
     }
   },
 
-  sendMessage: async (text) => {
+  sendMessage: async (text, chatId) => {
+    const activeChatId = chatId || databaseManager.getLastActiveChatId();
     const userMsg: ChatMessage = {
       id: `chat-${Date.now()}`,
       sender: "user",
@@ -239,10 +256,11 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
     };
 
     if (databaseManager.isActive()) {
-      databaseManager.persistChatMessage(userMsg);
+      databaseManager.persistChatMessage(userMsg, activeChatId);
       databaseManager.save();
       set({
-        chatHistory: databaseManager.getChatHistory(),
+        chatHistory: databaseManager.getChatHistory(activeChatId),
+        chatSessions: databaseManager.getChatSessions(),
         isGenerating: true,
       });
     } else {
@@ -285,10 +303,11 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
       };
 
       if (databaseManager.isActive()) {
-        databaseManager.persistChatMessage(aiMsg);
+        databaseManager.persistChatMessage(aiMsg, activeChatId);
         databaseManager.save();
         set({
-          chatHistory: databaseManager.getChatHistory(),
+          chatHistory: databaseManager.getChatHistory(activeChatId),
+          chatSessions: databaseManager.getChatSessions(),
           isGenerating: false,
         });
       } else {
@@ -309,10 +328,11 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
       };
 
       if (databaseManager.isActive()) {
-        databaseManager.persistChatMessage(errorMsg);
+        databaseManager.persistChatMessage(errorMsg, activeChatId);
         databaseManager.save();
         set({
-          chatHistory: databaseManager.getChatHistory(),
+          chatHistory: databaseManager.getChatHistory(activeChatId),
+          chatSessions: databaseManager.getChatSessions(),
           isGenerating: false,
         });
       } else {
@@ -324,7 +344,8 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
     }
   },
 
-  applyAction: (actionId, messageId) => {
+  applyAction: (actionId, messageId, chatId) => {
+    const activeChatId = chatId || databaseManager.getLastActiveChatId();
     if (databaseManager.isActive()) {
       databaseManager.removeActionChipsFromMessage(messageId);
 
@@ -384,13 +405,14 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
       }
 
       if (confirmMsg) {
-        databaseManager.persistChatMessage(confirmMsg);
+        databaseManager.persistChatMessage(confirmMsg, activeChatId);
       }
       databaseManager.save();
 
       set({
-        chatHistory: databaseManager.getChatHistory(),
+        chatHistory: databaseManager.getChatHistory(activeChatId),
         savings: databaseManager.getSavings(),
+        chatSessions: databaseManager.getChatSessions(),
       });
     } else {
       set((state) => {
@@ -462,6 +484,18 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
 
         return { chatHistory };
       });
+    }
+  },
+
+  loadChatHistory: (chatId) => {
+    if (databaseManager.isActive()) {
+      set({ chatHistory: databaseManager.getChatHistory(chatId) });
+    }
+  },
+
+  loadChatSessions: () => {
+    if (databaseManager.isActive()) {
+      set({ chatSessions: databaseManager.getChatSessions() });
     }
   },
 }));
