@@ -17,16 +17,16 @@ export function ChatInput({ newChat, chatId }: { newChat?: boolean; chatId?: str
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatHistory, isGenerating]);
 
-  const handleSend = async () => {
+  const handleSend = () => {
     if (!inputText.trim()) return;
     const textToSend = inputText;
     setInputText("");
     if (newChat) {
       const newChatId = `chat-${Date.now()}`;
-      await sendMessage(textToSend, newChatId);
+      sendMessage(textToSend, newChatId);
       navigate(`/dashboard/chat/${newChatId}`);
     } else {
-      await sendMessage(textToSend, chatId);
+      sendMessage(textToSend, chatId);
     }
   };
   //

@@ -27,7 +27,7 @@ export function Goals() {
   };
 
   return (
-    <div className="flex-1 p-5 md:p-8 overflow-y-auto no-scrollbar space-y-6">
+    <div className="flex-1 p-5 md:p-8 overflow-y-auto no-scrollbar space-y-6 animate-fade-in-up">
       {/* Profile Header */}
       <div className="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm flex flex-col sm:flex-row items-center gap-6">
         <img

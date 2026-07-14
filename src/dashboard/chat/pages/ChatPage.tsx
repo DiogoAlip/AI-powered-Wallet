@@ -30,7 +30,7 @@ export function Chat() {
   // };
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-64px)] h-full bg-gray-50 overflow-hidden">
+    <div className="flex flex-col min-h-[calc(100vh-64px)] h-full bg-gray-50 overflow-hidden animate-fade-in-up">
       {/* Quick Entry Section */}
 
       <section className="flex-1 overflow-y-auto no-scrollbar p-5 space-y-6 flex flex-col relative">

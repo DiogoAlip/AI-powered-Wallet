@@ -13,7 +13,7 @@ export function Limits() {
   const weekProgressPercent = 71;
 
   return (
-    <div className="flex-1 p-5 md:p-8 overflow-y-auto no-scrollbar space-y-6">
+    <div className="flex-1 p-5 md:p-8 overflow-y-auto no-scrollbar space-y-6 animate-fade-in-up">
       <WeeklyPacingCard weekProgressPercent={weekProgressPercent} />
 
       {/* Budgets Grid */}

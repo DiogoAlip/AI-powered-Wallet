@@ -45,7 +45,7 @@ export function History() {
   ];
 
   return (
-    <div className="flex-1 p-5 md:p-8 overflow-y-auto no-scrollbar space-y-6">
+    <div className="flex-1 p-5 md:p-8 overflow-y-auto no-scrollbar space-y-6 animate-fade-in-up">
       <HistoryKPIs
         totalExpense={totalExpense}
         totalIncome={totalIncome}

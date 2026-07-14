@@ -231,7 +231,7 @@ Instrucciones de comportamiento:
         ...contents,
         {
           role: "model",
-          parts: [{ functionCall: part.functionCall }]
+          parts: [part]
         },
         {
           role: "function",
