@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
 import { Outlet, Navigate } from "react-router";
-import { NavBar } from "../components/NavBar";
 import { SideBar } from "../components/SideBar";
 import { useAuthStore } from "../../store/auth.store";
 import { useFinancesStore } from "../../store/finances.store";
 
 export const DashboardLayout = () => {
-  const [sideBar, setSideBar] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const user = useAuthStore((state) => state.user);
 
   const { dbReady, loadUserDatabase, clearUserDatabase } = useFinancesStore();
 
-  const toggleSideBar = () => setSideBar(!sideBar);
+  const toggleMobile = () => setMobileOpen((o) => !o);
+  const toggleExpanded = () => setSidebarExpanded((e) => !e);
 
   useEffect(() => {
     if (isAuthenticated && user?.email) {
@@ -30,7 +31,6 @@ export const DashboardLayout = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#0d1527] text-white p-6">
         <div className="flex flex-col items-center gap-6 max-w-sm text-center">
-          {/* Animated Spinner with modern visual aesthetics */}
           <div className="relative w-16 h-16">
             <div className="absolute inset-0 rounded-full border-4 border-teal-500/20"></div>
             <div className="absolute inset-0 rounded-full border-4 border-t-teal-400 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
@@ -49,10 +49,19 @@ export const DashboardLayout = () => {
 
   return (
     <>
-      <SideBar isOpen={sideBar} toggleSideBar={toggleSideBar} />
-      <NavBar toggleSideBar={toggleSideBar} />
-      <Outlet />
+      <SideBar
+        isOpen={mobileOpen}
+        expanded={sidebarExpanded}
+        toggleSideBar={toggleMobile}
+        toggleExpanded={toggleExpanded}
+      />
+      <div
+        className={`transition-all duration-300 ease-in-out ${
+          sidebarExpanded ? "md:ml-64" : "md:ml-16"
+        }`}
+      >
+        <Outlet />
+      </div>
     </>
   );
 };
-

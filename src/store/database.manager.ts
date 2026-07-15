@@ -1,5 +1,7 @@
 import initSqlJs from "sql.js";
 import type { Database } from "sql.js";
+// @ts-ignore
+import sqlWasmUrl from "sql.js/dist/sql-wasm.wasm?url";
 import { indexedDbStorage } from "./indexedDbStorage";
 import type {
   Transaction,
@@ -37,7 +39,7 @@ class DatabaseManager {
 
     if (!this.SQL) {
       this.SQL = await initSqlJs({
-        locateFile: (file) => `https://cdn.jsdelivr.net/npm/sql.js@1.12.0/dist/${file}`,
+        locateFile: () => sqlWasmUrl,
       });
     }
 
@@ -88,6 +90,37 @@ class DatabaseManager {
         );
       }
       await this.save();
+    }
+
+    // Auto-seed default chat logs if chat_messages table has 0 rows for demo user
+    if (email.toLowerCase() === "demo@financia.com") {
+      const chatCheck = this.activeDb!.prepare("SELECT COUNT(*) as count FROM chat_messages WHERE user_email = ?");
+      chatCheck.bind([email]);
+      let hasChat = false;
+      if (chatCheck.step()) {
+        hasChat = (chatCheck.getAsObject().count as number) > 0;
+      }
+      chatCheck.free();
+
+      if (!hasChat) {
+        for (const chat of INITIAL_CHAT_HISTORY) {
+          this.activeDb!.run(
+            "INSERT INTO chat_messages (id, user_email, chat_id, sender, timestamp, text, transaction_detail, action_chips, info_text) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [
+              chat.id,
+              email,
+              "chat-1",
+              chat.sender,
+              chat.timestamp,
+              chat.text,
+              chat.transactionDetail ? JSON.stringify(chat.transactionDetail) : null,
+              chat.actionChips ? JSON.stringify(chat.actionChips) : null,
+              chat.infoText || null,
+            ]
+          );
+        }
+        await this.save();
+      }
     }
 
     return true;
@@ -176,6 +209,12 @@ class DatabaseManager {
       db.run("ALTER TABLE chat_messages ADD COLUMN chat_id TEXT");
     } catch {
       // column already exists
+    }
+
+    try {
+      db.run("UPDATE chat_messages SET chat_id = 'chat-1' WHERE chat_id IS NULL");
+    } catch {
+      // ignore
     }
   }
 
@@ -456,6 +495,7 @@ class DatabaseManager {
     const stmt = this.activeDb.prepare(
       "SELECT DISTINCT chat_id FROM chat_messages WHERE user_email = ? AND chat_id IS NOT NULL"
     );
+    stmt.bind([this.activeUserEmail]);
     const sessions: string[] = [];
     while (stmt.step()) {
       const row = stmt.getAsObject();
