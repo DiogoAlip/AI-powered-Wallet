@@ -542,13 +542,32 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
 
   deleteChatMessage: (messageId) => {
     const chatHistory = get().chatHistory;
-    const msg = chatHistory.find((m) => m.id === messageId);
-    if (msg?.transactionDetail?.id) {
-      get().deleteTransaction(msg.transactionDetail.id);
+    const idx = chatHistory.findIndex((m) => m.id === messageId);
+    if (idx === -1) return;
+
+    const msg = chatHistory[idx];
+    const idsToDelete = [messageId];
+    let transactionIdToDelete = msg.transactionDetail?.id;
+
+    // Check if the next message is the associated AI response
+    if (msg.sender === "user" && idx + 1 < chatHistory.length) {
+      const nextMsg = chatHistory[idx + 1];
+      if (nextMsg.sender === "ai") {
+        idsToDelete.push(nextMsg.id);
+        if (nextMsg.transactionDetail?.id) {
+          transactionIdToDelete = nextMsg.transactionDetail.id;
+        }
+      }
+    }
+
+    if (transactionIdToDelete) {
+      get().deleteTransaction(transactionIdToDelete);
     }
 
     if (databaseManager.isActive()) {
-      databaseManager.deleteChatMessage(messageId);
+      for (const id of idsToDelete) {
+        databaseManager.deleteChatMessage(id);
+      }
       databaseManager.save();
       
       const sessions = databaseManager.getChatSessions();
@@ -559,7 +578,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
       });
     } else {
       set((state) => ({
-        chatHistory: state.chatHistory.filter((m) => m.id !== messageId),
+        chatHistory: state.chatHistory.filter((m) => !idsToDelete.includes(m.id)),
       }));
     }
   },

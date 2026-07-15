@@ -193,12 +193,12 @@ function SideBarContent({
         <button
           onClick={toggleExpanded}
           title={expanded ? "Contraer" : "Expandir"}
-          className="hidden md:flex p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-200/70 transition-colors shrink-0"
+          className="hidden md:flex p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-200/70 transition-colors shrink-0"
         >
           {expanded ? (
-            <IconLayoutSidebarLeftCollapse className="w-4 h-4" />
+            <IconLayoutSidebarLeftCollapse className="w-5 h-5" />
           ) : (
-            <IconLayoutSidebarLeftExpand className="w-4 h-4" />
+            <IconLayoutSidebarLeftExpand className="w-5 h-5" />
           )}
         </button>
 

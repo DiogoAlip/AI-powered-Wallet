@@ -8,10 +8,12 @@ import {
   IconCheck,
   IconVolume,
   IconTrash,
+  IconAlertTriangle,
 } from "@tabler/icons-react";
 import { useFinancesStore } from "../../../store/finances.store.ts";
 import { ChatInput } from "../components/ChatInput.tsx";
 import { MarkdownText } from "../components/MarkdownText.tsx";
+import type { ChatMessage } from "../../types/ChatTypes.ts";
 
 export function Chat() {
   const { id: chatId } = useParams();
@@ -26,6 +28,7 @@ export function Chat() {
 
   // Quick Action States
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [pendingDeleteMsg, setPendingDeleteMsg] = useState<ChatMessage | null>(null);
 
   useEffect(() => {
     return () => {
@@ -178,33 +181,35 @@ export function Chat() {
                 <button
                   type="button"
                   onClick={() => handleCopy(msg.id, msg.text)}
-                  className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-teal-600 transition-colors cursor-pointer"
+                  className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-teal-600 transition-colors cursor-pointer"
                   title="Copiar texto"
                 >
                   {copiedId === msg.id ? (
-                    <IconCheck className="w-3.5 h-3.5 text-green-600" />
+                    <IconCheck className="w-4.5 h-4.5 text-green-600" />
                   ) : (
-                    <IconCopy className="w-3.5 h-3.5" />
+                    <IconCopy className="w-4.5 h-4.5" />
                   )}
                 </button>
 
                 <button
                   type="button"
                   onClick={() => handleSpeak(msg.text)}
-                  className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-teal-600 transition-colors cursor-pointer"
+                  className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-teal-600 transition-colors cursor-pointer"
                   title="Escuchar mensaje"
                 >
-                  <IconVolume className="w-3.5 h-3.5" />
+                  <IconVolume className="w-4.5 h-4.5" />
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => deleteChatMessage(msg.id)}
-                  className="p-1 rounded-md hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
-                  title="Eliminar mensaje"
-                >
-                  <IconTrash className="w-3.5 h-3.5" />
-                </button>
+                {msg.sender !== "ai" && (
+                  <button
+                    type="button"
+                    onClick={() => setPendingDeleteMsg(msg)}
+                    className="p-1.5 rounded-md hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
+                    title="Eliminar mensaje"
+                  >
+                    <IconTrash className="w-4.5 h-4.5" />
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -241,6 +246,57 @@ export function Chat() {
       </section>
 
       <ChatInput chatId={chatId} />
+
+      {pendingDeleteMsg && (
+        <div className="fixed inset-0 bg-[#0b1c30]/50 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full space-y-4 text-center border border-red-100 animate-fade-in-up">
+            <div className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto border border-red-200">
+              <IconAlertTriangle className="w-6 h-6" />
+            </div>
+
+            <div className="space-y-2">
+              <h4 className="font-sans font-bold text-base text-[#0b1c30]">
+                ¿Eliminar mensaje?
+              </h4>
+              <p className="font-sans text-xs text-gray-500 leading-relaxed">
+                {(() => {
+                  const idx = chatHistory.findIndex((m) => m.id === pendingDeleteMsg.id);
+                  const hasResponse = idx !== -1 && idx + 1 < chatHistory.length && chatHistory[idx + 1].sender === "ai";
+                  const hasTransaction = !!(pendingDeleteMsg.transactionDetail || (hasResponse && chatHistory[idx + 1].transactionDetail));
+                  
+                  if (hasTransaction) {
+                    return "Al eliminar este mensaje, también se borrarán permanentemente la respuesta de FinancIA! y la transacción asociada a esta interacción.";
+                  }
+                  if (hasResponse) {
+                    return "Al eliminar este mensaje, también se borrará la respuesta de FinancIA! asociada.";
+                  }
+                  return "¿Estás seguro de que deseas eliminar este mensaje?";
+                })()}
+              </p>
+            </div>
+
+            <div className="flex gap-3 justify-center pt-2">
+              <button
+                type="button"
+                onClick={() => setPendingDeleteMsg(null)}
+                className="flex-1 px-4 py-2 border border-gray-200 hover:bg-gray-50 text-gray-600 font-sans text-xs font-semibold rounded-xl transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  deleteChatMessage(pendingDeleteMsg.id);
+                  setPendingDeleteMsg(null);
+                }}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-sans text-xs font-semibold rounded-xl transition-colors cursor-pointer"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
