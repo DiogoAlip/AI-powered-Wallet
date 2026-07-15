@@ -1,17 +1,17 @@
 import { create } from "zustand";
-import { databaseManager } from "./database.manager";
+import { databaseManager } from "./database.manager.ts";
 import type {
   Transaction,
   Budget,
   ChatMessage,
   SavingsGoal,
-} from "../dashboard/types/ChatTypes";
+} from "../dashboard/types/ChatTypes.ts";
 import {
   INITIAL_TRANSACTIONS,
   INITIAL_BUDGETS,
   INITIAL_SAVINGS,
   INITIAL_CHAT_HISTORY,
-} from "./mockData";
+} from "./mockData.ts";
 import { GeminiService } from "../dashboard/chat/helper/gemini.service.ts";
 
 export interface UseFinancesState {
@@ -569,7 +569,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
         databaseManager.deleteChatMessage(id);
       }
       databaseManager.save();
-      
+
       const sessions = databaseManager.getChatSessions();
       const targetChatId = chatId || databaseManager.getLastActiveChatId();
       set({

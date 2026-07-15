@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router";
 import { useFinancesStore } from "../../../store/finances.store.ts";
-import { ChatInput } from "../components/ChatInput";
-import { randomWelcomePhrase } from "../helper/randomWelcomPhrases";
+import { ChatInput } from "../components/ChatInput.tsx";
+import { randomWelcomePhrase } from "../helper/randomWelcomPhrases.ts";
 import { IconMessage, IconSparkles } from "@tabler/icons-react";
 
 export const NewChat = () => {
