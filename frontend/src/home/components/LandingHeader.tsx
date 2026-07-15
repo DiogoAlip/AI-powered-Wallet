@@ -7,7 +7,7 @@ export function LandingHeader() {
   const navigate = useNavigate();
 
   const handleDemoLogin = () => {
-    login("demo@financia.com", "Socio FinancIA! Pro");
+    login("demo@financia.com");
     navigate("/dashboard/chat");
   };
 

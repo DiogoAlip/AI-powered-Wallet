@@ -1,18 +1,11 @@
 import { create } from "zustand";
-import { databaseManager } from "./database.manager.ts";
+import { useAuthStore } from "./auth.store.ts";
 import type {
   Transaction,
   Budget,
   ChatMessage,
   SavingsGoal,
 } from "../dashboard/types/ChatTypes.ts";
-import {
-  INITIAL_TRANSACTIONS,
-  INITIAL_BUDGETS,
-  INITIAL_SAVINGS,
-  INITIAL_CHAT_HISTORY,
-} from "./mockData.ts";
-import { GeminiService } from "../dashboard/chat/helper/gemini.service.ts";
 
 export interface UseFinancesState {
   transactions: Transaction[];
@@ -27,55 +20,80 @@ export interface UseFinancesState {
   // Actions
   loadUserDatabase: (email: string) => Promise<void>;
   clearUserDatabase: () => void;
-  addTransaction: (tx: Omit<Transaction, "id" | "date">) => Transaction;
-  deleteTransaction: (id: string) => void;
-  updateBudgetLimit: (category: string, limit: number) => void;
-  updateBudgetSpent: (category: string, spent: number) => void;
-  depositSavings: (amount: number) => void;
-  resetSavings: () => void;
-  addChatMessage: (msg: ChatMessage) => void;
-  setChatHistory: (history: ChatMessage[]) => void;
+  addTransaction: (tx: Omit<Transaction, "id" | "date">) => Promise<void>;
+  deleteTransaction: (id: string) => Promise<void>;
+  updateBudgetLimit: (category: string, limit: number) => Promise<void>;
+  updateBudgetSpent: (category: string, spent: number) => Promise<void>;
+  depositSavings: (amount: number) => Promise<void>;
+  resetSavings: () => Promise<void>;
+  addChatMessage: (msg: ChatMessage) => Promise<void>;
+  setChatHistory: (history: ChatMessage[]) => Promise<void>;
   sendMessage: (text: string, chatId?: string) => Promise<void>;
-  applyAction: (actionId: string, messageId: string, chatId?: string) => void;
-  loadChatHistory: (chatId: string) => void;
-  loadChatSessions: () => void;
-  addCategory: (name: string) => void;
-  updateCategory: (oldName: string, newName: string) => void;
-  deleteCategory: (name: string) => void;
-  deleteChatMessage: (messageId: string, chatId?: string) => void;
+  applyAction: (actionId: string, messageId: string, chatId?: string) => Promise<void>;
+  loadChatHistory: (chatId: string) => Promise<void>;
+  loadChatSessions: () => Promise<void>;
+  addCategory: (name: string) => Promise<void>;
+  updateCategory: (oldName: string, newName: string) => Promise<void>;
+  deleteCategory: (name: string) => Promise<void>;
+  deleteChatMessage: (messageId: string, chatId?: string) => Promise<void>;
 }
 
+const getEmail = () => {
+  return useAuthStore.getState().user?.email || "";
+};
+
+const apiFetch = async (url: string, options: RequestInit = {}) => {
+  const email = getEmail();
+  if (!email) {
+    throw new Error("No active user session found.");
+  }
+  const headers = {
+    "Content-Type": "application/json",
+    "x-user-email": email,
+    ...(options.headers || {}),
+  };
+  const res = await fetch(url, { ...options, headers });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP error! status: ${res.status}`);
+  }
+  return res.json();
+};
+
 export const useFinancesStore = create<UseFinancesState>((set, get) => ({
-  transactions: INITIAL_TRANSACTIONS,
-  budgets: INITIAL_BUDGETS,
-  savings: INITIAL_SAVINGS,
-  chatHistory: INITIAL_CHAT_HISTORY,
+  transactions: [],
+  budgets: [],
+  savings: { name: "Fondo de Emergencia", target: 5000, current: 0 },
+  chatHistory: [],
   chatSessions: [],
   categories: ["Comida fuera", "Transporte", "Supermercado", "Facturas", "Compras", "Otros"],
   isGenerating: false,
   dbReady: false,
 
-  loadUserDatabase: async (email) => {
+  loadUserDatabase: async (_email) => {
     set({ dbReady: false });
     try {
-      await databaseManager.init(email);
-      const activeChatId = databaseManager.getLastActiveChatId();
-      set({
-        transactions: databaseManager.getTransactions(),
-        budgets: databaseManager.getBudgets(),
-        savings: databaseManager.getSavings(),
-        chatHistory: databaseManager.getChatHistory(activeChatId),
-        chatSessions: databaseManager.getChatSessions(),
-        categories: databaseManager.getCategories(),
-        dbReady: true,
-      });
+      // Backend automatically checks/initializes user on login endpoint,
+      // then we pull the latest state
+      const data = await apiFetch("/api/finances");
+      if (data.success && data.state) {
+        set({
+          transactions: data.state.transactions,
+          budgets: data.state.budgets,
+          savings: data.state.savings,
+          chatHistory: data.state.chatHistory,
+          chatSessions: data.state.chatSessions,
+          categories: data.state.categories,
+          dbReady: true,
+        });
+      }
     } catch (err) {
       console.error("Failed to load user database:", err);
       set({
-        transactions: INITIAL_TRANSACTIONS,
-        budgets: INITIAL_BUDGETS,
-        savings: INITIAL_SAVINGS,
-        chatHistory: INITIAL_CHAT_HISTORY,
+        transactions: [],
+        budgets: [],
+        savings: { name: "Fondo de Emergencia", target: 5000, current: 0 },
+        chatHistory: [],
         chatSessions: [],
         categories: ["Comida fuera", "Transporte", "Supermercado", "Facturas", "Compras", "Otros"],
         dbReady: true,
@@ -84,11 +102,10 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
   },
 
   clearUserDatabase: () => {
-    databaseManager.close();
     set({
       transactions: [],
       budgets: [],
-      savings: INITIAL_SAVINGS,
+      savings: { name: "Fondo de Emergencia", target: 5000, current: 0 },
       chatHistory: [],
       chatSessions: [],
       categories: ["Comida fuera", "Transporte", "Supermercado", "Facturas", "Compras", "Otros"],
@@ -96,451 +113,309 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
     });
   },
 
-  addTransaction: (tx) => {
-    const newTx: Transaction = {
-      ...tx,
-      id: `tx-${Date.now()}`,
-      date: "Hoy",
-    };
-
-    if (databaseManager.isActive()) {
-      databaseManager.addTransaction(newTx);
-      databaseManager.save();
-      set({
-        transactions: databaseManager.getTransactions(),
-        budgets: databaseManager.getBudgets(),
+  addTransaction: async (tx) => {
+    try {
+      const data = await apiFetch("/api/finances/transactions", {
+        method: "POST",
+        body: JSON.stringify(tx),
       });
-    } else {
-      set((state) => {
-        let updatedBudgets = state.budgets;
-        if (tx.type === "expense") {
-          updatedBudgets = state.budgets.map((b) =>
-            b.category === tx.category ? { ...b, spent: b.spent + tx.amount } : b
-          );
-        }
-
-        return {
-          transactions: [newTx, ...state.transactions],
-          budgets: updatedBudgets,
-        };
-      });
-    }
-
-    return newTx;
-  },
-
-  deleteTransaction: (id) => {
-    if (databaseManager.isActive()) {
-      const txDeleted = databaseManager.deleteTransaction(id);
-      if (txDeleted) {
-        databaseManager.save();
+      if (data.success && data.state) {
         set({
-          transactions: databaseManager.getTransactions(),
-          budgets: databaseManager.getBudgets(),
+          transactions: data.state.transactions,
+          budgets: data.state.budgets,
         });
       }
-    } else {
-      set((state) => {
-        const txToDelete = state.transactions.find((t) => t.id === id);
-        if (!txToDelete) return {};
+    } catch (err) {
+      console.error("Failed to add transaction:", err);
+    }
+  },
 
-        let updatedBudgets = state.budgets;
-        if (txToDelete.type === "expense") {
-          updatedBudgets = state.budgets.map((b) =>
-            b.category === txToDelete.category
-              ? { ...b, spent: Math.max(0, b.spent - txToDelete.amount) }
-              : b
-          );
-        }
-
-        return {
-          transactions: state.transactions.filter((t) => t.id !== id),
-          budgets: updatedBudgets,
-        };
+  deleteTransaction: async (id) => {
+    try {
+      const data = await apiFetch(`/api/finances/transactions/${id}`, {
+        method: "DELETE",
       });
-    }
-  },
-
-  updateBudgetLimit: (category, limit) => {
-    if (databaseManager.isActive()) {
-      databaseManager.updateBudgetLimit(category, limit);
-      databaseManager.save();
-      set({ budgets: databaseManager.getBudgets() });
-    } else {
-      set((state) => ({
-        budgets: state.budgets.map((b) =>
-          b.category === category ? { ...b, limit } : b
-        ),
-      }));
-    }
-  },
-
-  updateBudgetSpent: (category, spent) => {
-    if (databaseManager.isActive()) {
-      databaseManager.updateBudgetSpent(category, spent);
-      databaseManager.save();
-      set({ budgets: databaseManager.getBudgets() });
-    } else {
-      set((state) => ({
-        budgets: state.budgets.map((b) =>
-          b.category === category ? { ...b, spent } : b
-        ),
-      }));
-    }
-  },
-
-  depositSavings: (amount) => {
-    if (databaseManager.isActive()) {
-      databaseManager.depositSavings(amount);
-      databaseManager.save();
-      set({ savings: databaseManager.getSavings() });
-    } else {
-      set((state) => ({
-        savings: {
-          ...state.savings,
-          current: state.savings.current + amount,
-        },
-      }));
-    }
-  },
-
-  resetSavings: () => {
-    if (databaseManager.isActive()) {
-      databaseManager.resetSavings();
-      databaseManager.save();
-      set({ savings: databaseManager.getSavings() });
-    } else {
-      set((state) => ({
-        savings: {
-          ...state.savings,
-          current: 0,
-        },
-      }));
-    }
-  },
-
-  addChatMessage: (msg) => {
-    if (databaseManager.isActive()) {
-      const activeChatId = databaseManager.getLastActiveChatId();
-      databaseManager.persistChatMessage(msg, activeChatId);
-      databaseManager.save();
-      set({
-        chatHistory: databaseManager.getChatHistory(activeChatId),
-        chatSessions: databaseManager.getChatSessions(),
-      });
-    } else {
-      set((state) => ({
-        chatHistory: [...state.chatHistory, msg],
-      }));
-    }
-  },
-
-  setChatHistory: (history) => {
-    if (databaseManager.isActive()) {
-      const activeChatId = databaseManager.getLastActiveChatId();
-      databaseManager.clearChatHistory(activeChatId);
-      for (const msg of history) {
-        databaseManager.persistChatMessage(msg, activeChatId);
+      if (data.success && data.state) {
+        set({
+          transactions: data.state.transactions,
+          budgets: data.state.budgets,
+        });
       }
-      databaseManager.save();
-      set({
-        chatHistory: databaseManager.getChatHistory(activeChatId),
-        chatSessions: databaseManager.getChatSessions(),
+    } catch (err) {
+      console.error("Failed to delete transaction:", err);
+    }
+  },
+
+  updateBudgetLimit: async (category, limit) => {
+    try {
+      const data = await apiFetch("/api/finances/budgets", {
+        method: "PUT",
+        body: JSON.stringify({ category, limit }),
       });
-    } else {
-      set({ chatHistory: history });
+      if (data.success && data.state) {
+        set({ budgets: data.state.budgets });
+      }
+    } catch (err) {
+      console.error("Failed to update budget limit:", err);
+    }
+  },
+
+  updateBudgetSpent: async (category, spent) => {
+    try {
+      const data = await apiFetch("/api/finances/budgets", {
+        method: "PUT",
+        body: JSON.stringify({ category, spent }),
+      });
+      if (data.success && data.state) {
+        set({ budgets: data.state.budgets });
+      }
+    } catch (err) {
+      console.error("Failed to update budget spent:", err);
+    }
+  },
+
+  depositSavings: async (amount) => {
+    try {
+      const data = await apiFetch("/api/finances/savings/deposit", {
+        method: "POST",
+        body: JSON.stringify({ amount }),
+      });
+      if (data.success && data.state) {
+        set({ savings: data.state.savings });
+      }
+    } catch (err) {
+      console.error("Failed to deposit savings:", err);
+    }
+  },
+
+  resetSavings: async () => {
+    try {
+      const data = await apiFetch("/api/finances/savings/reset", {
+        method: "POST",
+      });
+      if (data.success && data.state) {
+        set({ savings: data.state.savings });
+      }
+    } catch (err) {
+      console.error("Failed to reset savings:", err);
+    }
+  },
+
+  addChatMessage: async (msg) => {
+    try {
+      const activeChatId = get().chatHistory[0]?.id || "chat-welcome";
+      const data = await apiFetch("/api/finances/chat-messages", {
+        method: "POST",
+        body: JSON.stringify({ message: msg, chatId: activeChatId }),
+      });
+      if (data.success && data.state) {
+        set({
+          chatHistory: data.state.chatHistory,
+          chatSessions: data.state.chatSessions,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to add chat message:", err);
+    }
+  },
+
+  setChatHistory: async (history) => {
+    try {
+      const activeChatId = get().chatHistory[0]?.id || "chat-welcome";
+      // Clear history on backend
+      await apiFetch(`/api/finances/chat-messages?chatId=${activeChatId}`, {
+        method: "DELETE",
+      });
+      // Save all messages
+      for (const msg of history) {
+        await apiFetch("/api/finances/chat-messages", {
+          method: "POST",
+          body: JSON.stringify({ message: msg, chatId: activeChatId }),
+        });
+      }
+      const data = await apiFetch("/api/finances");
+      if (data.success && data.state) {
+        set({
+          chatHistory: data.state.chatHistory,
+          chatSessions: data.state.chatSessions,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to set chat history:", err);
     }
   },
 
   sendMessage: async (text, chatId) => {
-    const activeChatId = chatId || databaseManager.getLastActiveChatId();
-    const userMsg: ChatMessage = {
-      id: `chat-${Date.now()}`,
-      sender: "user",
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      text,
-    };
-
-    if (databaseManager.isActive()) {
-      databaseManager.persistChatMessage(userMsg, activeChatId);
-      databaseManager.save();
-      set({
-        chatHistory: databaseManager.getChatHistory(activeChatId),
-        chatSessions: databaseManager.getChatSessions(),
-        isGenerating: true,
-      });
-    } else {
-      set((state) => ({
-        chatHistory: [...state.chatHistory, userMsg],
-        isGenerating: true,
-      }));
-    }
+    const activeChatId = chatId || get().chatHistory[0]?.id || "chat-welcome";
+    set({ isGenerating: true });
 
     try {
-      const apiKey = (import.meta.env.VITE_GEMINI_API_KEY as string) || "";
-      if (!apiKey) {
-        throw new Error(
-          "Clave de API de Gemini ausente. Por favor, define VITE_GEMINI_API_KEY en tu archivo .env o .env.local para usar el asistente FinancIA!."
-        );
-      }
+      const data = await apiFetch("/api/finances/chat", {
+        method: "POST",
+        body: JSON.stringify({ text, chatId: activeChatId }),
+      });
 
-      const { transactions, budgets, savings, chatHistory } = get();
-      const response = await GeminiService.chat(
-        text,
-        chatHistory,
-        { transactions, budgets, savings },
-        {
-          addTransaction: get().addTransaction,
-          depositSavings: get().depositSavings,
-          updateBudgetLimit: get().updateBudgetLimit,
-        }
-      );
-
-      const aiMsg: ChatMessage = {
-        id: `chat-${Date.now()}`,
-        sender: "ai",
-        timestamp: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        text: response.text,
-        transactionDetail: response.transactionDetail,
-        infoText: response.infoText,
-      };
-
-      if (databaseManager.isActive()) {
-        databaseManager.persistChatMessage(aiMsg, activeChatId);
-        databaseManager.save();
+      if (data.success && data.state) {
         set({
-          chatHistory: databaseManager.getChatHistory(activeChatId),
-          chatSessions: databaseManager.getChatSessions(),
+          transactions: data.state.transactions,
+          budgets: data.state.budgets,
+          savings: data.state.savings,
+          chatHistory: data.state.chatHistory,
+          chatSessions: data.state.chatSessions,
           isGenerating: false,
         });
-      } else {
-        set((state) => ({
-          chatHistory: [...state.chatHistory, aiMsg],
-          isGenerating: false,
-        }));
       }
     } catch (error: any) {
-      const errorMsg: ChatMessage = {
-        id: `chat-${Date.now()}`,
-        sender: "ai",
-        timestamp: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        text: `⚠️ Error de configuración: ${error.message || error}`,
-      };
-
-      if (databaseManager.isActive()) {
-        databaseManager.persistChatMessage(errorMsg, activeChatId);
-        databaseManager.save();
-        set({
-          chatHistory: databaseManager.getChatHistory(activeChatId),
-          chatSessions: databaseManager.getChatSessions(),
-          isGenerating: false,
-        });
-      } else {
-        set((state) => ({
-          chatHistory: [...state.chatHistory, errorMsg],
-          isGenerating: false,
-        }));
-      }
-    }
-  },
-
-  applyAction: (actionId, messageId, chatId) => {
-    const activeChatId = chatId || databaseManager.getLastActiveChatId();
-    if (databaseManager.isActive()) {
-      databaseManager.removeActionChipsFromMessage(messageId);
-
-      let confirmMsg: ChatMessage | null = null;
-
-      if (
-        actionId === "move_to_savings" ||
-        actionId === "move_to_savings_quick"
-      ) {
-        const transferAmount = actionId === "move_to_savings" ? 120 : 50;
-        databaseManager.depositSavings(transferAmount);
-
-        const currentSavings = databaseManager.getSavings();
-
-        confirmMsg = {
-          id: `chat-${Date.now()}`,
-          sender: "ai",
-          timestamp: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          text: `¡Listo! He transferido $${transferAmount.toLocaleString("es-ES", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })} a tu ahorro '${currentSavings.name}'.`,
-        };
-      } else if (actionId === "ignore") {
-        confirmMsg = {
-          id: `chat-${Date.now()}`,
-          sender: "ai",
-          timestamp: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          text: "De acuerdo, he ignorado la sugerencia.",
-        };
-      } else if (actionId === "ask_record_expense") {
-        confirmMsg = {
-          id: `chat-${Date.now()}`,
-          sender: "ai",
-          timestamp: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          text: "Perfecto. Dime qué compraste y cuánto costó. Por ejemplo: 'Compré un café por 4.50'.",
-        };
-      } else if (actionId === "ask_view_limits") {
-        confirmMsg = {
-          id: `chat-${Date.now()}`,
-          sender: "ai",
-          timestamp: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          text: "Puedes ver todos tus presupuestos detallados en la pestaña 'Estadísticas y Límites' del menú lateral.",
-        };
-      }
-
-      if (confirmMsg) {
-        databaseManager.persistChatMessage(confirmMsg, activeChatId);
-      }
-      databaseManager.save();
-
-      set({
-        chatHistory: databaseManager.getChatHistory(activeChatId),
-        savings: databaseManager.getSavings(),
-        chatSessions: databaseManager.getChatSessions(),
-      });
-    } else {
-      set((state) => {
-        const chatHistory = state.chatHistory.map((msg) =>
-          msg.id === messageId ? { ...msg, actionChips: [] } : msg
-        );
-
-        if (
-          actionId === "move_to_savings" ||
-          actionId === "move_to_savings_quick"
-        ) {
-          const transferAmount = actionId === "move_to_savings" ? 120 : 50;
-          const updatedSavings = {
-            ...state.savings,
-            current: state.savings.current + transferAmount,
-          };
-
-          const confirmMsg: ChatMessage = {
-            id: `chat-${Date.now()}`,
-            sender: "ai",
-            timestamp: new Date().toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-            text: `¡Listo! He transferido $${transferAmount.toLocaleString("es-ES", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })} a tu ahorro '${state.savings.name}'.`,
-          };
-
-          return {
-            chatHistory: [...chatHistory, confirmMsg],
-            savings: updatedSavings,
-          };
-        } else if (actionId === "ignore") {
-          const confirmMsg: ChatMessage = {
-            id: `chat-${Date.now()}`,
-            sender: "ai",
-            timestamp: new Date().toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-            text: "De acuerdo, he ignorado la sugerencia.",
-          };
-          return { chatHistory: [...chatHistory, confirmMsg] };
-        } else if (actionId === "ask_record_expense") {
-          const promptMsg: ChatMessage = {
-            id: `chat-${Date.now()}`,
-            sender: "ai",
-            timestamp: new Date().toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-            text: "Perfecto. Dime qué compraste y cuánto costó. Por ejemplo: 'Compré un café por 4.50'.",
-          };
-          return { chatHistory: [...chatHistory, promptMsg] };
-        } else if (actionId === "ask_view_limits") {
-          const promptMsg: ChatMessage = {
-            id: `chat-${Date.now()}`,
-            sender: "ai",
-            timestamp: new Date().toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-            text: "Puedes ver todos tus presupuestos detallados en la pestaña 'Estadísticas y Límites' del menú lateral.",
-          };
-          return { chatHistory: [...chatHistory, promptMsg] };
+      console.error("Failed to send chat message:", error);
+      // Reload state to show the error message persisted by backend
+      try {
+        const data = await apiFetch("/api/finances");
+        if (data.success && data.state) {
+          set({
+            chatHistory: data.state.chatHistory,
+            chatSessions: data.state.chatSessions,
+          });
         }
+      } catch (e) {
+        console.error("Failed to recover finances state:", e);
+      }
+      set({ isGenerating: false });
+    }
+  },
 
-        return { chatHistory };
+  applyAction: async (actionId, messageId, chatId) => {
+    const activeChatId = chatId || get().chatHistory[0]?.id || "chat-welcome";
+    try {
+      // 1. Remove action chips from the message
+      await apiFetch(`/api/finances/chat-messages/${messageId}/remove-action-chips`, {
+        method: "PUT",
       });
+
+      // 2. Perform target actions
+      let confirmText = "";
+      if (actionId === "move_to_savings" || actionId === "move_to_savings_quick") {
+        const transferAmount = actionId === "move_to_savings" ? 120 : 50;
+        await apiFetch("/api/finances/savings/deposit", {
+          method: "POST",
+          body: JSON.stringify({ amount: transferAmount }),
+        });
+        const savingsData = await apiFetch("/api/finances");
+        const currentSavingsName = savingsData.state.savings.name;
+        confirmText = `¡Listo! He transferido $${transferAmount.toLocaleString("es-ES", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })} a tu ahorro '${currentSavingsName}'.`;
+      } else if (actionId === "ignore") {
+        confirmText = "De acuerdo, he ignorado la sugerencia.";
+      } else if (actionId === "ask_record_expense") {
+        confirmText = "Perfecto. Dime qué compraste y cuánto costó. Por ejemplo: 'Compré un café por 4.50'.";
+      } else if (actionId === "ask_view_limits") {
+        confirmText = "Puedes ver todos tus presupuestos detallados en la pestaña 'Estadísticas y Límites' del menú lateral.";
+      }
+
+      // 3. Persist confirmation message if any
+      if (confirmText) {
+        const confirmMsg = {
+          id: `chat-${Date.now()}`,
+          sender: "ai",
+          timestamp: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          text: confirmText,
+        };
+        await apiFetch("/api/finances/chat-messages", {
+          method: "POST",
+          body: JSON.stringify({ message: confirmMsg, chatId: activeChatId }),
+        });
+      }
+
+      // 4. Reload full state
+      const data = await apiFetch("/api/finances");
+      if (data.success && data.state) {
+        set({
+          chatHistory: data.state.chatHistory,
+          savings: data.state.savings,
+          chatSessions: data.state.chatSessions,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to apply action:", err);
     }
   },
 
-  loadChatHistory: (chatId) => {
-    if (databaseManager.isActive()) {
-      set({ chatHistory: databaseManager.getChatHistory(chatId) });
+  loadChatHistory: async (chatId) => {
+    try {
+      const data = await apiFetch(`/api/finances/chat-history?chatId=${chatId}`);
+      if (data.success) {
+        set({ chatHistory: data.chatHistory });
+      }
+    } catch (err) {
+      console.error("Failed to load chat history:", err);
     }
   },
 
-  loadChatSessions: () => {
-    if (databaseManager.isActive()) {
-      set({ chatSessions: databaseManager.getChatSessions() });
+  loadChatSessions: async () => {
+    try {
+      const data = await apiFetch("/api/finances");
+      if (data.success && data.state) {
+        set({ chatSessions: data.state.chatSessions });
+      }
+    } catch (err) {
+      console.error("Failed to load chat sessions:", err);
     }
   },
 
-  addCategory: (name) => {
-    if (databaseManager.isActive()) {
-      databaseManager.addCategory(name);
-      databaseManager.save();
-      set({ categories: databaseManager.getCategories() });
-    }
-  },
-
-  updateCategory: (oldName, newName) => {
-    if (databaseManager.isActive()) {
-      databaseManager.updateCategory(oldName, newName);
-      databaseManager.save();
-      set({
-        categories: databaseManager.getCategories(),
-        transactions: databaseManager.getTransactions(),
-        budgets: databaseManager.getBudgets(),
+  addCategory: async (name) => {
+    try {
+      const data = await apiFetch("/api/finances/categories", {
+        method: "POST",
+        body: JSON.stringify({ name }),
       });
+      if (data.success && data.state) {
+        set({ categories: data.state.categories });
+      }
+    } catch (err) {
+      console.error("Failed to add category:", err);
     }
   },
 
-  deleteCategory: (name) => {
-    if (databaseManager.isActive()) {
-      databaseManager.deleteCategory(name);
-      databaseManager.save();
-      set({
-        categories: databaseManager.getCategories(),
-        transactions: databaseManager.getTransactions(),
-        budgets: databaseManager.getBudgets(),
+  updateCategory: async (oldName, newName) => {
+    try {
+      const data = await apiFetch("/api/finances/categories", {
+        method: "PUT",
+        body: JSON.stringify({ oldName, newName }),
       });
+      if (data.success && data.state) {
+        set({
+          categories: data.state.categories,
+          transactions: data.state.transactions,
+          budgets: data.state.budgets,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to update category:", err);
     }
   },
 
-  deleteChatMessage: (messageId, chatId) => {
+  deleteCategory: async (name) => {
+    try {
+      const data = await apiFetch(`/api/finances/categories?name=${encodeURIComponent(name)}`, {
+        method: "DELETE",
+      });
+      if (data.success && data.state) {
+        set({
+          categories: data.state.categories,
+          transactions: data.state.transactions,
+          budgets: data.state.budgets,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to delete category:", err);
+    }
+  },
+
+  deleteChatMessage: async (messageId, chatId) => {
     const chatHistory = get().chatHistory;
     const idx = chatHistory.findIndex((m) => m.id === messageId);
     if (idx === -1) return;
@@ -549,7 +424,6 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
     const idsToDelete = [messageId];
     let transactionIdToDelete = msg.transactionDetail?.id;
 
-    // Check if the next message is the associated AI response
     if (msg.sender === "user" && idx + 1 < chatHistory.length) {
       const nextMsg = chatHistory[idx + 1];
       if (nextMsg.sender === "ai") {
@@ -560,27 +434,32 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
       }
     }
 
-    if (transactionIdToDelete) {
-      get().deleteTransaction(transactionIdToDelete);
-    }
-
-    if (databaseManager.isActive()) {
-      for (const id of idsToDelete) {
-        databaseManager.deleteChatMessage(id);
+    try {
+      if (transactionIdToDelete) {
+        await apiFetch(`/api/finances/transactions/${transactionIdToDelete}`, {
+          method: "DELETE",
+        });
       }
-      databaseManager.save();
 
-      const sessions = databaseManager.getChatSessions();
-      const targetChatId = chatId || databaseManager.getLastActiveChatId();
-      set({
-        chatHistory: databaseManager.getChatHistory(targetChatId),
-        chatSessions: sessions,
-      });
-    } else {
-      set((state) => ({
-        chatHistory: state.chatHistory.filter((m) => !idsToDelete.includes(m.id)),
-      }));
+      for (const id of idsToDelete) {
+        await apiFetch(`/api/finances/chat-messages/${id}`, {
+          method: "DELETE",
+        });
+      }
+
+      const data = await apiFetch("/api/finances");
+      if (data.success && data.state) {
+        const targetChatId = chatId || data.state.activeChatId || "chat-welcome";
+        const historyData = await apiFetch(`/api/finances/chat-history?chatId=${targetChatId}`);
+        set({
+          chatHistory: historyData.chatHistory,
+          chatSessions: data.state.chatSessions,
+          transactions: data.state.transactions,
+          budgets: data.state.budgets,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to delete chat message:", err);
     }
   },
 }));
-

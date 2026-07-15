@@ -1,9 +1,4 @@
-import type {
-  Transaction,
-  Budget,
-  ChatMessage,
-  SavingsGoal,
-} from "../dashboard/types/ChatTypes.ts";
+import type { Transaction, Budget, ChatMessage, SavingsGoal } from "./types.js";
 
 export const INITIAL_TRANSACTIONS: Transaction[] = [
   {

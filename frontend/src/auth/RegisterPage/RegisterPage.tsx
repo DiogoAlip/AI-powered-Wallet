@@ -198,7 +198,7 @@ export const RegisterPage = () => {
             <button
               type="button"
               onClick={() => {
-                login("demo@financia.com", "Socio FinancIA! Pro");
+                login("demo@financia.com");
                 navigate("/dashboard/chat");
               }}
               className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 bg-teal-50 border border-teal-100 hover:bg-teal-100 text-teal-800 rounded-xl text-xs font-bold cursor-pointer transition-all transform hover:scale-[1.01]"

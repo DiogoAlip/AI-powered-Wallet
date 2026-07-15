@@ -6,8 +6,6 @@ import {
   IconAlertTriangle,
   IconCheck,
   IconKey,
-  IconEye,
-  IconEyeOff,
 } from "@tabler/icons-react";
 import { useAuthStore } from "../../store/auth.store";
 import { useFinancesStore } from "../../store/finances.store";
@@ -46,11 +44,6 @@ export function PrivacyPage() {
   const [analyticsOptOut, setAnalyticsOptOut] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleted, setDeleted] = useState(false);
-  const [showApiKey, setShowApiKey] = useState(false);
-
-  const apiKeyDisplay = import.meta.env.VITE_GEMINI_API_KEY
-    ? "••••••••••••••••••••••••••••••••"
-    : "No configurada";
 
   const handleDeleteData = () => {
     clearUserDatabase();
@@ -89,11 +82,11 @@ export function PrivacyPage() {
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-0.5">
               <span className="text-xs font-bold text-[#0b1c30] block">
-                Almacenamiento 100% local
+                Base de datos en el servidor
               </span>
               <span className="text-[11px] text-gray-400 block">
-                Todos los datos se guardan en SQLite dentro de tu navegador mediante IndexedDB.
-                Ningún servidor externo recibe tu información.
+                Todos los datos se guardan en una base de datos SQLite segura en el servidor de FinancIA!
+                mediante llamadas REST API.
               </span>
             </div>
             <ToggleSwitch checked={localOnly} onChange={() => setLocalOnly(!localOnly)} />
@@ -132,29 +125,19 @@ export function PrivacyPage() {
 
         <div className="space-y-2">
           <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-            VITE_GEMINI_API_KEY
+            GEMINI_API_KEY (Servidor)
           </label>
           <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5">
             <code className="flex-1 font-mono text-xs text-[#0b1c30] truncate">
-              {showApiKey && import.meta.env.VITE_GEMINI_API_KEY
-                ? import.meta.env.VITE_GEMINI_API_KEY
-                : apiKeyDisplay}
+              Administrada de forma segura en el servidor
             </code>
-            <button
-              onClick={() => setShowApiKey((s) => !s)}
-              className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer shrink-0"
-            >
-              {showApiKey ? (
-                <IconEyeOff className="w-4 h-4" />
-              ) : (
-                <IconEye className="w-4 h-4" />
-              )}
-            </button>
+            <div className="text-teal-600 text-[10px] font-bold flex items-center gap-1 shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse"></span> Activa
+            </div>
           </div>
           <p className="text-[11px] text-gray-400">
-            Configura esta variable en tu archivo{" "}
-            <code className="bg-gray-100 px-1 py-0.5 rounded text-gray-600">.env.local</code>{" "}
-            para activar las respuestas inteligentes de Gemini.
+            La clave de API de Gemini se almacena de forma segura en el archivo{" "}
+            <code className="bg-gray-100 px-1 py-0.5 rounded text-gray-600">.env</code> del servidor backend, previniendo su exposición al navegador.
           </p>
         </div>
       </div>
@@ -173,8 +156,8 @@ export function PrivacyPage() {
         <dl className="space-y-2">
           {[
             { label: "Usuario", value: user?.email ?? "—" },
-            { label: "Tipo de sesión", value: "Persistente (localStorage)" },
-            { label: "Cifrado de datos", value: "Navegador nativo (IndexedDB)" },
+            { label: "Tipo de sesión", value: "Servidor REST + LocalStorage" },
+            { label: "Cifrado de datos", value: "Servidor local (SQLite3)" },
           ].map(({ label, value }) => (
             <div key={label} className="flex justify-between text-xs">
               <dt className="text-gray-400">{label}</dt>
