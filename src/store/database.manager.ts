@@ -43,7 +43,12 @@ class DatabaseManager {
       });
     }
 
-    const dbData = await indexedDbStorage.get(`sqlite_db_${email}`);
+    let dbData: Uint8Array | null = null;
+    if (email.toLowerCase() === "demo@financia.com") {
+      dbData = null;
+    } else {
+      dbData = await indexedDbStorage.get(`sqlite_db_${email}`);
+    }
     this.activeDb = dbData ? new this.SQL.Database(dbData) : new this.SQL.Database();
 
     this.initializeSchema();

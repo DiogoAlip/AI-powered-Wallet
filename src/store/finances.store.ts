@@ -42,7 +42,7 @@ export interface UseFinancesState {
   addCategory: (name: string) => void;
   updateCategory: (oldName: string, newName: string) => void;
   deleteCategory: (name: string) => void;
-  deleteChatMessage: (messageId: string) => void;
+  deleteChatMessage: (messageId: string, chatId?: string) => void;
 }
 
 export const useFinancesStore = create<UseFinancesState>((set, get) => ({
@@ -540,7 +540,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
     }
   },
 
-  deleteChatMessage: (messageId) => {
+  deleteChatMessage: (messageId, chatId) => {
     const chatHistory = get().chatHistory;
     const idx = chatHistory.findIndex((m) => m.id === messageId);
     if (idx === -1) return;
@@ -571,9 +571,9 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
       databaseManager.save();
       
       const sessions = databaseManager.getChatSessions();
-      const activeChatId = databaseManager.getLastActiveChatId();
+      const targetChatId = chatId || databaseManager.getLastActiveChatId();
       set({
-        chatHistory: databaseManager.getChatHistory(activeChatId),
+        chatHistory: databaseManager.getChatHistory(targetChatId),
         chatSessions: sessions,
       });
     } else {

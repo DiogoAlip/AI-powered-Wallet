@@ -286,7 +286,7 @@ export function Chat() {
               <button
                 type="button"
                 onClick={() => {
-                  deleteChatMessage(pendingDeleteMsg.id);
+                  deleteChatMessage(pendingDeleteMsg.id, chatId);
                   setPendingDeleteMsg(null);
                 }}
                 className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-sans text-xs font-semibold rounded-xl transition-colors cursor-pointer"
