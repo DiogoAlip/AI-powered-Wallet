@@ -62,7 +62,7 @@ class DatabaseManager {
         1,
       ]);
       
-      const demoEmails = ["demo@financia.com", "ejemplo@financia.com"];
+      const demoEmails = ["demo@financia.com"];
       if (demoEmails.includes(email.toLowerCase())) {
         this.seedDefaultData(email);
       } else {

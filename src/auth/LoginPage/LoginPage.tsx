@@ -159,34 +159,7 @@ export const LoginPage = () => {
             </button>
           </div>
 
-          {/* Demo Accounts Section */}
-          <div className="mt-8 pt-6 border-t border-gray-100 space-y-3">
-            <h4 className="text-center text-xs font-bold text-gray-400 uppercase tracking-wider">
-              Probar con datos de demostración
-            </h4>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  login("demo@financia.com", "Socio FinancIA! Pro");
-                  navigate("/dashboard/chat");
-                }}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-teal-50 border border-teal-100 hover:bg-teal-100 text-teal-800 rounded-xl text-xs font-bold cursor-pointer transition-all transform hover:scale-[1.02]"
-              >
-                Usuario Demo
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  login("ejemplo@financia.com", "Socio Ejemplo");
-                  navigate("/dashboard/chat");
-                }}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-50 border border-blue-100 hover:bg-blue-100 text-blue-800 rounded-xl text-xs font-bold cursor-pointer transition-all transform hover:scale-[1.02]"
-              >
-                Usuario Ejemplo
-              </button>
-            </div>
-          </div>
+
 
           {/* Signup Link */}
           <p className="text-center text-xs text-gray-500 mt-8">

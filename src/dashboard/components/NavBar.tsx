@@ -1,11 +1,15 @@
 import { IconUserCircle, IconMenu2 } from "@tabler/icons-react";
 import { Link } from "react-router";
+import { useAuthStore } from "../../store/auth.store";
 
 interface NavBarProps {
   toggleSideBar: () => void;
 }
 
 export const NavBar = ({ toggleSideBar }: NavBarProps) => {
+  const user = useAuthStore((state) => state.user);
+  const isDemo = user?.email === "demo@financia.com";
+
   return (
     <>
       <div className="h-16"></div>
@@ -28,6 +32,11 @@ export const NavBar = ({ toggleSideBar }: NavBarProps) => {
               <span className="text-[10px] bg-teal-50 border border-teal-200 text-teal-800 font-semibold px-2 py-0.5 rounded-full hidden sm:inline-block">
                 Inteligente
               </span>
+              {isDemo && (
+                <span className="text-[10px] bg-amber-50 border border-amber-200 text-amber-800 font-bold px-2 py-0.5 rounded-full inline-block animate-pulse">
+                  Entorno Demo
+                </span>
+              )}
             </div>
           </div>
 

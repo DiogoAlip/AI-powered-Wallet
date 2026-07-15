@@ -1,10 +1,18 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { useAuthStore } from "../../store/auth.store.ts";
 import {
   IconArrowNarrowRight,
   IconSparkles,
 } from "@tabler/icons-react";
 
 export function HeroSection() {
+  const login = useAuthStore((state) => state.login);
+  const navigate = useNavigate();
+
+  const handleDemoLogin = () => {
+    login("demo@financia.com", "Socio FinancIA! Pro");
+    navigate("/dashboard/chat");
+  };
   return (
     <section className="relative px-6 py-12 md:py-24 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
       {/* Decorative ambient gradient */}
@@ -38,6 +46,12 @@ export function HeroSection() {
             Comenzar Gratis
             <IconArrowNarrowRight className="w-4 h-4" />
           </Link>
+          <button
+            onClick={handleDemoLogin}
+            className="w-full sm:w-auto px-8 py-3.5 bg-teal-50 hover:bg-teal-100 text-[#006a61] border border-teal-200 font-sans text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer"
+          >
+            Probar Demo
+          </button>
         </div>
 
         {/* Social Proof */}

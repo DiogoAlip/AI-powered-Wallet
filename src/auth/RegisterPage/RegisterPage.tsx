@@ -17,6 +17,7 @@ export const RegisterPage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const register = useAuthStore((state) => state.register);
+  const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -186,6 +187,23 @@ export const RegisterPage = () => {
             <button className="flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors text-gray-700">
               <IconBrandAppleFilled className="w-4 h-4 text-gray-600" />
               Apple
+            </button>
+          </div>
+
+          {/* Demo Accounts Section */}
+          <div className="mt-8 pt-6 border-t border-gray-100 space-y-3">
+            <h4 className="text-center text-xs font-bold text-gray-400 uppercase tracking-wider">
+              Probar con datos de demostración
+            </h4>
+            <button
+              type="button"
+              onClick={() => {
+                login("demo@financia.com", "Socio FinancIA! Pro");
+                navigate("/dashboard/chat");
+              }}
+              className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 bg-teal-50 border border-teal-100 hover:bg-teal-100 text-teal-800 rounded-xl text-xs font-bold cursor-pointer transition-all transform hover:scale-[1.01]"
+            >
+              Usuario Demo
             </button>
           </div>
 
