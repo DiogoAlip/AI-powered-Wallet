@@ -37,16 +37,15 @@ function ToggleSwitch({
 export function PrivacyPage() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
-  const clearUserDatabase = useFinancesStore((s) => s.clearUserDatabase);
+  const deleteUserAccount = useFinancesStore((s) => s.deleteUserAccount);
   const navigate = useNavigate();
 
-  const [localOnly, setLocalOnly] = useState(true);
   const [analyticsOptOut, setAnalyticsOptOut] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleted, setDeleted] = useState(false);
 
-  const handleDeleteData = () => {
-    clearUserDatabase();
+  const handleDeleteData = async () => {
+    await deleteUserAccount();
     logout();
     setDeleted(true);
     setTimeout(() => navigate("/"), 1500);
@@ -73,7 +72,7 @@ export function PrivacyPage() {
               Almacenamiento de Datos
             </h3>
             <p className="font-sans text-[11px] text-gray-400">
-              Tus datos nunca salen de tu dispositivo.
+              Datos protegidos y sincronizados en tiempo real.
             </p>
           </div>
         </div>
@@ -82,14 +81,15 @@ export function PrivacyPage() {
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-0.5">
               <span className="text-xs font-bold text-[#0b1c30] block">
-                Base de datos en el servidor
+                Base de datos activa en el servidor
               </span>
               <span className="text-[11px] text-gray-400 block">
-                Todos los datos se guardan en una base de datos SQLite segura en el servidor de FinancIA!
-                mediante llamadas REST API.
+                Todos tus datos se guardan de forma segura en la base de datos SQLite del servidor backend mediante llamadas REST API cifradas.
               </span>
             </div>
-            <ToggleSwitch checked={localOnly} onChange={() => setLocalOnly(!localOnly)} />
+            <span className="text-teal-600 text-[10px] font-bold flex items-center gap-1 shrink-0 bg-teal-50 border border-teal-100 rounded-lg px-2.5 py-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse"></span> Activa
+            </span>
           </div>
 
           <div className="flex items-start justify-between gap-4">
@@ -199,8 +199,8 @@ export function PrivacyPage() {
             <div className="flex items-start gap-2">
               <IconAlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
               <p className="text-xs text-red-700 leading-relaxed">
-                Esta acción eliminará permanentemente todos tus datos locales (transacciones,
-                presupuestos, chats, metas y configuración) y cerrará tu sesión. No se puede deshacer.
+                Esta acción eliminará permanentemente todos tus datos del servidor (transacciones,
+                presupuestos, chats, metas y configuración) y tu cuenta. No se puede deshacer.
               </p>
             </div>
             <div className="flex gap-2">

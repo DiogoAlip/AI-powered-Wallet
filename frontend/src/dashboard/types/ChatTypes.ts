@@ -30,6 +30,7 @@ export interface SavingsGoal {
   name: string;
   target: number;
   current: number;
+  recommendations?: string | null;
 }
 
 export interface AppState {

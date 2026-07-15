@@ -3,7 +3,6 @@ import {
   IconRobot,
   IconTrendingUp,
   IconWallet,
-  IconSettings,
   IconX,
   IconLogout,
   IconMessage,
@@ -14,6 +13,7 @@ import {
   IconChevronUp,
   IconShieldLock,
   IconInfoCircle,
+  IconPig,
 } from "@tabler/icons-react";
 import { NavLink, useLocation, useNavigate } from "react-router";
 import { useAuthStore } from "../../store/auth.store";
@@ -29,7 +29,7 @@ interface SideBarProps {
 const routes = [
   { id: "limits", label: "Estadísticas y Límites", icon: IconTrendingUp },
   { id: "history", label: "Historial de Gastos", icon: IconWallet },
-  { id: "goals", label: "Mi Cuenta y Metas", icon: IconSettings },
+  { id: "goals", label: "Metas de Ahorro", icon: IconPig },
 ];
 
 /** Floating account menu shown above the account button */

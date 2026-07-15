@@ -38,6 +38,7 @@ export function initDb(dbPath = "./data/finances.db"): DatabaseSync {
 
   const db = new DatabaseSync(dbPath);
   dbInstance = db;
+  db.exec("PRAGMA foreign_keys = ON;");
 
   // Initialize schema
   db.exec(`
@@ -81,9 +82,16 @@ export function initDb(dbPath = "./data/finances.db"): DatabaseSync {
       name TEXT,
       target REAL,
       current REAL,
+      recommendations TEXT,
       FOREIGN KEY(user_email) REFERENCES users(email) ON DELETE CASCADE
     );
   `);
+
+  try {
+    db.exec("ALTER TABLE savings ADD COLUMN recommendations TEXT;");
+  } catch (e) {
+    // Already exists
+  }
 
   db.exec(`
     CREATE TABLE IF NOT EXISTS chat_messages (
@@ -321,14 +329,15 @@ export function updateBudgetSpent(email: string, category: string, spent: number
 export function getSavings(email: string): SavingsGoal {
   const db = getDb();
   const row = db.prepare(
-    "SELECT name, target, current FROM savings WHERE user_email = ?"
-  ).get(email.toLowerCase()) as { name: string; target: number; current: number } | undefined;
+    "SELECT name, target, current, recommendations FROM savings WHERE user_email = ?"
+  ).get(email.toLowerCase()) as { name: string; target: number; current: number; recommendations: string | null } | undefined;
 
   if (row) {
     return {
       name: row.name,
       target: row.target,
       current: row.current,
+      recommendations: row.recommendations || null,
     };
   }
   return INITIAL_SAVINGS;
@@ -491,4 +500,33 @@ export function getUserState(email: string): UserState {
     activeChatId,
     chatHistory: getChatHistory(cleanEmail, activeChatId),
   };
+}
+
+export function updateSavingsGoal(email: string, name: string, target: number): void {
+  const db = getDb();
+  db.prepare("UPDATE savings SET name = ?, target = ? WHERE user_email = ?").run(
+    name,
+    target,
+    email.toLowerCase()
+  );
+}
+
+export function saveSavingsRecommendations(email: string, recommendationsMarkdown: string): void {
+  const db = getDb();
+  db.prepare("UPDATE savings SET recommendations = ? WHERE user_email = ?").run(
+    recommendationsMarkdown,
+    email.toLowerCase()
+  );
+}
+
+export function clearSavingsRecommendations(email: string): void {
+  const db = getDb();
+  db.prepare("UPDATE savings SET recommendations = NULL WHERE user_email = ?").run(
+    email.toLowerCase()
+  );
+}
+
+export function deleteUserAccount(email: string): void {
+  const db = getDb();
+  db.prepare("DELETE FROM users WHERE email = ?").run(email.toLowerCase());
 }

@@ -16,6 +16,7 @@ export interface UseFinancesState {
   categories: string[];
   isGenerating: boolean;
   dbReady: boolean;
+  loadingRecommendations: boolean;
 
   // Actions
   loadUserDatabase: (email: string) => Promise<void>;
@@ -36,6 +37,10 @@ export interface UseFinancesState {
   updateCategory: (oldName: string, newName: string) => Promise<void>;
   deleteCategory: (name: string) => Promise<void>;
   deleteChatMessage: (messageId: string, chatId?: string) => Promise<void>;
+  updateSavingsGoal: (name: string, target: number) => Promise<void>;
+  deleteUserAccount: () => Promise<void>;
+  loadSavingsRecommendations: () => Promise<string>;
+  applySavingsRecommendation: () => Promise<void>;
 }
 
 const getEmail = () => {
@@ -69,6 +74,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
   categories: ["Comida fuera", "Transporte", "Supermercado", "Facturas", "Compras", "Otros"],
   isGenerating: false,
   dbReady: false,
+  loadingRecommendations: false,
 
   loadUserDatabase: async (_email) => {
     set({ dbReady: false });
@@ -461,5 +467,65 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
     } catch (err) {
       console.error("Failed to delete chat message:", err);
     }
+  },
+
+  updateSavingsGoal: async (name, target) => {
+    try {
+      const data = await apiFetch("/api/finances/savings", {
+        method: "PUT",
+        body: JSON.stringify({ name, target }),
+      });
+      if (data.success && data.state) {
+        set({ savings: data.state.savings });
+      }
+    } catch (err) {
+      console.error("Failed to update savings goal:", err);
+    }
+  },
+
+  deleteUserAccount: async () => {
+    try {
+      await apiFetch("/api/finances/account", {
+        method: "DELETE",
+      });
+      get().clearUserDatabase();
+    } catch (err) {
+      console.error("Failed to delete user account:", err);
+    }
+  },
+
+  loadSavingsRecommendations: async () => {
+    set({ loadingRecommendations: true });
+    try {
+      const data = await apiFetch("/api/finances/savings/recommendations");
+      if (data.success) {
+        set({ savings: data.state.savings, loadingRecommendations: false });
+        return data.recommendations;
+      }
+    } catch (err) {
+      console.error("Failed to load savings recommendations:", err);
+    }
+    set({ loadingRecommendations: false });
+    return "";
+  },
+
+  applySavingsRecommendation: async () => {
+    set({ loadingRecommendations: true });
+    try {
+      const data = await apiFetch("/api/finances/savings/apply-recommendation", {
+        method: "POST",
+      });
+      if (data.success && data.state) {
+        set({
+          savings: data.state.savings,
+          budgets: data.state.budgets,
+          chatHistory: data.state.chatHistory,
+          loadingRecommendations: false,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to apply savings recommendation:", err);
+    }
+    set({ loadingRecommendations: false });
   },
 }));

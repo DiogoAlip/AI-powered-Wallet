@@ -19,6 +19,12 @@ import {
   clearChatHistory,
   deleteChatMessage,
   removeActionChipsFromMessage,
+  updateSavingsGoal,
+  saveSavingsRecommendations,
+  clearSavingsRecommendations,
+  deleteUserAccount,
+  getBudgets,
+  getSavings,
 } from "./db.js";
 import { chat } from "./gemini.js";
 import type { ChatMessage } from "./types.js";
@@ -186,6 +192,102 @@ app.post("/api/finances/savings/reset", authMiddleware, (req: Request, res: Resp
   } catch (error) {
     console.error("Error resetting savings:", error);
     res.status(500).json({ error: "Failed to reset savings" });
+  }
+});
+
+// 5b. Savings configuration, recommendations, and account deletion
+app.put("/api/finances/savings", authMiddleware, (req: Request, res: Response) => {
+  const authReq = req as AuthenticatedRequest;
+  const { name, target } = req.body;
+  if (!name || target === undefined) {
+    return res.status(400).json({ error: "Name and target are required" });
+  }
+  try {
+    updateSavingsGoal(authReq.userEmail, name, parseFloat(target));
+    res.json({ success: true, state: getUserState(authReq.userEmail) });
+  } catch (error) {
+    console.error("Error updating savings goal:", error);
+    res.status(500).json({ error: "Failed to update savings goal" });
+  }
+});
+
+app.get("/api/finances/savings/recommendations", authMiddleware, (req: Request, res: Response) => {
+  const authReq = req as AuthenticatedRequest;
+  try {
+    const budgets = getBudgets(authReq.userEmail);
+    const savings = getSavings(authReq.userEmail);
+    const surpluses = budgets.filter((b) => b.limit > 0 && b.limit - b.spent > 0);
+
+    let md = "";
+    if (surpluses.length === 0) {
+      md = "¡Excelente trabajo! Has optimizado al máximo tus presupuestos y no se han encontrado excedentes disponibles para ahorro.";
+    } else {
+      md = `### 💡 Sugerencias de Ahorro Inteligente\n\nHe analizado tus presupuestos semanales activos y he detectado excedentes disponibles. Te sugiero transferir el 50% de estos excedentes a tu **${savings.name}**:\n\n`;
+      let totalSuggested = 0;
+      for (const b of surpluses) {
+        const surplus = b.limit - b.spent;
+        const suggested = Math.round(surplus * 0.5 * 100) / 100;
+        if (suggested > 0) {
+          md += `*   **${b.category}**: Excedente de **$${surplus.toFixed(2)}**. Sugerimos ahorrar **$${suggested.toFixed(2)}**.\n`;
+          totalSuggested += suggested;
+        }
+      }
+      md += `\n---\n\n**Ahorro total recomendado**: **$${totalSuggested.toFixed(2)}**\n\n*Haz clic en "Aplicar Sugerencias" para transferir y consolidar estos montos automáticamente.*`;
+    }
+
+    saveSavingsRecommendations(authReq.userEmail, md);
+    res.json({ success: true, recommendations: md, state: getUserState(authReq.userEmail) });
+  } catch (error) {
+    console.error("Error loading recommendations:", error);
+    res.status(500).json({ error: "Failed to calculate recommendations" });
+  }
+});
+
+app.post("/api/finances/savings/apply-recommendation", authMiddleware, (req: Request, res: Response) => {
+  const authReq = req as AuthenticatedRequest;
+  try {
+    const budgets = getBudgets(authReq.userEmail);
+    const surpluses = budgets.filter((b) => b.limit > 0 && b.limit - b.spent > 0);
+
+    let totalSaved = 0;
+    for (const b of surpluses) {
+      const surplus = b.limit - b.spent;
+      const suggested = Math.round(surplus * 0.5 * 100) / 100;
+      if (suggested > 0) {
+        depositSavings(authReq.userEmail, suggested);
+        updateBudgetSpent(authReq.userEmail, b.category, b.spent + suggested);
+        totalSaved += suggested;
+      }
+    }
+
+    clearSavingsRecommendations(authReq.userEmail);
+    
+    if (totalSaved > 0) {
+      const activeChatId = "chat-welcome";
+      const systemMessage: ChatMessage = {
+        id: `chat-${Date.now()}`,
+        sender: "ai",
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        text: `🤖 **Ahorro Automático Aplicado**: He transferido un total de **$${totalSaved.toFixed(2)}** a tus ahorros a partir de tus excedentes de presupuesto.`
+      };
+      persistChatMessage(authReq.userEmail, systemMessage, activeChatId);
+    }
+
+    res.json({ success: true, state: getUserState(authReq.userEmail) });
+  } catch (error) {
+    console.error("Error applying savings recommendation:", error);
+    res.status(500).json({ error: "Failed to apply recommendation" });
+  }
+});
+
+app.delete("/api/finances/account", authMiddleware, (req: Request, res: Response) => {
+  const authReq = req as AuthenticatedRequest;
+  try {
+    deleteUserAccount(authReq.userEmail);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting account:", error);
+    res.status(500).json({ error: "Failed to delete account" });
   }
 });
 
