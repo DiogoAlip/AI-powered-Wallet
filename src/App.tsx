@@ -10,6 +10,9 @@ import { NewChat } from "./dashboard/chat/pages/NewChatPage.tsx";
 import { Limits } from "./dashboard/limits/LimitsPage.tsx";
 import { History } from "./dashboard/history/HistoryPage.tsx";
 import { Goals } from "./dashboard/goals/GoalsPage.tsx";
+import { ProfilePage } from "./dashboard/user/ProfilePage.tsx";
+import { PrivacyPage } from "./dashboard/user/PrivacyPage.tsx";
+import { AboutPage } from "./dashboard/user/AboutPage.tsx";
 
 const router = createBrowserRouter([
   {
@@ -54,6 +57,9 @@ const router = createBrowserRouter([
         element: <History />,
       },
       { path: "goals", element: <Goals /> },
+      { path: "profile", element: <ProfilePage /> },
+      { path: "privacy", element: <PrivacyPage /> },
+      { path: "about", element: <AboutPage /> },
     ],
   },
 ]);

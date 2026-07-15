@@ -37,10 +37,12 @@ function AccountMenu({
   user,
   isDemo,
   onLogout,
+  onNavigate,
 }: {
   user: { name: string; email: string } | null;
   isDemo: boolean;
   onLogout: () => void;
+  onNavigate: (path: string) => void;
 }) {
   return (
     <div className="absolute bottom-full left-2 right-2 mb-2 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50 animate-fade-in-up">
@@ -65,15 +67,24 @@ function AccountMenu({
 
       {/* Menu items */}
       <div className="py-1.5">
-        <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors text-left cursor-pointer">
+        <button
+          onClick={() => onNavigate("/dashboard/profile")}
+          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors text-left cursor-pointer"
+        >
           <IconUserCircle className="w-4 h-4 text-gray-400 shrink-0" />
           <span className="font-sans">Mi Perfil</span>
         </button>
-        <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors text-left cursor-pointer">
+        <button
+          onClick={() => onNavigate("/dashboard/privacy")}
+          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors text-left cursor-pointer"
+        >
           <IconShieldLock className="w-4 h-4 text-gray-400 shrink-0" />
           <span className="font-sans">Privacidad y Seguridad</span>
         </button>
-        <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors text-left cursor-pointer">
+        <button
+          onClick={() => onNavigate("/dashboard/about")}
+          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors text-left cursor-pointer"
+        >
           <IconInfoCircle className="w-4 h-4 text-gray-400 shrink-0" />
           <span className="font-sans">Acerca de FinancIA!</span>
         </button>
@@ -133,6 +144,11 @@ function SideBarContent({
     logout();
     toggleSideBar();
     navigate("/");
+  };
+
+  const handleNavigate = (path: string) => {
+    setAccountOpen(false);
+    navigate(path);
   };
 
   const getSessionLabel = (sessionId: string, idx: number) => {
@@ -292,7 +308,7 @@ function SideBarContent({
       <div className={`shrink-0 border-t border-gray-200/80 ${expanded ? "p-2" : "p-1.5"} relative`}>
         {/* Floating menu */}
         {accountOpen && (
-          <AccountMenu user={user} isDemo={isDemo} onLogout={handleLogout} />
+          <AccountMenu user={user} isDemo={isDemo} onLogout={handleLogout} onNavigate={handleNavigate} />
         )}
 
         {/* Account trigger button */}
