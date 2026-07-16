@@ -1,6 +1,4 @@
-import type { Transaction, Budget, ChatMessage, SavingsGoal } from "./types.js";
-
-export const INITIAL_TRANSACTIONS: Transaction[] = [
+export const INITIAL_TRANSACTIONS = [
   {
     id: "tx-1",
     merchant: "Green Cafe",
@@ -57,7 +55,7 @@ export const INITIAL_TRANSACTIONS: Transaction[] = [
   },
 ];
 
-export const INITIAL_BUDGETS: Budget[] = [
+export const INITIAL_BUDGETS = [
   {
     category: "Comida fuera",
     spent: 49.5, // 4.50 (Starbucks) + 45.00 (Green Cafe)
@@ -95,13 +93,13 @@ export const INITIAL_BUDGETS: Budget[] = [
   },
 ];
 
-export const INITIAL_SAVINGS: SavingsGoal = {
+export const INITIAL_SAVINGS = {
   name: "Fondo de Emergencia",
   target: 5000.0,
   current: 450.0,
 };
 
-export const INITIAL_CHAT_HISTORY: ChatMessage[] = [
+export const INITIAL_CHAT_HISTORY = [
   {
     id: "chat-1",
     sender: "ai",

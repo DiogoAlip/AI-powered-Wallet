@@ -1,15 +1,6 @@
 import { DatabaseSync } from "node:sqlite";
 import fs from "node:fs";
 import path from "node:path";
-import type {
-  User,
-  Transaction,
-  Budget,
-  SavingsGoal,
-  ChatMessage,
-  UserState,
-  ActionChip,
-} from "./types.js";
 import {
   INITIAL_TRANSACTIONS,
   INITIAL_BUDGETS,
@@ -26,9 +17,9 @@ const DEFAULT_CATEGORIES = [
   "Otros",
 ];
 
-let dbInstance: DatabaseSync | null = null;
+let dbInstance = null;
 
-export function initDb(dbPath = "./data/finances.db"): DatabaseSync {
+export function initDb(dbPath = "./data/finances.db") {
   if (dbInstance) return dbInstance;
 
   const dir = path.dirname(dbPath);
@@ -120,21 +111,21 @@ export function initDb(dbPath = "./data/finances.db"): DatabaseSync {
   return db;
 }
 
-function getDb(): DatabaseSync {
+function getDb() {
   if (!dbInstance) {
     return initDb();
   }
   return dbInstance;
 }
 
-export function getUser(email: string): User | null {
+export function getUser(email) {
   const db = getDb();
   const stmt = db.prepare("SELECT * FROM users WHERE email = ?");
-  const row = stmt.get(email.toLowerCase()) as { email: string; name: string; initialized: number } | undefined;
+  const row = stmt.get(email.toLowerCase());
   return row ? { email: row.email, name: row.name, initialized: row.initialized === 1 } : null;
 }
 
-export function initializeUser(email: string, name = "Socio FinancIA!"): User {
+export function initializeUser(email, name = "Socio FinancIA!") {
   const db = getDb();
   const cleanEmail = email.toLowerCase();
   const existing = getUser(cleanEmail);
@@ -175,19 +166,19 @@ export function initializeUser(email: string, name = "Socio FinancIA!"): User {
       "INSERT OR IGNORE INTO savings (user_email, name, target, current) VALUES (?, ?, ?, ?)"
     ).run(cleanEmail, INITIAL_SAVINGS.name, INITIAL_SAVINGS.target, INITIAL_SAVINGS.current);
 
-    for (const chat of INITIAL_CHAT_HISTORY) {
+    for (const chatMsg of INITIAL_CHAT_HISTORY) {
       db.prepare(
         "INSERT OR IGNORE INTO chat_messages (id, user_email, chat_id, sender, timestamp, text, transaction_detail, action_chips, info_text) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
       ).run(
-        chat.id,
+        chatMsg.id,
         cleanEmail,
         "chat-1",
-        chat.sender,
-        chat.timestamp,
-        chat.text,
-        chat.transactionDetail ? JSON.stringify(chat.transactionDetail) : null,
-        chat.actionChips ? JSON.stringify(chat.actionChips) : null,
-        chat.infoText || null
+        chatMsg.sender,
+        chatMsg.timestamp,
+        chatMsg.text,
+        chatMsg.transactionDetail ? JSON.stringify(chatMsg.transactionDetail) : null,
+        chatMsg.actionChips ? JSON.stringify(chatMsg.actionChips) : null,
+        chatMsg.infoText || null
       );
     }
   } else {
@@ -219,20 +210,12 @@ export function initializeUser(email: string, name = "Socio FinancIA!"): User {
   return { email: cleanEmail, name, initialized: true };
 }
 
-export function getTransactions(email: string): Transaction[] {
+export function getTransactions(email) {
   const db = getDb();
   const stmt = db.prepare(
     "SELECT id, merchant, category, amount, date, account, type FROM transactions WHERE user_email = ?"
   );
-  const rows = stmt.all(email.toLowerCase()) as {
-    id: string;
-    merchant: string;
-    category: string;
-    amount: number;
-    date: string;
-    account: string;
-    type: "expense" | "income";
-  }[];
+  const rows = stmt.all(email.toLowerCase());
   return rows.map((r) => ({
     id: r.id,
     merchant: r.merchant,
@@ -244,7 +227,7 @@ export function getTransactions(email: string): Transaction[] {
   }));
 }
 
-export function addTransaction(email: string, tx: Omit<Transaction, "id" | "date"> & { id?: string; date?: string }): Transaction {
+export function addTransaction(email, tx) {
   const db = getDb();
   const cleanEmail = email.toLowerCase();
   const id = tx.id || `tx-${Date.now()}`;
@@ -271,12 +254,12 @@ export function addTransaction(email: string, tx: Omit<Transaction, "id" | "date
   };
 }
 
-export function deleteTransaction(email: string, id: string): { type: "expense" | "income"; category: string; amount: number } | null {
+export function deleteTransaction(email, id) {
   const db = getDb();
   const cleanEmail = email.toLowerCase();
 
   const txStmt = db.prepare("SELECT type, category, amount FROM transactions WHERE id = ? AND user_email = ?");
-  const tx = txStmt.get(id, cleanEmail) as { type: "expense" | "income"; category: string; amount: number } | undefined;
+  const tx = txStmt.get(id, cleanEmail);
 
   if (tx) {
     db.prepare("DELETE FROM transactions WHERE id = ? AND user_email = ?").run(id, cleanEmail);
@@ -291,17 +274,11 @@ export function deleteTransaction(email: string, id: string): { type: "expense" 
   return null;
 }
 
-export function getBudgets(email: string): Budget[] {
+export function getBudgets(email) {
   const db = getDb();
   const rows = db.prepare(
     "SELECT category, spent, limit_val, icon, color FROM budgets WHERE user_email = ?"
-  ).all(email.toLowerCase()) as {
-    category: string;
-    spent: number;
-    limit_val: number;
-    icon: string;
-    color: string;
-  }[];
+  ).all(email.toLowerCase());
 
   return rows.map((r) => ({
     category: r.category,
@@ -312,25 +289,25 @@ export function getBudgets(email: string): Budget[] {
   }));
 }
 
-export function updateBudgetLimit(email: string, category: string, limit: number): void {
+export function updateBudgetLimit(email, category, limit) {
   const db = getDb();
   db.prepare(
     "UPDATE budgets SET limit_val = ? WHERE user_email = ? AND category = ?"
   ).run(limit, email.toLowerCase(), category);
 }
 
-export function updateBudgetSpent(email: string, category: string, spent: number): void {
+export function updateBudgetSpent(email, category, spent) {
   const db = getDb();
   db.prepare(
     "UPDATE budgets SET spent = ? WHERE user_email = ? AND category = ?"
   ).run(spent, email.toLowerCase(), category);
 }
 
-export function getSavings(email: string): SavingsGoal {
+export function getSavings(email) {
   const db = getDb();
   const row = db.prepare(
     "SELECT name, target, current, recommendations FROM savings WHERE user_email = ?"
-  ).get(email.toLowerCase()) as { name: string; target: number; current: number; recommendations: string | null } | undefined;
+  ).get(email.toLowerCase());
 
   if (row) {
     return {
@@ -343,25 +320,25 @@ export function getSavings(email: string): SavingsGoal {
   return INITIAL_SAVINGS;
 }
 
-export function depositSavings(email: string, amount: number): void {
+export function depositSavings(email, amount) {
   const db = getDb();
   db.prepare(
     "UPDATE savings SET current = current + ? WHERE user_email = ?"
   ).run(amount, email.toLowerCase());
 }
 
-export function resetSavings(email: string): void {
+export function resetSavings(email) {
   const db = getDb();
   db.prepare(
     "UPDATE savings SET current = 0 WHERE user_email = ?"
   ).run(email.toLowerCase());
 }
 
-export function getCategories(email: string): string[] {
+export function getCategories(email) {
   const db = getDb();
   const rows = db.prepare(
     "SELECT name FROM categories WHERE user_email = ? ORDER BY name ASC"
-  ).all(email.toLowerCase()) as { name: string }[];
+  ).all(email.toLowerCase());
 
   const categories = rows.map((r) => r.name);
   const filtered = categories.filter((c) => c !== "Otros");
@@ -369,14 +346,14 @@ export function getCategories(email: string): string[] {
   return filtered;
 }
 
-export function addCategory(email: string, name: string): void {
+export function addCategory(email, name) {
   const db = getDb();
   db.prepare(
     "INSERT OR IGNORE INTO categories (user_email, name) VALUES (?, ?)"
   ).run(email.toLowerCase(), name);
 }
 
-export function updateCategory(email: string, oldName: string, newName: string): void {
+export function updateCategory(email, oldName, newName) {
   if (oldName === "Otros" || newName === "Otros") return;
   const db = getDb();
   const cleanEmail = email.toLowerCase();
@@ -394,7 +371,7 @@ export function updateCategory(email: string, oldName: string, newName: string):
   ).run(newName, oldName, cleanEmail);
 }
 
-export function deleteCategory(email: string, name: string): void {
+export function deleteCategory(email, name) {
   if (name === "Otros") return;
   const db = getDb();
   const cleanEmail = email.toLowerCase();
@@ -412,19 +389,11 @@ export function deleteCategory(email: string, name: string): void {
   ).run(name, cleanEmail);
 }
 
-export function getChatHistory(email: string, chatId: string): ChatMessage[] {
+export function getChatHistory(email, chatId) {
   const db = getDb();
   const rows = db.prepare(
     "SELECT id, sender, timestamp, text, transaction_detail, action_chips, info_text FROM chat_messages WHERE user_email = ? AND chat_id = ? ORDER BY rowid ASC"
-  ).all(email.toLowerCase(), chatId) as {
-    id: string;
-    sender: "user" | "ai";
-    timestamp: string;
-    text: string;
-    transaction_detail: string | null;
-    action_chips: string | null;
-    info_text: string | null;
-  }[];
+  ).all(email.toLowerCase(), chatId);
 
   return rows.map((r) => ({
     id: r.id,
@@ -437,7 +406,7 @@ export function getChatHistory(email: string, chatId: string): ChatMessage[] {
   }));
 }
 
-export function persistChatMessage(email: string, msg: ChatMessage, chatId: string): void {
+export function persistChatMessage(email, msg, chatId) {
   const db = getDb();
   db.prepare(
     "INSERT INTO chat_messages (id, user_email, chat_id, sender, timestamp, text, transaction_detail, action_chips, info_text) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
@@ -454,7 +423,7 @@ export function persistChatMessage(email: string, msg: ChatMessage, chatId: stri
   );
 }
 
-export function clearChatHistory(email: string, chatId: string): void {
+export function clearChatHistory(email, chatId) {
   const db = getDb();
   db.prepare("DELETE FROM chat_messages WHERE user_email = ? AND chat_id = ?").run(
     email.toLowerCase(),
@@ -462,33 +431,33 @@ export function clearChatHistory(email: string, chatId: string): void {
   );
 }
 
-export function getChatSessions(email: string): string[] {
+export function getChatSessions(email) {
   const db = getDb();
   const rows = db.prepare(
     "SELECT DISTINCT chat_id FROM chat_messages WHERE user_email = ? AND chat_id IS NOT NULL"
-  ).all(email.toLowerCase()) as { chat_id: string }[];
+  ).all(email.toLowerCase());
   return rows.map((r) => r.chat_id);
 }
 
-export function getLastActiveChatId(email: string): string {
+export function getLastActiveChatId(email) {
   const db = getDb();
   const row = db.prepare(
     "SELECT chat_id FROM chat_messages WHERE user_email = ? AND chat_id IS NOT NULL ORDER BY rowid DESC LIMIT 1"
-  ).get(email.toLowerCase()) as { chat_id: string } | undefined;
+  ).get(email.toLowerCase());
   return row && row.chat_id ? row.chat_id : "chat-welcome";
 }
 
-export function removeActionChipsFromMessage(messageId: string): void {
+export function removeActionChipsFromMessage(messageId) {
   const db = getDb();
   db.prepare("UPDATE chat_messages SET action_chips = NULL WHERE id = ?").run(messageId);
 }
 
-export function deleteChatMessage(messageId: string): void {
+export function deleteChatMessage(messageId) {
   const db = getDb();
   db.prepare("DELETE FROM chat_messages WHERE id = ?").run(messageId);
 }
 
-export function getUserState(email: string): UserState {
+export function getUserState(email) {
   const cleanEmail = email.toLowerCase();
   const activeChatId = getLastActiveChatId(cleanEmail);
   return {
@@ -502,7 +471,7 @@ export function getUserState(email: string): UserState {
   };
 }
 
-export function updateSavingsGoal(email: string, name: string, target: number): void {
+export function updateSavingsGoal(email, name, target) {
   const db = getDb();
   db.prepare("UPDATE savings SET name = ?, target = ? WHERE user_email = ?").run(
     name,
@@ -511,7 +480,7 @@ export function updateSavingsGoal(email: string, name: string, target: number): 
   );
 }
 
-export function saveSavingsRecommendations(email: string, recommendationsMarkdown: string): void {
+export function saveSavingsRecommendations(email, recommendationsMarkdown) {
   const db = getDb();
   db.prepare("UPDATE savings SET recommendations = ? WHERE user_email = ?").run(
     recommendationsMarkdown,
@@ -519,14 +488,14 @@ export function saveSavingsRecommendations(email: string, recommendationsMarkdow
   );
 }
 
-export function clearSavingsRecommendations(email: string): void {
+export function clearSavingsRecommendations(email) {
   const db = getDb();
   db.prepare("UPDATE savings SET recommendations = NULL WHERE user_email = ?").run(
     email.toLowerCase()
   );
 }
 
-export function deleteUserAccount(email: string): void {
+export function deleteUserAccount(email) {
   const db = getDb();
   db.prepare("DELETE FROM users WHERE email = ?").run(email.toLowerCase());
 }

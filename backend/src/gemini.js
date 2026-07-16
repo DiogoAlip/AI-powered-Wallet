@@ -6,7 +6,6 @@ import {
   depositSavings,
   updateBudgetLimit,
 } from "./db.js";
-import type { ChatMessage, GeminiResponse, Transaction, Budget, SavingsGoal } from "./types.js";
 
 const FINANCIAL_TOOLS = [
   {
@@ -78,7 +77,7 @@ const FINANCIAL_TOOLS = [
   }
 ];
 
-function getSystemInstruction(transactions: Transaction[], budgets: Budget[], savings: SavingsGoal): string {
+function getSystemInstruction(transactions, budgets, savings) {
   const budgetsContext = budgets
     .map((b) => `- **${b.category}**: Gastado $${b.spent.toFixed(2)} de un límite de $${b.limit.toFixed(2)}`)
     .join("\n");
@@ -114,7 +113,7 @@ Instrucciones de comportamiento:
 7. Nunca menciones la palabra "wallet" ni "billetera". Refiérete a la aplicación como "sistema de gestión financiera" o simplemente "FinancIA!".`;
 }
 
-async function makeApiRequest(model: string, apiKey: string, payload: any): Promise<any> {
+async function makeApiRequest(model, apiKey, payload) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
   
   try {
@@ -143,7 +142,7 @@ async function makeApiRequest(model: string, apiKey: string, payload: any): Prom
   }
 }
 
-export async function chat(userText: string, chatHistory: ChatMessage[], email: string): Promise<GeminiResponse> {
+export async function chat(userText, chatHistory, email) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY is not defined in the backend environment variables.");
@@ -183,12 +182,12 @@ export async function chat(userText: string, chatHistory: ChatMessage[], email: 
 
   if (part?.functionCall) {
     const { name, args } = part.functionCall;
-    let functionResult: any = null;
-    let transactionDetail: Transaction | undefined = undefined;
-    let infoText: string | undefined = undefined;
+    let functionResult = null;
+    let transactionDetail = undefined;
+    let infoText = undefined;
 
     if (name === "add_transaction") {
-      const txArgs = args as any;
+      const txArgs = args;
       const newTx = addTransaction(cleanEmail, {
         merchant: txArgs.merchant || "Gasto",
         category: txArgs.category || "Otros",
@@ -214,14 +213,14 @@ export async function chat(userText: string, chatHistory: ChatMessage[], email: 
       }
       functionResult = { status: "success", transaction: newTx };
     } else if (name === "deposit_savings") {
-      const amount = parseFloat((args as any).amount) || 0;
+      const amount = parseFloat(args.amount) || 0;
       depositSavings(cleanEmail, amount);
       functionResult = {
         status: "success",
         message: `Depositados $${amount.toFixed(2)} en la meta de ahorro.`
       };
     } else if (name === "update_budget_limit") {
-      const updateArgs = args as any;
+      const updateArgs = args;
       const limit = parseFloat(updateArgs.limit) || 0;
       const category = updateArgs.category;
       updateBudgetLimit(cleanEmail, category, limit);

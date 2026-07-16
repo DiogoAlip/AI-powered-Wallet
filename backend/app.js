@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from "express";
+import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import {
@@ -25,9 +25,8 @@ import {
   deleteUserAccount,
   getBudgets,
   getSavings,
-} from "./db.js";
-import { chat } from "./gemini.js";
-import type { ChatMessage } from "./types.js";
+} from "./src/db.js";
+import { chat } from "./src/gemini.js";
 
 // Load environment variables
 dotenv.config();
@@ -48,24 +47,20 @@ app.use(
 );
 app.use(express.json());
 
-export interface AuthenticatedRequest extends Request {
-  userEmail: string;
-}
-
 // Auth Header Middleware
-function authMiddleware(req: Request, res: Response, next: NextFunction) {
+function authMiddleware(req, res, next) {
   const email = req.headers["x-user-email"];
   if (!email || typeof email !== "string") {
     return res.status(401).json({ error: "Missing x-user-email header" });
   }
-  (req as AuthenticatedRequest).userEmail = email.toLowerCase();
+  req.userEmail = email.toLowerCase();
   next();
 }
 
 // REST Endpoints
 
 // 1. Auth Endpoints
-app.post("/api/auth/login", (req: Request, res: Response) => {
+app.post("/api/auth/login", (req, res) => {
   const { email } = req.body;
   if (!email) {
     return res.status(400).json({ error: "Email is required" });
@@ -79,7 +74,7 @@ app.post("/api/auth/login", (req: Request, res: Response) => {
   }
 });
 
-app.post("/api/auth/register", (req: Request, res: Response) => {
+app.post("/api/auth/register", (req, res) => {
   const { name, email } = req.body;
   if (!email || !name) {
     return res.status(400).json({ error: "Name and email are required" });
@@ -94,10 +89,9 @@ app.post("/api/auth/register", (req: Request, res: Response) => {
 });
 
 // 2. State & Data retrieval
-app.get("/api/finances", authMiddleware, (req: Request, res: Response) => {
-  const authReq = req as AuthenticatedRequest;
+app.get("/api/finances", authMiddleware, (req, res) => {
   try {
-    const state = getUserState(authReq.userEmail);
+    const state = getUserState(req.userEmail);
     res.json({ success: true, state });
   } catch (error) {
     console.error("Error loading finances state:", error);
@@ -105,14 +99,13 @@ app.get("/api/finances", authMiddleware, (req: Request, res: Response) => {
   }
 });
 
-app.get("/api/finances/chat-history", authMiddleware, (req: Request, res: Response) => {
-  const authReq = req as AuthenticatedRequest;
+app.get("/api/finances/chat-history", authMiddleware, (req, res) => {
   const { chatId } = req.query;
   if (!chatId || typeof chatId !== "string") {
     return res.status(400).json({ error: "chatId query parameter is required" });
   }
   try {
-    const history = getChatHistory(authReq.userEmail, chatId);
+    const history = getChatHistory(req.userEmail, chatId);
     res.json({ success: true, chatHistory: history });
   } catch (error) {
     console.error("Error loading chat history:", error);
@@ -121,23 +114,21 @@ app.get("/api/finances/chat-history", authMiddleware, (req: Request, res: Respon
 });
 
 // 3. Transactions CRUD
-app.post("/api/finances/transactions", authMiddleware, (req: Request, res: Response) => {
-  const authReq = req as AuthenticatedRequest;
+app.post("/api/finances/transactions", authMiddleware, (req, res) => {
   try {
-    const tx = addTransaction(authReq.userEmail, req.body);
-    res.json({ success: true, transaction: tx, state: getUserState(authReq.userEmail) });
+    const tx = addTransaction(req.userEmail, req.body);
+    res.json({ success: true, transaction: tx, state: getUserState(req.userEmail) });
   } catch (error) {
     console.error("Error adding transaction:", error);
     res.status(500).json({ error: "Failed to add transaction" });
   }
 });
 
-app.delete("/api/finances/transactions/:id", authMiddleware, (req: Request, res: Response) => {
-  const authReq = req as AuthenticatedRequest;
+app.delete("/api/finances/transactions/:id", authMiddleware, (req, res) => {
   try {
-    const deleted = deleteTransaction(authReq.userEmail, req.params.id as string);
+    const deleted = deleteTransaction(req.userEmail, req.params.id);
     if (deleted) {
-      res.json({ success: true, state: getUserState(authReq.userEmail) });
+      res.json({ success: true, state: getUserState(req.userEmail) });
     } else {
       res.status(404).json({ error: "Transaction not found" });
     }
@@ -148,20 +139,19 @@ app.delete("/api/finances/transactions/:id", authMiddleware, (req: Request, res:
 });
 
 // 4. Budgets
-app.put("/api/finances/budgets", authMiddleware, (req: Request, res: Response) => {
-  const authReq = req as AuthenticatedRequest;
+app.put("/api/finances/budgets", authMiddleware, (req, res) => {
   const { category, limit, spent } = req.body;
   if (!category) {
     return res.status(400).json({ error: "Category is required" });
   }
   try {
     if (limit !== undefined) {
-      updateBudgetLimit(authReq.userEmail, category, parseFloat(limit));
+      updateBudgetLimit(req.userEmail, category, parseFloat(limit));
     }
     if (spent !== undefined) {
-      updateBudgetSpent(authReq.userEmail, category, parseFloat(spent));
+      updateBudgetSpent(req.userEmail, category, parseFloat(spent));
     }
-    res.json({ success: true, state: getUserState(authReq.userEmail) });
+    res.json({ success: true, state: getUserState(req.userEmail) });
   } catch (error) {
     console.error("Error updating budget:", error);
     res.status(500).json({ error: "Failed to update budget" });
@@ -169,26 +159,24 @@ app.put("/api/finances/budgets", authMiddleware, (req: Request, res: Response) =
 });
 
 // 5. Savings
-app.post("/api/finances/savings/deposit", authMiddleware, (req: Request, res: Response) => {
-  const authReq = req as AuthenticatedRequest;
+app.post("/api/finances/savings/deposit", authMiddleware, (req, res) => {
   const { amount } = req.body;
   if (amount === undefined) {
     return res.status(400).json({ error: "Amount is required" });
   }
   try {
-    depositSavings(authReq.userEmail, parseFloat(amount));
-    res.json({ success: true, state: getUserState(authReq.userEmail) });
+    depositSavings(req.userEmail, parseFloat(amount));
+    res.json({ success: true, state: getUserState(req.userEmail) });
   } catch (error) {
     console.error("Error depositing savings:", error);
     res.status(500).json({ error: "Failed to deposit savings" });
   }
 });
 
-app.post("/api/finances/savings/reset", authMiddleware, (req: Request, res: Response) => {
-  const authReq = req as AuthenticatedRequest;
+app.post("/api/finances/savings/reset", authMiddleware, (req, res) => {
   try {
-    resetSavings(authReq.userEmail);
-    res.json({ success: true, state: getUserState(authReq.userEmail) });
+    resetSavings(req.userEmail);
+    res.json({ success: true, state: getUserState(req.userEmail) });
   } catch (error) {
     console.error("Error resetting savings:", error);
     res.status(500).json({ error: "Failed to reset savings" });
@@ -196,26 +184,24 @@ app.post("/api/finances/savings/reset", authMiddleware, (req: Request, res: Resp
 });
 
 // 5b. Savings configuration, recommendations, and account deletion
-app.put("/api/finances/savings", authMiddleware, (req: Request, res: Response) => {
-  const authReq = req as AuthenticatedRequest;
+app.put("/api/finances/savings", authMiddleware, (req, res) => {
   const { name, target } = req.body;
   if (!name || target === undefined) {
     return res.status(400).json({ error: "Name and target are required" });
   }
   try {
-    updateSavingsGoal(authReq.userEmail, name, parseFloat(target));
-    res.json({ success: true, state: getUserState(authReq.userEmail) });
+    updateSavingsGoal(req.userEmail, name, parseFloat(target));
+    res.json({ success: true, state: getUserState(req.userEmail) });
   } catch (error) {
     console.error("Error updating savings goal:", error);
     res.status(500).json({ error: "Failed to update savings goal" });
   }
 });
 
-app.get("/api/finances/savings/recommendations", authMiddleware, (req: Request, res: Response) => {
-  const authReq = req as AuthenticatedRequest;
+app.get("/api/finances/savings/recommendations", authMiddleware, (req, res) => {
   try {
-    const budgets = getBudgets(authReq.userEmail);
-    const savings = getSavings(authReq.userEmail);
+    const budgets = getBudgets(req.userEmail);
+    const savings = getSavings(req.userEmail);
     const surpluses = budgets.filter((b) => b.limit > 0 && b.limit - b.spent > 0);
 
     let md = "";
@@ -235,18 +221,17 @@ app.get("/api/finances/savings/recommendations", authMiddleware, (req: Request, 
       md += `\n---\n\n**Ahorro total recomendado**: **$${totalSuggested.toFixed(2)}**\n\n*Haz clic en "Aplicar Sugerencias" para transferir y consolidar estos montos automáticamente.*`;
     }
 
-    saveSavingsRecommendations(authReq.userEmail, md);
-    res.json({ success: true, recommendations: md, state: getUserState(authReq.userEmail) });
+    saveSavingsRecommendations(req.userEmail, md);
+    res.json({ success: true, recommendations: md, state: getUserState(req.userEmail) });
   } catch (error) {
     console.error("Error loading recommendations:", error);
     res.status(500).json({ error: "Failed to calculate recommendations" });
   }
 });
 
-app.post("/api/finances/savings/apply-recommendation", authMiddleware, (req: Request, res: Response) => {
-  const authReq = req as AuthenticatedRequest;
+app.post("/api/finances/savings/apply-recommendation", authMiddleware, (req, res) => {
   try {
-    const budgets = getBudgets(authReq.userEmail);
+    const budgets = getBudgets(req.userEmail);
     const surpluses = budgets.filter((b) => b.limit > 0 && b.limit - b.spent > 0);
 
     let totalSaved = 0;
@@ -254,36 +239,35 @@ app.post("/api/finances/savings/apply-recommendation", authMiddleware, (req: Req
       const surplus = b.limit - b.spent;
       const suggested = Math.round(surplus * 0.5 * 100) / 100;
       if (suggested > 0) {
-        depositSavings(authReq.userEmail, suggested);
-        updateBudgetSpent(authReq.userEmail, b.category, b.spent + suggested);
+        depositSavings(req.userEmail, suggested);
+        updateBudgetSpent(req.userEmail, b.category, b.spent + suggested);
         totalSaved += suggested;
       }
     }
 
-    clearSavingsRecommendations(authReq.userEmail);
+    clearSavingsRecommendations(req.userEmail);
     
     if (totalSaved > 0) {
       const activeChatId = "chat-welcome";
-      const systemMessage: ChatMessage = {
+      const systemMessage = {
         id: `chat-${Date.now()}`,
         sender: "ai",
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         text: `🤖 **Ahorro Automático Aplicado**: He transferido un total de **$${totalSaved.toFixed(2)}** a tus ahorros a partir de tus excedentes de presupuesto.`
       };
-      persistChatMessage(authReq.userEmail, systemMessage, activeChatId);
+      persistChatMessage(req.userEmail, systemMessage, activeChatId);
     }
 
-    res.json({ success: true, state: getUserState(authReq.userEmail) });
+    res.json({ success: true, state: getUserState(req.userEmail) });
   } catch (error) {
     console.error("Error applying savings recommendation:", error);
     res.status(500).json({ error: "Failed to apply recommendation" });
   }
 });
 
-app.delete("/api/finances/account", authMiddleware, (req: Request, res: Response) => {
-  const authReq = req as AuthenticatedRequest;
+app.delete("/api/finances/account", authMiddleware, (req, res) => {
   try {
-    deleteUserAccount(authReq.userEmail);
+    deleteUserAccount(req.userEmail);
     res.json({ success: true });
   } catch (error) {
     console.error("Error deleting account:", error);
@@ -292,45 +276,42 @@ app.delete("/api/finances/account", authMiddleware, (req: Request, res: Response
 });
 
 // 6. Categories
-app.post("/api/finances/categories", authMiddleware, (req: Request, res: Response) => {
-  const authReq = req as AuthenticatedRequest;
+app.post("/api/finances/categories", authMiddleware, (req, res) => {
   const { name } = req.body;
   if (!name) {
     return res.status(400).json({ error: "Category name is required" });
   }
   try {
-    addCategory(authReq.userEmail, name);
-    res.json({ success: true, state: getUserState(authReq.userEmail) });
+    addCategory(req.userEmail, name);
+    res.json({ success: true, state: getUserState(req.userEmail) });
   } catch (error) {
     console.error("Error adding category:", error);
     res.status(500).json({ error: "Failed to add category" });
   }
 });
 
-app.put("/api/finances/categories", authMiddleware, (req: Request, res: Response) => {
-  const authReq = req as AuthenticatedRequest;
+app.put("/api/finances/categories", authMiddleware, (req, res) => {
   const { oldName, newName } = req.body;
   if (!oldName || !newName) {
     return res.status(400).json({ error: "oldName and newName are required" });
   }
   try {
-    updateCategory(authReq.userEmail, oldName, newName);
-    res.json({ success: true, state: getUserState(authReq.userEmail) });
+    updateCategory(req.userEmail, oldName, newName);
+    res.json({ success: true, state: getUserState(req.userEmail) });
   } catch (error) {
     console.error("Error updating category:", error);
     res.status(500).json({ error: "Failed to update category" });
   }
 });
 
-app.delete("/api/finances/categories", authMiddleware, (req: Request, res: Response) => {
-  const authReq = req as AuthenticatedRequest;
+app.delete("/api/finances/categories", authMiddleware, (req, res) => {
   const { name } = req.query;
   if (!name || typeof name !== "string") {
     return res.status(400).json({ error: "Category name query param is required" });
   }
   try {
-    deleteCategory(authReq.userEmail, name);
-    res.json({ success: true, state: getUserState(authReq.userEmail) });
+    deleteCategory(req.userEmail, name);
+    res.json({ success: true, state: getUserState(req.userEmail) });
   } catch (error) {
     console.error("Error deleting category:", error);
     res.status(500).json({ error: "Failed to delete category" });
@@ -338,52 +319,48 @@ app.delete("/api/finances/categories", authMiddleware, (req: Request, res: Respo
 });
 
 // 7. Chat messages operations
-app.post("/api/finances/chat-messages", authMiddleware, (req: Request, res: Response) => {
-  const authReq = req as AuthenticatedRequest;
+app.post("/api/finances/chat-messages", authMiddleware, (req, res) => {
   const { message, chatId } = req.body;
   if (!message || !chatId) {
     return res.status(400).json({ error: "message and chatId are required" });
   }
   try {
-    persistChatMessage(authReq.userEmail, message, chatId);
-    res.json({ success: true, state: getUserState(authReq.userEmail) });
+    persistChatMessage(req.userEmail, message, chatId);
+    res.json({ success: true, state: getUserState(req.userEmail) });
   } catch (error) {
     console.error("Error persisting chat message:", error);
     res.status(500).json({ error: "Failed to persist chat message" });
   }
 });
 
-app.delete("/api/finances/chat-messages", authMiddleware, (req: Request, res: Response) => {
-  const authReq = req as AuthenticatedRequest;
+app.delete("/api/finances/chat-messages", authMiddleware, (req, res) => {
   const { chatId } = req.query;
   if (!chatId || typeof chatId !== "string") {
     return res.status(400).json({ error: "chatId query parameter is required" });
   }
   try {
-    clearChatHistory(authReq.userEmail, chatId);
-    res.json({ success: true, state: getUserState(authReq.userEmail) });
+    clearChatHistory(req.userEmail, chatId);
+    res.json({ success: true, state: getUserState(req.userEmail) });
   } catch (error) {
     console.error("Error clearing chat history:", error);
     res.status(500).json({ error: "Failed to clear chat history" });
   }
 });
 
-app.delete("/api/finances/chat-messages/:id", authMiddleware, (req: Request, res: Response) => {
-  const authReq = req as AuthenticatedRequest;
+app.delete("/api/finances/chat-messages/:id", authMiddleware, (req, res) => {
   try {
-    deleteChatMessage(req.params.id as string);
-    res.json({ success: true, state: getUserState(authReq.userEmail) });
+    deleteChatMessage(req.params.id);
+    res.json({ success: true, state: getUserState(req.userEmail) });
   } catch (error) {
     console.error("Error deleting chat message:", error);
     res.status(500).json({ error: "Failed to delete chat message" });
   }
 });
 
-app.put("/api/finances/chat-messages/:id/remove-action-chips", authMiddleware, (req: Request, res: Response) => {
-  const authReq = req as AuthenticatedRequest;
+app.put("/api/finances/chat-messages/:id/remove-action-chips", authMiddleware, (req, res) => {
   try {
-    removeActionChipsFromMessage(req.params.id as string);
-    res.json({ success: true, state: getUserState(authReq.userEmail) });
+    removeActionChipsFromMessage(req.params.id);
+    res.json({ success: true, state: getUserState(req.userEmail) });
   } catch (error) {
     console.error("Error removing action chips:", error);
     res.status(500).json({ error: "Failed to remove action chips" });
@@ -391,8 +368,7 @@ app.put("/api/finances/chat-messages/:id/remove-action-chips", authMiddleware, (
 });
 
 // 8. Gemini Intelligent Chat Integration
-app.post("/api/finances/chat", authMiddleware, async (req: Request, res: Response) => {
-  const authReq = req as AuthenticatedRequest;
+app.post("/api/finances/chat", authMiddleware, async (req, res) => {
   const { text, chatId } = req.body;
   if (!text || !chatId) {
     return res.status(400).json({ error: "text and chatId are required" });
@@ -400,7 +376,7 @@ app.post("/api/finances/chat", authMiddleware, async (req: Request, res: Respons
 
   try {
     // 1. Create and persist user chat message
-    const userMsg: ChatMessage = {
+    const userMsg = {
       id: `chat-${Date.now()}`,
       sender: "user",
       timestamp: new Date().toLocaleTimeString([], {
@@ -409,16 +385,16 @@ app.post("/api/finances/chat", authMiddleware, async (req: Request, res: Respons
       }),
       text,
     };
-    persistChatMessage(authReq.userEmail, userMsg, chatId);
+    persistChatMessage(req.userEmail, userMsg, chatId);
 
     // 2. Fetch compile-ready chat history from DB
-    const chatHistory = getChatHistory(authReq.userEmail, chatId);
+    const chatHistory = getChatHistory(req.userEmail, chatId);
 
     // 3. Invoke multi-turn Gemini reasoning (executes tool actions automatically on the SQLite DB)
-    const reply = await chat(text, chatHistory, authReq.userEmail);
+    const reply = await chat(text, chatHistory, req.userEmail);
 
     // 4. Create and persist AI assistant reply in SQLite
-    const aiMsg: ChatMessage = {
+    const aiMsg = {
       id: `chat-${Date.now()}`,
       sender: "ai",
       timestamp: new Date().toLocaleTimeString([], {
@@ -437,19 +413,19 @@ app.post("/api/finances/chat", authMiddleware, async (req: Request, res: Respons
       } : undefined,
       infoText: reply.infoText,
     };
-    persistChatMessage(authReq.userEmail, aiMsg, chatId);
+    persistChatMessage(req.userEmail, aiMsg, chatId);
 
     // 5. Send updated state back to client for instant UI alignment
     res.json({
       success: true,
       response: reply,
-      state: getUserState(authReq.userEmail),
+      state: getUserState(req.userEmail),
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Chat orchestration error:", error);
     
     // Persist error message in DB to show user
-    const errorMsg: ChatMessage = {
+    const errorMsg = {
       id: `chat-${Date.now()}`,
       sender: "ai",
       timestamp: new Date().toLocaleTimeString([], {
@@ -460,14 +436,14 @@ app.post("/api/finances/chat", authMiddleware, async (req: Request, res: Respons
     };
     
     try {
-      persistChatMessage(authReq.userEmail, errorMsg, chatId);
+      persistChatMessage(req.userEmail, errorMsg, chatId);
     } catch (persistErr) {
       console.error("Failed to persist error message:", persistErr);
     }
 
     res.status(500).json({
       error: "Failed to process chat conversation",
-      state: getUserState(authReq.userEmail),
+      state: getUserState(req.userEmail),
     });
   }
 });
