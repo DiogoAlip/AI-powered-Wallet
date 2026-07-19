@@ -33,9 +33,17 @@ export interface SavingsGoal {
   recommendations?: string | null;
 }
 
+export interface SavingsLog {
+  id: string;
+  amount: number;
+  date: string;
+  note: string;
+}
+
 export interface AppState {
   transactions: Transaction[];
   budgets: Budget[];
   savings: SavingsGoal;
+  savingsLogs: SavingsLog[];
   chatHistory: ChatMessage[];
 }

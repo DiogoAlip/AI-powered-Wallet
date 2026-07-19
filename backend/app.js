@@ -30,6 +30,7 @@ import {
   saveUserBudgetTips,
   getUser,
   updatePassword,
+  deleteSavingsLog,
 } from "./src/db.js";
 import { chat, generateBudgetTips } from "./src/gemini.js";
 
@@ -214,16 +215,30 @@ app.post("/api/finances/budgets/tips/refresh", authMiddleware, async (req, res) 
 
 // 5. Savings
 app.post("/api/finances/savings/deposit", authMiddleware, (req, res) => {
-  const { amount } = req.body;
+  const { amount, note } = req.body;
   if (amount === undefined) {
     return res.status(400).json({ error: "Amount is required" });
   }
   try {
-    depositSavings(req.userEmail, parseFloat(amount));
+    depositSavings(req.userEmail, parseFloat(amount), note);
     res.json({ success: true, state: getUserState(req.userEmail) });
   } catch (error) {
     console.error("Error depositing savings:", error);
     res.status(500).json({ error: "Failed to deposit savings" });
+  }
+});
+
+app.delete("/api/finances/savings/logs/:id", authMiddleware, (req, res) => {
+  try {
+    const deleted = deleteSavingsLog(req.userEmail, req.params.id);
+    if (deleted) {
+      res.json({ success: true, state: getUserState(req.userEmail) });
+    } else {
+      res.status(404).json({ error: "Savings log entry not found" });
+    }
+  } catch (error) {
+    console.error("Error deleting savings log:", error);
+    res.status(500).json({ error: "Failed to delete savings log" });
   }
 });
 

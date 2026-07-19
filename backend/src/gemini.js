@@ -50,6 +50,10 @@ const FINANCIAL_TOOLS = [
             amount: {
               type: "NUMBER",
               description: "El monto a ahorrar en dólares."
+            },
+            note: {
+              type: "STRING",
+              description: "El concepto, motivo o descripción del ahorro (ej: 'Ahorro de almuerzo', 'Excedente de transporte', 'Premio'). Opcional."
             }
           },
           required: ["amount"]
@@ -214,10 +218,11 @@ export async function chat(userText, chatHistory, email) {
       functionResult = { status: "success", transaction: newTx };
     } else if (name === "deposit_savings") {
       const amount = parseFloat(args.amount) || 0;
-      depositSavings(cleanEmail, amount);
+      const note = args.note || "Aporte desde chat";
+      depositSavings(cleanEmail, amount, note);
       functionResult = {
         status: "success",
-        message: `Depositados $${amount.toFixed(2)} en la meta de ahorro.`
+        message: `Depositados $${amount.toFixed(2)} en la meta de ahorro con concepto: '${note}'.`
       };
     } else if (name === "update_budget_limit") {
       const updateArgs = args;

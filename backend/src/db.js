@@ -80,6 +80,17 @@ export function initDb(dbPath = "./data/finances.db") {
     );
   `);
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS savings_logs (
+      id TEXT PRIMARY KEY,
+      user_email TEXT,
+      amount REAL,
+      date TEXT,
+      note TEXT,
+      FOREIGN KEY(user_email) REFERENCES users(email) ON DELETE CASCADE
+    );
+  `);
+
   try {
     db.exec("ALTER TABLE savings ADD COLUMN recommendations TEXT;");
   } catch (e) {
@@ -172,6 +183,17 @@ export function initializeUser(email, name = "Socio FinancIA!", password = null)
     db.prepare(
       "INSERT OR IGNORE INTO savings (user_email, name, target, current) VALUES (?, ?, ?, ?)"
     ).run(cleanEmail, INITIAL_SAVINGS.name, INITIAL_SAVINGS.target, INITIAL_SAVINGS.current);
+
+    const mockLogs = [
+      { id: "sl-1", amount: 150.0, date: "Hace 15 días", note: "Aporte inicial" },
+      { id: "sl-2", amount: 200.0, date: "Hace 10 días", note: "Ahorro mensual" },
+      { id: "sl-3", amount: 100.0, date: "Hace 5 días", note: "Excedente de Comida" },
+    ];
+    for (const log of mockLogs) {
+      db.prepare(
+        "INSERT OR IGNORE INTO savings_logs (id, user_email, amount, date, note) VALUES (?, ?, ?, ?, ?)"
+      ).run(log.id, cleanEmail, log.amount, log.date, log.note);
+    }
 
     for (const chatMsg of INITIAL_CHAT_HISTORY) {
       db.prepare(
@@ -327,18 +349,36 @@ export function getSavings(email) {
   return INITIAL_SAVINGS;
 }
 
-export function depositSavings(email, amount) {
+export function depositSavings(email, amount, note = "Aporte manual") {
   const db = getDb();
+  const cleanEmail = email.toLowerCase();
   db.prepare(
     "UPDATE savings SET current = current + ? WHERE user_email = ?"
-  ).run(amount, email.toLowerCase());
+  ).run(amount, cleanEmail);
+
+  const id = `sl-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  const date = new Date().toLocaleDateString("es-ES", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  db.prepare(
+    "INSERT INTO savings_logs (id, user_email, amount, date, note) VALUES (?, ?, ?, ?, ?)"
+  ).run(id, cleanEmail, amount, date, note);
 }
 
 export function resetSavings(email) {
   const db = getDb();
+  const cleanEmail = email.toLowerCase();
   db.prepare(
     "UPDATE savings SET current = 0 WHERE user_email = ?"
-  ).run(email.toLowerCase());
+  ).run(cleanEmail);
+  db.prepare(
+    "DELETE FROM savings_logs WHERE user_email = ?"
+  ).run(cleanEmail);
 }
 
 export function getCategories(email) {
@@ -464,6 +504,31 @@ export function deleteChatMessage(messageId) {
   db.prepare("DELETE FROM chat_messages WHERE id = ?").run(messageId);
 }
 
+export function getSavingsLogs(email) {
+  const db = getDb();
+  const rows = db.prepare(
+    "SELECT id, amount, date, note FROM savings_logs WHERE user_email = ? ORDER BY rowid DESC"
+  ).all(email.toLowerCase());
+  return rows.map((r) => ({
+    id: r.id,
+    amount: r.amount,
+    date: r.date,
+    note: r.note,
+  }));
+}
+
+export function deleteSavingsLog(email, id) {
+  const db = getDb();
+  const cleanEmail = email.toLowerCase();
+  const log = db.prepare("SELECT amount FROM savings_logs WHERE id = ? AND user_email = ?").get(id, cleanEmail);
+  if (log) {
+    db.prepare("DELETE FROM savings_logs WHERE id = ? AND user_email = ?").run(id, cleanEmail);
+    db.prepare("UPDATE savings SET current = MAX(0, current - ?) WHERE user_email = ?").run(log.amount, cleanEmail);
+    return log;
+  }
+  return null;
+}
+
 export function getUserState(email) {
   const cleanEmail = email.toLowerCase();
   const activeChatId = getLastActiveChatId(cleanEmail);
@@ -471,6 +536,7 @@ export function getUserState(email) {
     transactions: getTransactions(cleanEmail),
     budgets: getBudgets(cleanEmail),
     savings: getSavings(cleanEmail),
+    savingsLogs: getSavingsLogs(cleanEmail),
     categories: getCategories(cleanEmail),
     chatSessions: getChatSessions(cleanEmail),
     activeChatId,

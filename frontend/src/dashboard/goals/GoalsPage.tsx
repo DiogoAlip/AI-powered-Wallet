@@ -7,6 +7,9 @@ import {
   IconAward,
   IconSettings,
   IconCircleCheck,
+  IconHistory,
+  IconTrash,
+  IconTrendingUp,
 } from "@tabler/icons-react";
 import { useFinancesStore } from "../../store/finances.store";
 import { MarkdownText } from "../chat/components/MarkdownText";
@@ -20,6 +23,8 @@ export function Goals() {
     loadSavingsRecommendations,
     applySavingsRecommendation,
     loadingRecommendations,
+    savingsLogs,
+    deleteSavingsLog,
   } = useFinancesStore();
 
   const [depositAmount, setDepositAmount] = useState("");
@@ -279,6 +284,77 @@ export function Goals() {
             </div>
           </div>
 
+          {/* Historial de Aportaciones Card */}
+          <div className="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm space-y-4">
+            <div className="flex items-center gap-3 pb-2 border-b border-gray-100">
+              <div className="w-9 h-9 rounded-xl bg-teal-50 flex items-center justify-center text-[#006a61]">
+                <IconHistory className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className="font-display font-bold text-sm text-[#0b1c30]">
+                  Historial de Aportaciones
+                </h4>
+                <p className="font-sans text-[11px] text-gray-400 mt-0.5">
+                  Registro de tus depósitos y ahorros acumulados.
+                </p>
+              </div>
+            </div>
+
+            <div className="relative">
+              {savingsLogs && savingsLogs.length > 0 ? (
+                <div className="max-h-72 overflow-y-auto no-scrollbar pr-1 space-y-2.5">
+                  {savingsLogs.map((log) => (
+                    <div
+                      key={log.id}
+                      className="flex items-center justify-between p-3 bg-gray-50/50 hover:bg-gray-50 border border-gray-100/70 rounded-xl transition-all group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-7.5 h-7.5 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
+                          <IconTrendingUp className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-xs font-bold text-[#0b1c30] block truncate">
+                            {log.note || "Aporte"}
+                          </span>
+                          <span className="text-[10px] text-gray-400 block font-semibold mt-0.5">
+                            {log.date}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2.5 shrink-0">
+                        <span className="text-xs font-display font-bold text-emerald-600">
+                          +${log.amount.toLocaleString("es-ES", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </span>
+                        <button
+                          onClick={() => deleteSavingsLog(log.id)}
+                          className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all cursor-pointer"
+                          title="Eliminar aporte"
+                        >
+                          <IconTrash className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 space-y-2">
+                  <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-300 mx-auto">
+                    <IconHistory className="w-6 h-6" />
+                  </div>
+                  <p className="text-xs text-gray-400 font-sans">
+                    Aún no tienes aportaciones registradas.
+                  </p>
+                  <p className="text-[10px] text-gray-400/80 font-sans">
+                    Comienza a ahorrar desde el panel o chateando con FinancIA!
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
 
         </div>
 

@@ -5,12 +5,14 @@ import type {
   Budget,
   ChatMessage,
   SavingsGoal,
+  SavingsLog,
 } from "../dashboard/types/ChatTypes.ts";
 
 export interface UseFinancesState {
   transactions: Transaction[];
   budgets: Budget[];
   savings: SavingsGoal;
+  savingsLogs: SavingsLog[];
   chatHistory: ChatMessage[];
   chatSessions: string[];
   categories: string[];
@@ -25,7 +27,8 @@ export interface UseFinancesState {
   deleteTransaction: (id: string) => Promise<void>;
   updateBudgetLimit: (category: string, limit: number) => Promise<void>;
   updateBudgetSpent: (category: string, spent: number) => Promise<void>;
-  depositSavings: (amount: number) => Promise<void>;
+  depositSavings: (amount: number, note?: string) => Promise<void>;
+  deleteSavingsLog: (id: string) => Promise<void>;
   resetSavings: () => Promise<void>;
   addChatMessage: (msg: ChatMessage) => Promise<void>;
   setChatHistory: (history: ChatMessage[]) => Promise<void>;
@@ -76,6 +79,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
   transactions: [],
   budgets: [],
   savings: { name: "Fondo de Emergencia", target: 5000, current: 0 },
+  savingsLogs: [],
   chatHistory: [],
   chatSessions: [],
   categories: ["Comida fuera", "Transporte", "Supermercado", "Facturas", "Compras", "Otros"],
@@ -96,6 +100,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
           transactions: data.state.transactions,
           budgets: data.state.budgets,
           savings: data.state.savings,
+          savingsLogs: data.state.savingsLogs || [],
           chatHistory: data.state.chatHistory,
           chatSessions: data.state.chatSessions,
           categories: data.state.categories,
@@ -109,6 +114,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
         transactions: [],
         budgets: [],
         savings: { name: "Fondo de Emergencia", target: 5000, current: 0 },
+        savingsLogs: [],
         chatHistory: [],
         chatSessions: [],
         categories: ["Comida fuera", "Transporte", "Supermercado", "Facturas", "Compras", "Otros"],
@@ -123,6 +129,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
       transactions: [],
       budgets: [],
       savings: { name: "Fondo de Emergencia", target: 5000, current: 0 },
+      savingsLogs: [],
       chatHistory: [],
       chatSessions: [],
       categories: ["Comida fuera", "Transporte", "Supermercado", "Facturas", "Compras", "Otros"],
@@ -192,17 +199,36 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
     }
   },
 
-  depositSavings: async (amount) => {
+  depositSavings: async (amount, note) => {
     try {
       const data = await apiFetch("/api/finances/savings/deposit", {
         method: "POST",
-        body: JSON.stringify({ amount }),
+        body: JSON.stringify({ amount, note }),
       });
       if (data.success && data.state) {
-        set({ savings: data.state.savings });
+        set({
+          savings: data.state.savings,
+          savingsLogs: data.state.savingsLogs || [],
+        });
       }
     } catch (err) {
       console.error("Failed to deposit savings:", err);
+    }
+  },
+
+  deleteSavingsLog: async (id) => {
+    try {
+      const data = await apiFetch(`/api/finances/savings/logs/${id}`, {
+        method: "DELETE",
+      });
+      if (data.success && data.state) {
+        set({
+          savings: data.state.savings,
+          savingsLogs: data.state.savingsLogs || [],
+        });
+      }
+    } catch (err) {
+      console.error("Failed to delete savings log:", err);
     }
   },
 
@@ -212,7 +238,10 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
         method: "POST",
       });
       if (data.success && data.state) {
-        set({ savings: data.state.savings });
+        set({
+          savings: data.state.savings,
+          savingsLogs: data.state.savingsLogs || [],
+        });
       }
     } catch (err) {
       console.error("Failed to reset savings:", err);
@@ -278,6 +307,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
           transactions: data.state.transactions,
           budgets: data.state.budgets,
           savings: data.state.savings,
+          savingsLogs: data.state.savingsLogs || [],
           chatHistory: data.state.chatHistory,
           chatSessions: data.state.chatSessions,
           isGenerating: false,
@@ -365,6 +395,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
         set({
           chatHistory: data.state.chatHistory,
           savings: data.state.savings,
+          savingsLogs: data.state.savingsLogs || [],
           chatSessions: data.state.chatSessions,
         });
       }
@@ -543,6 +574,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
       if (data.success && data.state) {
         set({
           savings: data.state.savings,
+          savingsLogs: data.state.savingsLogs || [],
           budgets: data.state.budgets,
           chatHistory: data.state.chatHistory,
           loadingRecommendations: false,
@@ -566,6 +598,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
           transactions: data.state.transactions,
           budgets: data.state.budgets,
           savings: data.state.savings,
+          savingsLogs: data.state.savingsLogs || [],
           chatHistory: data.state.chatHistory,
         });
       }
