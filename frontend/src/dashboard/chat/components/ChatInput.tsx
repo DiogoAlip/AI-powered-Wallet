@@ -241,11 +241,10 @@ export function ChatInput({ newChat, chatId }: { newChat?: boolean; chatId?: str
             <button
               type="button"
               onClick={handleMicClick}
-              className={`p-3 transition-colors mb-0.5 rounded-full ${
-                isRecording
-                  ? "text-red-600 bg-red-50 hover:bg-red-100 animate-pulse border border-red-200"
-                  : "text-gray-400 hover:text-teal-600"
-              }`}
+              className={`p-3 transition-colors mb-0.5 rounded-full ${isRecording
+                ? "text-red-600 bg-red-50 hover:bg-red-100 animate-pulse border border-red-200"
+                : "text-gray-400 hover:text-teal-600"
+                }`}
             >
               <IconMicrophone className="w-5 h-5" />
             </button>

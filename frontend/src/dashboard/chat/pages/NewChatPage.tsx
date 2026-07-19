@@ -38,16 +38,16 @@ export const NewChat = () => {
       {/* Recent Chats Section */}
       {chatSessions.length > 0 && (
         <div className="w-full max-w-2xl mb-8 space-y-3">
-          <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-1">
+          <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-1 text-center">
             Conversaciones Recientes
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-3 justify-center">
             {chatSessions.map((sessionId, idx) => (
               <button
                 key={sessionId}
                 type="button"
                 onClick={() => navigate(`/dashboard/chat/${sessionId}`)}
-                className="flex items-center gap-3 p-4 bg-white border border-gray-100 rounded-2xl hover:border-teal-500 hover:shadow-md transition-all text-left cursor-pointer group"
+                className="flex items-center gap-3 p-4 bg-white border border-gray-100 rounded-2xl hover:border-teal-500 hover:shadow-md transition-all text-left cursor-pointer group w-full sm:w-[calc(50%-6px)] max-w-sm"
               >
                 <div className="w-10 h-10 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center shrink-0 group-hover:bg-teal-600 group-hover:text-white transition-colors">
                   <IconMessage className="w-5 h-5" />
@@ -67,7 +67,7 @@ export const NewChat = () => {
       )}
 
       {/* Chat Input */}
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-4xl">
         <ChatInput newChat={true} />
       </div>
     </div>
