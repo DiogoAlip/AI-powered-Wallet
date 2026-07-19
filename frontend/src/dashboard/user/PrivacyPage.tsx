@@ -5,7 +5,6 @@ import {
   IconTrash,
   IconAlertTriangle,
   IconCheck,
-  IconKey,
 } from "@tabler/icons-react";
 import { useAuthStore } from "../../store/auth.store";
 import { useFinancesStore } from "../../store/finances.store";
@@ -81,20 +80,6 @@ export function PrivacyPage() {
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-0.5">
               <span className="text-xs font-bold text-[#0b1c30] block">
-                Base de datos activa en el servidor
-              </span>
-              <span className="text-[11px] text-gray-400 block">
-                Todos tus datos se guardan de forma segura en la base de datos SQLite del servidor backend mediante llamadas REST API cifradas.
-              </span>
-            </div>
-            <span className="text-teal-600 text-[10px] font-bold flex items-center gap-1 shrink-0 bg-teal-50 border border-teal-100 rounded-lg px-2.5 py-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse"></span> Activa
-            </span>
-          </div>
-
-          <div className="flex items-start justify-between gap-4">
-            <div className="space-y-0.5">
-              <span className="text-xs font-bold text-[#0b1c30] block">
                 Opt-out de telemetría anónima
               </span>
               <span className="text-[11px] text-gray-400 block">
@@ -109,38 +94,7 @@ export function PrivacyPage() {
         </div>
       </div>
 
-      {/* API Key */}
-      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 space-y-4">
-        <div className="flex items-center gap-3 pb-2 border-b border-gray-100">
-          <div className="w-9 h-9 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600 shrink-0">
-            <IconKey className="w-4 h-4" />
-          </div>
-          <div>
-            <h3 className="font-display font-bold text-sm text-[#0b1c30]">Clave de API Gemini</h3>
-            <p className="font-sans text-[11px] text-gray-400">
-              Requerida para habilitar el asistente FinancIA! con IA real.
-            </p>
-          </div>
-        </div>
 
-        <div className="space-y-2">
-          <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-            GEMINI_API_KEY (Servidor)
-          </label>
-          <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5">
-            <code className="flex-1 font-mono text-xs text-[#0b1c30] truncate">
-              Administrada de forma segura en el servidor
-            </code>
-            <div className="text-teal-600 text-[10px] font-bold flex items-center gap-1 shrink-0">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse"></span> Activa
-            </div>
-          </div>
-          <p className="text-[11px] text-gray-400">
-            La clave de API de Gemini se almacena de forma segura en el archivo{" "}
-            <code className="bg-gray-100 px-1 py-0.5 rounded text-gray-600">.env</code> del servidor backend, previniendo su exposición al navegador.
-          </p>
-        </div>
-      </div>
 
       {/* Session info */}
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 space-y-3">

@@ -18,6 +18,7 @@ import {
 import { NavLink, useLocation, useNavigate } from "react-router";
 import { useAuthStore } from "../../store/auth.store";
 import { useFinancesStore } from "../../store/finances.store";
+import defaultAvatar from "../../assets/default-avatar.svg";
 
 interface SideBarProps {
   isOpen: boolean;
@@ -49,9 +50,11 @@ function AccountMenu({
       {/* User info header */}
       <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/60">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-sm">
-            {user?.name?.charAt(0).toUpperCase() ?? "U"}
-          </div>
+          <img
+            src={defaultAvatar}
+            alt="Usuario"
+            className="w-9 h-9 rounded-full object-cover shrink-0 shadow-sm border border-gray-100"
+          />
           <div className="min-w-0">
             <p className="font-sans font-semibold text-sm text-[#0b1c30] truncate">{user?.name}</p>
             <p className="font-sans text-[11px] text-gray-400 truncate">{user?.email}</p>
@@ -320,9 +323,11 @@ function SideBarContent({
           } ${accountOpen ? "bg-white shadow-sm" : ""}`}
         >
           {/* Avatar */}
-          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-sm">
-            {user?.name?.charAt(0).toUpperCase() ?? "U"}
-          </div>
+          <img
+            src={defaultAvatar}
+            alt="Usuario"
+            className="w-7 h-7 rounded-full object-cover shrink-0 shadow-sm border border-gray-100"
+          />
 
           {expanded && (
             <>

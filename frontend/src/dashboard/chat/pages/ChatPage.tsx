@@ -14,6 +14,7 @@ import { useFinancesStore } from "../../../store/finances.store.ts";
 import { ChatInput } from "../components/ChatInput.tsx";
 import { MarkdownText } from "../components/MarkdownText.tsx";
 import type { ChatMessage } from "../../types/ChatTypes.ts";
+import defaultAvatar from "../../../assets/default-avatar.svg";
 
 export function Chat() {
   const { id: chatId } = useParams();
@@ -91,7 +92,7 @@ export function Chat() {
               <img
                 alt="User profile avatar"
                 className="w-10 h-10 rounded-full object-cover shrink-0 border border-gray-200"
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80"
+                src={defaultAvatar}
               />
             )}
 

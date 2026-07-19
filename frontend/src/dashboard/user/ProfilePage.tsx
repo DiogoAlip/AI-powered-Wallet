@@ -7,6 +7,30 @@ import {
   IconEdit,
 } from "@tabler/icons-react";
 import { useAuthStore } from "../../store/auth.store";
+import defaultAvatar from "../../assets/default-avatar.svg";
+
+function ToggleSwitch({
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  onChange: () => void;
+}) {
+  return (
+    <button
+      onClick={onChange}
+      className={`w-11 h-6 rounded-full transition-colors relative flex items-center shrink-0 cursor-pointer ${
+        checked ? "bg-[#006a61]" : "bg-gray-200"
+      }`}
+    >
+      <div
+        className={`w-4 h-4 rounded-full bg-white transition-transform shadow-sm absolute ${
+          checked ? "translate-x-6" : "translate-x-1"
+        }`}
+      />
+    </button>
+  );
+}
 
 export function ProfilePage() {
   const user = useAuthStore((state) => state.user);
@@ -15,6 +39,11 @@ export function ProfilePage() {
   const [name, setName] = useState(user?.name ?? "");
   const [saved, setSaved] = useState(false);
   const [editing, setEditing] = useState(false);
+
+  // Alertas e IA simulation states
+  const [notifications, setNotifications] = useState(true);
+  const [weeklyReport, setWeeklyReport] = useState(true);
+  const [aiProactive, setAiProactive] = useState(true);
 
   const handleSave = () => {
     // In a real app this would persist to backend; here we just give feedback
@@ -37,9 +66,11 @@ export function ProfilePage() {
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 flex flex-col sm:flex-row items-center gap-6">
         {/* Avatar */}
         <div className="relative shrink-0">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-3xl shadow-md">
-            {user?.name?.charAt(0).toUpperCase() ?? "U"}
-          </div>
+          <img
+            src={defaultAvatar}
+            alt="Foto de perfil"
+            className="w-20 h-20 rounded-full object-cover shadow-md border border-gray-100"
+          />
           {isDemo && (
             <span className="absolute -bottom-1 -right-1 bg-amber-400 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow">
               DEMO
@@ -131,6 +162,63 @@ export function ProfilePage() {
             Cambios guardados correctamente.
           </div>
         )}
+      </div>
+
+      {/* Preferences / Settings toggles */}
+      <div className="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm space-y-4">
+        <h3 className="font-display font-bold text-sm text-[#0b1c30] pb-2 border-b border-gray-100">
+          Preferencias de Alertas e IA
+        </h3>
+
+        <div className="space-y-4">
+          {/* Notifications Toggle */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-0.5">
+              <span className="text-xs font-bold text-[#0b1c30] block">
+                Notificaciones diarias de saldo
+              </span>
+              <span className="text-[11px] text-gray-400 block">
+                Mantente al tanto de tus movimientos bancarios.
+              </span>
+            </div>
+            <ToggleSwitch
+              checked={notifications}
+              onChange={() => setNotifications(!notifications)}
+            />
+          </div>
+
+          {/* Report toggle */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-0.5">
+              <span className="text-xs font-bold text-[#0b1c30] block">
+                Reportes de ahorro los fines de semana
+              </span>
+              <span className="text-[11px] text-gray-400 block">
+                Recibe gráficos semanales de tu salud de gasto.
+              </span>
+            </div>
+            <ToggleSwitch
+              checked={weeklyReport}
+              onChange={() => setWeeklyReport(!weeklyReport)}
+            />
+          </div>
+
+          {/* AI proactive toggle */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-0.5">
+              <span className="text-xs font-bold text-[#0b1c30] block">
+                IA Proactiva de FinancIA!
+              </span>
+              <span className="text-[11px] text-gray-400 block">
+                Permite sugerencias automatizadas de transferencias de excedente.
+              </span>
+            </div>
+            <ToggleSwitch
+              checked={aiProactive}
+              onChange={() => setAiProactive(!aiProactive)}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Account details */}

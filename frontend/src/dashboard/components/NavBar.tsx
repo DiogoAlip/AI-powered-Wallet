@@ -1,6 +1,7 @@
-import { IconUserCircle, IconMenu2 } from "@tabler/icons-react";
+import { IconMenu2 } from "@tabler/icons-react";
 import { Link } from "react-router";
 import { useAuthStore } from "../../store/auth.store";
+import defaultAvatar from "../../assets/default-avatar.svg";
 
 interface NavBarProps {
   toggleSideBar: () => void;
@@ -49,7 +50,11 @@ export const NavBar = ({ toggleSideBar, sidebarExpanded }: NavBarProps) => {
             </div>
           </div>
 
-          <IconUserCircle className="w-5 h-5 text-gray-400" />
+          <img
+            src={defaultAvatar}
+            alt="Perfil"
+            className="w-5 h-5 rounded-full object-cover border border-gray-100"
+          />
         </header>
       </div>
     </>

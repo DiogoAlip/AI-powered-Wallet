@@ -33,10 +33,7 @@ export function Goals() {
   // Recommendations state
   const [recommendationsText, setRecommendationsText] = useState(savings.recommendations || "");
 
-  // Toggles simulation
-  const [notifications, setNotifications] = useState(true);
-  const [weeklyReport, setWeeklyReport] = useState(true);
-  const [aiProactive, setAiProactive] = useState(true);
+
 
   const percent = Math.min(100, (savings.current / savings.target) * 100);
 
@@ -282,86 +279,7 @@ export function Goals() {
             </div>
           </div>
 
-          {/* Preferences / Settings toggles */}
-          <div className="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm space-y-4">
-            <h4 className="font-display font-bold text-[#0b1c30] text-sm pb-2 border-b border-gray-100">
-              Preferencias de Alertas e IA
-            </h4>
 
-            <div className="space-y-4">
-              {/* Notifications Toggle */}
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <span className="text-xs font-bold text-[#0b1c30] block">
-                    Notificaciones diarias de saldo
-                  </span>
-                  <span className="text-[11px] text-gray-400 block">
-                    Mantente al tanto de tus movimientos bancarios.
-                  </span>
-                </div>
-                <button
-                  onClick={() => setNotifications(!notifications)}
-                  className={`w-11 h-6 rounded-full transition-colors relative flex items-center cursor-pointer ${
-                    notifications ? "bg-[#006a61]" : "bg-gray-200"
-                  }`}
-                >
-                  <div
-                    className={`w-4 h-4 rounded-full bg-white transition-transform shadow-xs absolute ${
-                      notifications ? "translate-x-6" : "translate-x-1"
-                    }`}
-                  />
-                </button>
-              </div>
-
-              {/* Report toggle */}
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <span className="text-xs font-bold text-[#0b1c30] block">
-                    Reportes de ahorro los fines de semana
-                  </span>
-                  <span className="text-[11px] text-gray-400 block">
-                    Recibe gráficos semanales de tu salud de gasto.
-                  </span>
-                </div>
-                <button
-                  onClick={() => setWeeklyReport(!weeklyReport)}
-                  className={`w-11 h-6 rounded-full transition-colors relative flex items-center cursor-pointer ${
-                    weeklyReport ? "bg-[#006a61]" : "bg-gray-200"
-                  }`}
-                >
-                  <div
-                    className={`w-4 h-4 rounded-full bg-white transition-transform shadow-xs absolute ${
-                      weeklyReport ? "translate-x-6" : "translate-x-1"
-                    }`}
-                  />
-                </button>
-              </div>
-
-              {/* AI proactive toggle */}
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <span className="text-xs font-bold text-[#0b1c30] block">
-                    IA Proactiva de FinancIA!
-                  </span>
-                  <span className="text-[11px] text-gray-400 block">
-                    Permite sugerencias automatizadas de transferencias de excedente.
-                  </span>
-                </div>
-                <button
-                  onClick={() => setAiProactive(!aiProactive)}
-                  className={`w-11 h-6 rounded-full transition-colors relative flex items-center cursor-pointer ${
-                    aiProactive ? "bg-[#006a61]" : "bg-gray-200"
-                  }`}
-                >
-                  <div
-                    className={`w-4 h-4 rounded-full bg-white transition-transform shadow-xs absolute ${
-                      aiProactive ? "translate-x-6" : "translate-x-1"
-                    }`}
-                  />
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Right Column (Span 1) */}
