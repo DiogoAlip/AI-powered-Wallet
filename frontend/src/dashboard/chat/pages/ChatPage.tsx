@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import { getCategoryIcon } from "../../helpers/getCategoryIcon.tsx";
 import {
   IconRobot,
@@ -18,6 +18,7 @@ import defaultAvatar from "../../../assets/default-avatar.svg";
 
 export function Chat() {
   const { id: chatId } = useParams();
+  const navigate = useNavigate();
   const {
     chatHistory,
     applyAction,
@@ -51,6 +52,18 @@ export function Chat() {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "es-ES";
     window.speechSynthesis.speak(utterance);
+  };
+
+  const handleActionClick = async (actionId: string, msgId: string) => {
+    const result = await applyAction(actionId, msgId, chatId);
+    if (result?.navigateTo) {
+      navigate(result.navigateTo);
+    }
+    if (result?.focusInput) {
+      setTimeout(() => {
+        document.getElementById("chat-input-textarea")?.focus();
+      }, 50);
+    }
   };
 
   useEffect(() => {
@@ -158,7 +171,7 @@ export function Chat() {
                     {msg.actionChips.map((chip) => (
                       <button
                         key={chip.actionId}
-                        onClick={() => applyAction(chip.actionId, msg.id, chatId)}
+                        onClick={() => handleActionClick(chip.actionId, msg.id)}
                         className={`font-sans text-xs font-semibold px-4 py-2 rounded-full border transition-all ${
                           chip.actionId === "move_to_savings" ||
                           chip.actionId === "move_to_savings_quick"

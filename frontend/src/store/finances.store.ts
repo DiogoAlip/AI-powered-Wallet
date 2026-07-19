@@ -30,7 +30,11 @@ export interface UseFinancesState {
   addChatMessage: (msg: ChatMessage) => Promise<void>;
   setChatHistory: (history: ChatMessage[]) => Promise<void>;
   sendMessage: (text: string, chatId?: string) => Promise<void>;
-  applyAction: (actionId: string, messageId: string, chatId?: string) => Promise<void>;
+  applyAction: (actionId: string, messageId: string, chatId?: string) => Promise<{
+    success: boolean;
+    navigateTo?: string;
+    focusInput?: boolean;
+  }>;
   loadChatHistory: (chatId: string) => Promise<void>;
   loadChatSessions: () => Promise<void>;
   addCategory: (name: string) => Promise<void>;
@@ -299,6 +303,9 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
 
   applyAction: async (actionId, messageId, chatId) => {
     const activeChatId = chatId || get().chatHistory[0]?.id || "chat-welcome";
+    let navigateTo: string | undefined;
+    let focusInput: boolean | undefined;
+
     try {
       // 1. Remove action chips from the message
       await apiFetch(`/api/finances/chat-messages/${messageId}/remove-action-chips`, {
@@ -323,8 +330,16 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
         confirmText = "De acuerdo, he ignorado la sugerencia.";
       } else if (actionId === "ask_record_expense") {
         confirmText = "Perfecto. Dime qué compraste y cuánto costó. Por ejemplo: 'Compré un café por 4.50'.";
+        focusInput = true;
       } else if (actionId === "ask_view_limits") {
         confirmText = "Puedes ver todos tus presupuestos detallados en la pestaña 'Estadísticas y Límites' del menú lateral.";
+        navigateTo = "/dashboard/limits";
+      } else if (actionId === "ask_view_history") {
+        confirmText = "Te redirijo al Historial de Transacciones.";
+        navigateTo = "/dashboard/history";
+      } else if (actionId === "ask_view_goals") {
+        confirmText = "Te redirijo a tus Metas de Ahorro.";
+        navigateTo = "/dashboard/goals";
       }
 
       // 3. Persist confirmation message if any
@@ -353,8 +368,10 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
           chatSessions: data.state.chatSessions,
         });
       }
+      return { success: true, navigateTo, focusInput };
     } catch (err) {
       console.error("Failed to apply action:", err);
+      return { success: false };
     }
   },
 

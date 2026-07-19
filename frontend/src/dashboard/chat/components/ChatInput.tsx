@@ -230,6 +230,7 @@ export function ChatInput({ newChat, chatId }: { newChat?: boolean; chatId?: str
 
           <div className="flex-1 bg-white border border-gray-200 rounded-2xl flex items-end min-h-12 shadow-sm focus-within:border-[#006a61] focus-within:ring-1 focus-within:ring-[#006a61] transition-all">
             <textarea
+              id="chat-input-textarea"
               className="w-full bg-transparent border-none focus:ring-0 resize-none py-3 px-4 font-sans text-sm text-[#0b1c30] max-h-32 overflow-y-auto no-scrollbar outline-none"
               placeholder={isRecording ? "Escuchando... habla ahora" : "Mensaje a FinancIA!..."}
               rows={1}
