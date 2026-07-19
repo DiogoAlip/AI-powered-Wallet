@@ -36,7 +36,8 @@ export function initDb(dbPath = "./data/finances.db") {
     CREATE TABLE IF NOT EXISTS users (
       email TEXT PRIMARY KEY,
       name TEXT,
-      initialized INTEGER DEFAULT 0
+      initialized INTEGER DEFAULT 0,
+      budget_tips TEXT
     );
   `);
 
@@ -122,7 +123,7 @@ export function getUser(email) {
   const db = getDb();
   const stmt = db.prepare("SELECT * FROM users WHERE email = ?");
   const row = stmt.get(email.toLowerCase());
-  return row ? { email: row.email, name: row.name, initialized: row.initialized === 1 } : null;
+  return row ? { email: row.email, name: row.name, initialized: row.initialized === 1, budget_tips: row.budget_tips } : null;
 }
 
 export function initializeUser(email, name = "Socio FinancIA!") {
@@ -152,6 +153,10 @@ export function initializeUser(email, name = "Socio FinancIA!") {
   const isDemo = cleanEmail === "demo@financia.com";
   if (isDemo) {
     // Seed default data
+    db.prepare("UPDATE users SET budget_tips = ? WHERE email = ?").run(
+      "Moviendo tus $120 de ahorro excedente en comida a tu Meta de Emergencia aumentas tu probabilidad de meta en un 8%.\nTus suscripciones como Netflix representan el 15% de tu presupuesto de facturas fijas. ¡Un control sabio!\nEstás en camino de acumular un excedente neto de $1,400 este mes si mantienes este ritmo de consumo de transporte.",
+      cleanEmail
+    );
     for (const tx of INITIAL_TRANSACTIONS) {
       db.prepare(
         "INSERT OR IGNORE INTO transactions (id, user_email, merchant, category, amount, date, account, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
@@ -468,6 +473,7 @@ export function getUserState(email) {
     chatSessions: getChatSessions(cleanEmail),
     activeChatId,
     chatHistory: getChatHistory(cleanEmail, activeChatId),
+    budgetTips: getUserBudgetTips(cleanEmail),
   };
 }
 
@@ -498,4 +504,18 @@ export function clearSavingsRecommendations(email) {
 export function deleteUserAccount(email) {
   const db = getDb();
   db.prepare("DELETE FROM users WHERE email = ?").run(email.toLowerCase());
+}
+
+export function getUserBudgetTips(email) {
+  const db = getDb();
+  const row = db.prepare("SELECT budget_tips FROM users WHERE email = ?").get(email.toLowerCase());
+  return row ? row.budget_tips : null;
+}
+
+export function saveUserBudgetTips(email, tips) {
+  const db = getDb();
+  db.prepare("UPDATE users SET budget_tips = ? WHERE email = ?").run(
+    tips,
+    email.toLowerCase()
+  );
 }

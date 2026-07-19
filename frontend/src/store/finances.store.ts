@@ -41,6 +41,9 @@ export interface UseFinancesState {
   deleteUserAccount: () => Promise<void>;
   loadSavingsRecommendations: () => Promise<string>;
   applySavingsRecommendation: () => Promise<void>;
+  budgetTips: string;
+  loadingTips: boolean;
+  refreshBudgetTips: () => Promise<void>;
 }
 
 const getEmail = () => {
@@ -75,6 +78,8 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
   isGenerating: false,
   dbReady: false,
   loadingRecommendations: false,
+  budgetTips: "",
+  loadingTips: false,
 
   loadUserDatabase: async (_email) => {
     set({ dbReady: false });
@@ -90,6 +95,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
           chatHistory: data.state.chatHistory,
           chatSessions: data.state.chatSessions,
           categories: data.state.categories,
+          budgetTips: data.state.budgetTips || "",
           dbReady: true,
         });
       }
@@ -102,6 +108,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
         chatHistory: [],
         chatSessions: [],
         categories: ["Comida fuera", "Transporte", "Supermercado", "Facturas", "Compras", "Otros"],
+        budgetTips: "",
         dbReady: true,
       });
     }
@@ -115,6 +122,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
       chatHistory: [],
       chatSessions: [],
       categories: ["Comida fuera", "Transporte", "Supermercado", "Facturas", "Compras", "Otros"],
+      budgetTips: "",
       dbReady: false,
     });
   },
@@ -527,5 +535,26 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
       console.error("Failed to apply savings recommendation:", err);
     }
     set({ loadingRecommendations: false });
+  },
+
+  refreshBudgetTips: async () => {
+    set({ loadingTips: true });
+    try {
+      const data = await apiFetch("/api/finances/budgets/tips/refresh", {
+        method: "POST"
+      });
+      if (data.success) {
+        set({
+          budgetTips: data.budgetTips || "",
+          transactions: data.state.transactions,
+          budgets: data.state.budgets,
+          savings: data.state.savings,
+          chatHistory: data.state.chatHistory,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to refresh budget tips:", err);
+    }
+    set({ loadingTips: false });
   },
 }));

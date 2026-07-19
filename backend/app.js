@@ -27,8 +27,9 @@ import {
   deleteUserAccount,
   getBudgets,
   getSavings,
+  saveUserBudgetTips,
 } from "./src/db.js";
-import { chat } from "./src/gemini.js";
+import { chat, generateBudgetTips } from "./src/gemini.js";
 
 // Load environment variables
 dotenv.config();
@@ -162,6 +163,17 @@ app.put("/api/finances/budgets", authMiddleware, (req, res) => {
   } catch (error) {
     console.error("Error updating budget:", error);
     res.status(500).json({ error: "Failed to update budget" });
+  }
+});
+
+app.post("/api/finances/budgets/tips/refresh", authMiddleware, async (req, res) => {
+  try {
+    const tips = await generateBudgetTips(req.userEmail);
+    saveUserBudgetTips(req.userEmail, tips);
+    res.json({ success: true, budgetTips: tips, state: getUserState(req.userEmail) });
+  } catch (error) {
+    console.error("Error generating budget tips:", error);
+    res.status(500).json({ error: "Failed to generate budget tips" });
   }
 });
 

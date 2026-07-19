@@ -272,3 +272,100 @@ export async function chat(userText, chatHistory, email) {
     text: part?.text || "Lo siento, no pude procesar tu mensaje."
   };
 }
+
+function generateFallbackTips(budgets, savings) {
+  const tips = [];
+  const overSpent = budgets.filter(b => b.limit > 0 && b.spent > b.limit);
+  const nearLimit = budgets.filter(b => b.limit > 0 && b.spent >= b.limit * 0.75 && b.spent <= b.limit);
+  
+  if (overSpent.length > 0) {
+    tips.push(`Has superado tu límite en la categoría '${overSpent[0].category}'. Te sugerimos reducir gastos no esenciales esta semana.`);
+  }
+  
+  if (nearLimit.length > 0) {
+    tips.push(`Atención: Tu presupuesto en '${nearLimit[0].category}' está al ${Math.round((nearLimit[0].spent / nearLimit[0].limit) * 100)}% de su límite.`);
+  }
+  
+  if (savings && savings.target > 0) {
+    const progress = Math.round((savings.current / savings.target) * 100);
+    tips.push(`Llevas un ${progress}% de progreso hacia tu meta '${savings.name}'. ¡Sigue así!`);
+  }
+  
+  // Fallback defaults if list is short
+  if (tips.length < 3) {
+    tips.push("Revisa tus suscripciones activas para identificar gastos hormiga recurrentes.");
+  }
+  if (tips.length < 3) {
+    tips.push("Considera aumentar el límite de las categorías donde constantemente te excedes para reflejar tu gasto real.");
+  }
+  
+  return tips.slice(0, 3).join("\n");
+}
+
+export async function generateBudgetTips(email) {
+  const cleanEmail = email.toLowerCase();
+  const transactions = getTransactions(cleanEmail);
+  const budgets = getBudgets(cleanEmail);
+  const savings = getSavings(cleanEmail);
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    console.warn("GEMINI_API_KEY is not defined. Using local fallback tips.");
+    return generateFallbackTips(budgets, savings);
+  }
+
+  const modelName = "gemini-3.5-flash";
+
+  const budgetsContext = budgets
+    .map((b) => `- **${b.category}**: Gastado $${b.spent.toFixed(2)} de un límite de $${b.limit.toFixed(2)}`)
+    .join("\n");
+
+  const recentTxContext = transactions
+    .slice(0, 10)
+    .map(
+      (t) =>
+        `- [${t.type === "expense" ? "Gasto" : "Ingreso"}] $${t.amount.toFixed(2)} en **${t.merchant}** (Categoría: ${t.category}, Fecha: ${t.date})`
+    )
+    .join("\n");
+
+  const prompt = `Analiza mi situación financiera actual y dame exactamente 3 consejos o tips de presupuesto breves y prácticos en español.
+Cada consejo debe ser conciso (máximo 2 líneas) y estar formateado como una lista de viñetas (usando viñetas normales, ya que el frontend se encargará de renderizarlas).
+Usa mi contexto actual:
+
+Límites de Presupuesto Semanales:
+${budgetsContext}
+
+Últimos movimientos:
+${recentTxContext}
+
+Meta de ahorro activa: "${savings.name}", acumulado $${savings.current.toFixed(2)} de un objetivo de $${savings.target.toFixed(2)}.
+
+Por favor, proporciona los consejos separados por salto de línea sin numeración. Ejemplo:
+Moviendo tus $120 de ahorro excedente en comida a tu Meta de Emergencia aumentas tu probabilidad de meta en un 8%.
+Tus suscripciones como Netflix representan el 15% de tu presupuesto de facturas fijas. ¡Un control sabio!
+Estás en camino de acumular un excedente neto de $1,400 este mes si mantienes este ritmo de consumo de transporte.
+
+Devuelve SOLO los 3 consejos separados por saltos de línea simples. No incluyas títulos ni introducciones.`;
+
+  const payload = {
+    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    generationConfig: {
+      temperature: 0.7,
+      maxOutputTokens: 300,
+    }
+  };
+
+  try {
+    const response = await makeApiRequest(modelName, apiKey, payload);
+    const candidate = response.candidates?.[0];
+    const part = candidate?.content?.parts?.[0];
+    const text = part?.text?.trim() || "";
+    if (!text) {
+      throw new Error("Empty response from Gemini API");
+    }
+    return text;
+  } catch (error) {
+    console.error("Gemini API call failed for budget tips. Using local fallback:", error);
+    return generateFallbackTips(budgets, savings);
+  }
+}
