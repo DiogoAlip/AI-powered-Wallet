@@ -5,6 +5,7 @@ import { TransactionFilters } from "./components/TransactionFilters.tsx";
 import { TransactionList } from "./components/TransactionList.tsx";
 import { AddTransactionModal } from "./components/AddTransactionModal.tsx";
 import { CategoryManagerModal } from "../components/CategoryManagerModal.tsx";
+import { HistoryCharts } from "./components/HistoryCharts.tsx";
 
 export function History() {
   const { transactions, addTransaction, deleteTransaction, categories } = useFinancesStore();
@@ -61,6 +62,11 @@ export function History() {
       <TransactionList
         filteredTransactions={filteredTransactions}
         deleteTransaction={deleteTransaction}
+      />
+
+      <HistoryCharts
+        transactions={transactions}
+        categories={categories}
       />
 
       {isModalOpen && (

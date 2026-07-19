@@ -37,7 +37,8 @@ export function initDb(dbPath = "./data/finances.db") {
       email TEXT PRIMARY KEY,
       name TEXT,
       initialized INTEGER DEFAULT 0,
-      budget_tips TEXT
+      budget_tips TEXT,
+      password TEXT
     );
   `);
 
@@ -123,10 +124,10 @@ export function getUser(email) {
   const db = getDb();
   const stmt = db.prepare("SELECT * FROM users WHERE email = ?");
   const row = stmt.get(email.toLowerCase());
-  return row ? { email: row.email, name: row.name, initialized: row.initialized === 1, budget_tips: row.budget_tips } : null;
+  return row ? { email: row.email, name: row.name, initialized: row.initialized === 1, budget_tips: row.budget_tips, password: row.password } : null;
 }
 
-export function initializeUser(email, name = "Socio FinancIA!") {
+export function initializeUser(email, name = "Socio FinancIA!", password = null) {
   const db = getDb();
   const cleanEmail = email.toLowerCase();
   const existing = getUser(cleanEmail);
@@ -136,10 +137,11 @@ export function initializeUser(email, name = "Socio FinancIA!") {
   }
 
   // Create user
-  db.prepare("INSERT OR REPLACE INTO users (email, name, initialized) VALUES (?, ?, ?)").run(
+  db.prepare("INSERT OR REPLACE INTO users (email, name, initialized, password) VALUES (?, ?, ?, ?)").run(
     cleanEmail,
     name,
-    1
+    1,
+    password
   );
 
   // Seed categories
@@ -516,6 +518,14 @@ export function saveUserBudgetTips(email, tips) {
   const db = getDb();
   db.prepare("UPDATE users SET budget_tips = ? WHERE email = ?").run(
     tips,
+    email.toLowerCase()
+  );
+}
+
+export function updatePassword(email, newPassword) {
+  const db = getDb();
+  db.prepare("UPDATE users SET password = ? WHERE email = ?").run(
+    newPassword,
     email.toLowerCase()
   );
 }

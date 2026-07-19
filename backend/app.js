@@ -28,6 +28,8 @@ import {
   getBudgets,
   getSavings,
   saveUserBudgetTips,
+  getUser,
+  updatePassword,
 } from "./src/db.js";
 import { chat, generateBudgetTips } from "./src/gemini.js";
 
@@ -69,13 +71,17 @@ function authMiddleware(req, res, next) {
 
 // 1. Auth Endpoints
 app.post("/api/auth/login", (req, res) => {
-  const { email } = req.body;
+  const { email, password } = req.body;
   if (!email) {
     return res.status(400).json({ error: "Email is required" });
   }
   try {
-    const user = initializeUser(email);
-    res.json({ success: true, user });
+    const user = getUser(email);
+    if (user && user.password && user.password !== password) {
+      return res.status(401).json({ error: "Contraseña incorrecta" });
+    }
+    const initializedUserObj = initializeUser(email);
+    res.json({ success: true, user: initializedUserObj });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -83,16 +89,45 @@ app.post("/api/auth/login", (req, res) => {
 });
 
 app.post("/api/auth/register", (req, res) => {
-  const { name, email } = req.body;
+  const { name, email, password } = req.body;
   if (!email || !name) {
     return res.status(400).json({ error: "Name and email are required" });
   }
   try {
-    const user = initializeUser(email, name);
+    const user = initializeUser(email, name, password);
     res.json({ success: true, user });
   } catch (error) {
     console.error("Registration error:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.put("/api/auth/change-password", authMiddleware, (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!newPassword) {
+    return res.status(400).json({ error: "La nueva contraseña es requerida" });
+  }
+
+  const cleanEmail = req.userEmail;
+  if (cleanEmail === "demo@financia.com") {
+    return res.status(400).json({ error: "No está permitido cambiar la contraseña de la cuenta de demostración." });
+  }
+
+  try {
+    const user = getUser(cleanEmail);
+    if (!user) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+
+    if (user.password && user.password !== currentPassword) {
+      return res.status(400).json({ error: "La contraseña actual es incorrecta" });
+    }
+
+    updatePassword(cleanEmail, newPassword);
+    res.json({ success: true, message: "Contraseña actualizada exitosamente" });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    res.status(500).json({ error: "Error interno del servidor al cambiar la contraseña" });
   }
 });
 
