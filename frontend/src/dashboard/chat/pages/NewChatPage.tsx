@@ -57,7 +57,7 @@ export const NewChat = () => {
                     {getSessionLabel(sessionId, idx)}
                   </h4>
                   <p className="text-[11px] text-gray-400 mt-0.5">
-                    Haga clic para ver el historial
+                    Haga clic para ver
                   </p>
                 </div>
               </button>

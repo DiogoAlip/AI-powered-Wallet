@@ -78,7 +78,7 @@ export function MarkdownText({ text }: { text: string }) {
     } else {
       flushList(`line-${lineIdx}`);
       elements.push(
-        <p key={lineIdx} className="font-sans text-sm leading-relaxed mb-2">
+        <p key={lineIdx} className="font-sans text-sm leading-relaxed">
           {parseInline(line)}
         </p>
       );
