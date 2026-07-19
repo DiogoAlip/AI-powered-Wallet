@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 import {
   initDb,
   initializeUser,
@@ -35,6 +37,10 @@ const app = express();
 const port = process.env.PORT || 3000;
 const dbPath = process.env.DATABASE_PATH || "./data/finances.db";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const frontendDistPath = path.join(__dirname, "../frontend/dist");
+
 // Initialize SQLite database
 initDb(dbPath);
 
@@ -46,6 +52,7 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(express.static(frontendDistPath));
 
 // Auth Header Middleware
 function authMiddleware(req, res, next) {
@@ -446,6 +453,11 @@ app.post("/api/finances/chat", authMiddleware, async (req, res) => {
       state: getUserState(req.userEmail),
     });
   }
+});
+
+// Ruta comodín para soportar React Router (SPA)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(frontendDistPath, "index.html"));
 });
 
 // Start Express Server
