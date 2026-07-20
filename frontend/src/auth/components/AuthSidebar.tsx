@@ -1,5 +1,6 @@
 import React from "react";
 import { IconShield, IconSparkles2 } from "@tabler/icons-react";
+import { Link } from "react-router";
 
 interface AuthSidebarProps {
   title: React.ReactNode;
@@ -11,7 +12,11 @@ export const AuthSidebar: React.FC<AuthSidebarProps> = ({ title, subtitle }) => 
     <div className="w-full md:w-3/5 bg-[#0d1527] p-8 md:p-16 flex flex-col justify-between min-h-125 md:min-h-0">
       {/* Logo Top */}
       <div>
-        <h2 className="text-xl font-bold tracking-tight text-white">FinancIA!</h2>
+        <Link to="/" className="inline-block">
+          <h2 className="text-xl font-bold tracking-tight text-white hover:text-teal-400 transition-colors">
+            FinancIA!
+          </h2>
+        </Link>
       </div>
 
       {/* Hero Content */}
