@@ -11,7 +11,7 @@ El proyecto está dividido en dos partes principales:
 ## Características Principales
 
 1. **Página de Inicio (Landing Page):** Presentación atractiva y moderna con tarifas transparentes, testimonios y visualización del ecosistema del producto.
-2. **Asistente de IA (Chat):** Chatbot interactivo que parsea lenguaje natural (ej. _"Cena de $45 en Green Cafe"_), registra transacciones automáticamente e identifica oportunidades de ahorro.
+2. **Asistente de IA (Chat):** Chatbot interactivo que parsea lenguaje natural (ej. _"Cena de S/ 45,00 en Green Cafe"_), registra transacciones automáticamente e identifica oportunidades de ahorro.
 3. **Historial de Movimientos:** Panel integral con métricas en tiempo real (Balance Neto, Ingresos y Gastos Totales), buscador de establecimientos, filtros por categoría o tipo de flujo, y la posibilidad de añadir registros de forma manual.
 4. **Límites de Presupuesto:** Control de gastos por categorías con alertas de consumo progresivo (al llegar al 75% y sobrepasar el 100%) y una línea temporal para comparar el ritmo de gasto frente al avance de la semana.
 5. **Metas de Ahorro:** Rastreador de metas (ej. _Fondo de Emergencia_), progreso interactivo con depósito simulado y configuración de notificaciones proactivas de IA.
@@ -109,7 +109,7 @@ El servidor backend escuchará en el puerto configurado (puerto 3000 por defecto
 
 Existen dos métodos para registrar un movimiento:
 
-- **Por Chat de Lenguaje Natural (Recomendado):** Ve al módulo de chat, escribe un mensaje como _"Gasté $25 en Uber Trip hoy"_ o _"Comida por $12 en Starbucks"_. El asistente interpretará la información, mostrará la tarjeta de gasto procesada en pantalla y la agregará automáticamente a tu historial.
+- **Por Chat de Lenguaje Natural (Recomendado):** Ve al módulo de chat, escribe un mensaje como _"Gasté S/ 25,00 en Uber Trip hoy"_ o _"Comida por S/ 12,00 en Starbucks"_. El asistente interpretará la información, mostrará la tarjeta de gasto procesada en pantalla y la agregará automáticamente a tu historial.
 - **Registro Manual:** Ve al módulo **Historial de Gastos**, presiona el botón **Nuevo Registro**, rellena el establecimiento, categoría, cantidad y cuenta de origen, y presiona **Guardar**.
 
 ### 3. Controlar el Presupuesto
@@ -123,5 +123,5 @@ Existen dos métodos para registrar un movimiento:
 ### 4. Cumplir tus Metas de Ahorro
 
 - En la pestaña **Metas de Ahorro**, visualiza el progreso acumulado de tu meta (ej. Fondo de Emergencia).
-- Usa el simulador de depósitos rápidos para ingresar montos directamente (ej. $100) y ver el avance del porcentaje de tu meta de ahorro.
+- Usa el simulador de depósitos rápidos para ingresar montos directamente (ej. S/ 100,00) y ver el avance del porcentaje de tu meta de ahorro.
 - Activa o desactiva las sugerencias e informes financieros proactivos generados por la IA utilizando los interruptores (toggles) de configuración.

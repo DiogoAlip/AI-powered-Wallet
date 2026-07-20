@@ -360,7 +360,7 @@ La persistencia de FinancIA! se apoya en una base de datos relacional SQLite lig
         \item \textbf{user\_email} (TEXT, FK): Correo del propietario de la transacción. Referencia a `users(email)` con eliminación en cascada (`ON DELETE CASCADE`).
         \item \textbf{merchant} (TEXT): Nombre del establecimiento o concepto del flujo (ej: Starbucks, Salario).
         \item \textbf{category} (TEXT): Nombre de la categoría de gasto o ingreso.
-        \item \textbf{amount} (REAL): Monto numérico del movimiento en dólares estadounidenses.
+        \item \textbf{amount} (REAL): Monto numérico del movimiento en soles peruanos.
         \item \textbf{date} (TEXT): Marca temporal o descripción relativa del registro (ej: ``Hoy'', ``Ayer'').
         \item \textbf{account} (TEXT): Tipo de cuenta o medio de pago (ej: ``Tarjeta Personal'', ``Efectivo'').
         \item \textbf{type} (TEXT): Clasificador del flujo (``expense'' o ``income'').
@@ -381,7 +381,7 @@ La persistencia de FinancIA! se apoya en una base de datos relacional SQLite lig
     \begin{itemize}
         \item \textbf{user\_email} (TEXT, PK, FK): Referencia a `users(email)` con `ON DELETE CASCADE`.
         \item \textbf{name} (TEXT): Nombre de la meta de ahorro activa (ej: ``Fondo de Emergencia'').
-        \item \textbf{target} (REAL): Monto objetivo a ahorrar en dólares.
+        \item \textbf{target} (REAL): Monto objetivo a ahorrar en soles.
         \item \textbf{current} (REAL): Balance actual acumulado en la meta.
         \item \textbf{recommendations} (TEXT): Sugerencias y análisis acumulados en formato Markdown.
     \end{itemize}
@@ -417,12 +417,12 @@ Para asegurar que el modelo posea conocimiento completo sobre el estado financie
 
 \begin{verbatim}
 Aquí está el estado financiero actual del usuario:
-- Ahorros: Meta: "Fondo de Emergencia" ($450.00 / $5000.00)
+- Ahorros: Meta: "Fondo de Emergencia" (S/ 450,00 / S/ 5.000,00)
 - Límites de Presupuesto: 
-  * Comida fuera: Gastado $49.50 de un límite de $120.00
-  * Transporte: Gastado $18.75 de un límite de $150.00
+  * Comida fuera: Gastado S/ 49,50 de un límite de S/ 120,00
+  * Transporte: Gastado S/ 18,75 de un límite de S/ 150,00
 - Últimas Transacciones Registradas:
-  * Gasto $45.00 en Green Cafe (Comida fuera, Hoy)
+  * Gasto S/ 45,00 en Green Cafe (Comida fuera, Hoy)
 \end{verbatim}
 
 \subsubsection{Declaración y Ejecución de Herramientas (Function Calling)}

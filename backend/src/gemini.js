@@ -18,6 +18,18 @@ import {
   getTransactionsInDateRange,
 } from "./db.js";
 
+export function formatCurrencyBackend(amount) {
+  if (amount === null || amount === undefined || isNaN(amount)) {
+    return "S/ 0,00";
+  }
+  const sign = amount < 0 ? "-" : "";
+  const absoluteAmount = Math.abs(amount);
+  const parts = absoluteAmount.toFixed(2).split('.');
+  const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  const decimalPart = parts[1];
+  return `${sign}S/ ${integerPart},${decimalPart}`;
+}
+
 const FINANCIAL_TOOLS = [
   {
     functionDeclarations: [
@@ -37,7 +49,7 @@ const FINANCIAL_TOOLS = [
             },
             amount: {
               type: "NUMBER",
-              description: "El monto numérico de la transacción en dólares (ej: 18.75, 1200)."
+              description: "El monto numérico de la transacción en soles (ej: 18.75, 1200)."
             },
             type: {
               type: "STRING",
@@ -54,7 +66,7 @@ const FINANCIAL_TOOLS = [
       },
       {
         name: "update_budget_limit",
-        description: "Actualiza el límite de presupuesto semanal para una categoría de gasto en dólares. Utiliza esta herramienta si el usuario solicita cambiar, establecer o actualizar un presupuesto.",
+        description: "Actualiza el límite de presupuesto semanal para una categoría de gasto en soles. Utiliza esta herramienta si el usuario solicita cambiar, establecer o actualizar un presupuesto.",
         parameters: {
           type: "OBJECT",
           properties: {
@@ -64,7 +76,7 @@ const FINANCIAL_TOOLS = [
             },
             limit: {
               type: "NUMBER",
-              description: "El nuevo límite semanal establecido en dólares."
+              description: "El nuevo límite semanal establecido en soles."
             }
           },
           required: ["category", "limit"]
@@ -99,7 +111,7 @@ const FINANCIAL_TOOLS = [
             },
             amount: {
               type: "NUMBER",
-              description: "El nuevo monto de la transacción en dólares. Opcional."
+              description: "El nuevo monto de la transacción en soles. Opcional."
             },
             type: {
               type: "STRING",
@@ -144,7 +156,7 @@ const FINANCIAL_TOOLS = [
             },
             target: {
               type: "NUMBER",
-              description: "La nueva cantidad objetivo en dólares. Opcional."
+              description: "La nueva cantidad objetivo en soles. Opcional."
             },
             start_date: {
               type: "STRING",
@@ -216,7 +228,7 @@ const FINANCIAL_TOOLS = [
             },
             spent: {
               type: "NUMBER",
-              description: "La nueva cantidad gastada acumulada en dólares."
+              description: "La nueva cantidad gastada acumulada en soles."
             }
           },
           required: ["category", "spent"]
@@ -306,20 +318,20 @@ const FINANCIAL_TOOLS = [
 
 function getSystemInstruction(transactions, budgets, savings) {
   const budgetsContext = budgets
-    .map((b) => `- **${b.category}**: Gastado $${b.spent.toFixed(2)} de un límite de $${b.limit.toFixed(2)}`)
+    .map((b) => `- **${b.category}**: Gastado ${formatCurrencyBackend(b.spent)} de un límite de ${formatCurrencyBackend(b.limit)}`)
     .join("\n");
 
   const recentTxContext = transactions
     .slice(0, 5)
     .map(
       (t) =>
-        `- [${t.type === "expense" ? "Gasto" : "Ingreso"}] $${t.amount.toFixed(2)} en **${t.merchant}** (Categoría: ${t.category}, Fecha: ${t.date}, ID: ${t.id})`
+        `- [${t.type === "expense" ? "Gasto" : "Ingreso"}] ${formatCurrencyBackend(t.amount)} en **${t.merchant}** (Categoría: ${t.category}, Fecha: ${t.date}, ID: ${t.id})`
     )
     .join("\n");
 
   const savingsContext = savings.name
     ? `  Meta: "${savings.name}"
-  Acumulado: $${savings.current.toFixed(2)} de un objetivo de $${savings.target.toFixed(2)}
+  Acumulado: ${formatCurrencyBackend(savings.current)} de un objetivo de ${formatCurrencyBackend(savings.target)}
   Fecha de inicio: ${savings.start_date || 'No definida'}
   Fecha límite: ${savings.deadline || 'No definida'}`
     : `  Sin meta configurada actualmente.`;
@@ -350,7 +362,8 @@ Instrucciones de comportamiento:
 10. Si el usuario quiere cambiar o corregir manualmente la cantidad gastada acumulada en un presupuesto, utiliza la herramienta 'update_budget_spent'.
 11. Cuando ejecutes una acción, explica brevemente qué registraste, modificaste o eliminaste y cómo afecta a las finanzas del usuario (ej: saldo restante, avance del ahorro).
 12. Si un presupuesto ha sido excedido o está al 75% o más de su capacidad, adviérteselo amablemente al usuario con recomendaciones constructivas.
-13. Nunca menciones la palabra "wallet" ni "billetera". Refiérete a la aplicación como "sistema de gestión financiera" o simplemente "FinancIA!".`;
+13. Nunca menciones la palabra "wallet" ni "billetera". Refiérete a la aplicación como "sistema de gestión financiera" o simplemente "FinancIA!".
+14. La moneda oficial del sistema es el Sol peruano (S/). En todas tus respuestas de texto y explicaciones, debes referirte a los montos de dinero en Soles y formatearlos con puntuación decimal latinoamericana (coma para decimales y punto para miles, por ejemplo: S/ 1.234,56 o S/ 45,00). Nota: Los parámetros numéricos que envíes al llamar a funciones/herramientas deben seguir siendo números flotantes de JavaScript estándar con punto decimal (ej: 18.75).`;
 }
 
 async function makeApiRequest(model, apiKey, payload) {
@@ -446,8 +459,8 @@ export async function chat(userText, chatHistory, email) {
             const remaining = categoryBudget.limit - spentAfter;
             infoText =
               remaining >= 0
-                ? `Te quedan $${remaining.toFixed(2)} de tu presupuesto para '${newTx.category}'.`
-                : `¡Alerta! Has excedido el presupuesto de '${newTx.category}' por $${Math.abs(remaining).toFixed(2)}.`;
+                ? `Te quedan ${formatCurrencyBackend(remaining)} de tu presupuesto para '${newTx.category}'.`
+                : `¡Alerta! Has excedido el presupuesto de '${newTx.category}' por ${formatCurrencyBackend(Math.abs(remaining))}.`;
           }
         }
       }
@@ -459,7 +472,7 @@ export async function chat(userText, chatHistory, email) {
       updateBudgetLimit(cleanEmail, category, limit);
       functionResult = {
         status: "success",
-        message: `Presupuesto de '${category}' actualizado a un límite de $${limit.toFixed(2)}.`
+        message: `Presupuesto de '${category}' actualizado a un límite de ${formatCurrencyBackend(limit)}.`
       };
     } else if (name === "list_transactions") {
       const txs = getTransactions(cleanEmail);
@@ -488,8 +501,8 @@ export async function chat(userText, chatHistory, email) {
             const remaining = categoryBudget.limit - spentAfter;
             infoText =
               remaining >= 0
-                ? `Te quedan $${remaining.toFixed(2)} de tu presupuesto para '${updatedTx.category}' después de la actualización.`
-                : `¡Alerta! Has excedido el presupuesto de '${updatedTx.category}' por $${Math.abs(remaining).toFixed(2)} tras la actualización.`;
+                ? `Te quedan ${formatCurrencyBackend(remaining)} de tu presupuesto para '${updatedTx.category}' después de la actualización.`
+                : `¡Alerta! Has excedido el presupuesto de '${updatedTx.category}' por ${formatCurrencyBackend(Math.abs(remaining))} tras la actualización.`;
           }
         }
         functionResult = {
@@ -527,7 +540,7 @@ export async function chat(userText, chatHistory, email) {
       updateSavingsGoal(cleanEmail, goalName, target, startDate, deadline);
       functionResult = {
         status: "success",
-        message: `Meta de ahorro actualizada a '${goalName}' con un objetivo de $${target.toFixed(2)}, fecha de inicio ${startDate}${deadline ? ` y fecha límite ${deadline}` : ''}.`
+        message: `Meta de ahorro actualizada a '${goalName}' con un objetivo de ${formatCurrencyBackend(target)}, fecha de inicio ${startDate}${deadline ? ` y fecha límite ${deadline}` : ''}.`
       };
     } else if (name === "add_category") {
       const catArgs = args;
@@ -556,7 +569,7 @@ export async function chat(userText, chatHistory, email) {
       updateBudgetSpent(cleanEmail, budgetArgs.category, spent);
       functionResult = {
         status: "success",
-        message: `Gasto de la categoría '${budgetArgs.category}' actualizado manualmente a $${spent.toFixed(2)}.`
+        message: `Gasto de la categoría '${budgetArgs.category}' actualizado manualmente a ${formatCurrencyBackend(spent)}.`
       };
     } else if (name === "list_budgets") {
       const budgets = getBudgets(cleanEmail);
@@ -697,14 +710,14 @@ export async function generateBudgetTips(email) {
   const modelName = "gemini-3.5-flash";
 
   const budgetsContext = budgets
-    .map((b) => `- **${b.category}**: Gastado $${b.spent.toFixed(2)} de un límite de $${b.limit.toFixed(2)}`)
+    .map((b) => `- **${b.category}**: Gastado ${formatCurrencyBackend(b.spent)} de un límite de ${formatCurrencyBackend(b.limit)}`)
     .join("\n");
 
   const recentTxContext = transactions
     .slice(0, 10)
     .map(
       (t) =>
-        `- [${t.type === "expense" ? "Gasto" : "Ingreso"}] $${t.amount.toFixed(2)} en **${t.merchant}** (Categoría: ${t.category}, Fecha: ${t.date})`
+        `- [${t.type === "expense" ? "Gasto" : "Ingreso"}] ${formatCurrencyBackend(t.amount)} en **${t.merchant}** (Categoría: ${t.category}, Fecha: ${t.date})`
     )
     .join("\n");
 
@@ -718,12 +731,12 @@ ${budgetsContext}
 Últimos movimientos:
 ${recentTxContext}
 
-Meta de ahorro activa: "${savings.name}", acumulado $${savings.current.toFixed(2)} de un objetivo de $${savings.target.toFixed(2)}.
+Meta de ahorro activa: "${savings.name}", acumulado ${formatCurrencyBackend(savings.current)} de un objetivo de ${formatCurrencyBackend(savings.target)}.
 
-Por favor, proporciona los consejos separados por salto de línea sin numeración. Ejemplo:
-Moviendo tus $120 de ahorro excedente en comida a tu Meta de Emergencia aumentas tu probabilidad de meta en un 8%.
+Por favor, proporciona los consejos separados por salto de línea sin numeración. En tus consejos, todos los montos de dinero deben usar Soles y estar en formato decimal latinoamericano (ej: S/ 120,00 o S/ 1.400,00). Ejemplo:
+Moviendo tus S/ 120,00 de ahorro excedente en comida a tu Meta de Emergencia aumentas tu probabilidad de meta en un 8%.
 Tus suscripciones como Netflix representan el 15% de tu presupuesto de facturas fijas. ¡Un control sabio!
-Estás en camino de acumular un excedente neto de $1,400 este mes si mantienes este ritmo de consumo de transporte.
+Estás en camino de acumular un excedente neto de S/ 1.400,00 este mes si mantienes este ritmo de consumo de transporte.
 
 Devuelve SOLO los 3 consejos separados por saltos de línea simples. No incluyas títulos ni introducciones.`;
 

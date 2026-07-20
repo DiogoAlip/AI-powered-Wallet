@@ -211,7 +211,7 @@ export const INITIAL_CHAT_HISTORY = [
     id: "chat-1",
     sender: "ai",
     timestamp: "09:41 AM",
-    text: "¡Buenos días! He analizado tus transacciones recientes. Actualmente estás $120 por debajo del presupuesto para 'Comida fuera' esta semana. ¿Te gustaría que lo transfiera a tu meta de ahorro?",
+    text: "¡Buenos días! He analizado tus transacciones recientes. Actualmente estás S/ 120 por debajo del presupuesto para 'Comida fuera' esta semana. ¿Te gustaría que lo transfiera a tu meta de ahorro?",
     actionChips: [
       { text: "Ver Estadísticas", actionId: "ask_view_limits" },
       { text: "Ignorar", actionId: "ignore" },
@@ -221,7 +221,7 @@ export const INITIAL_CHAT_HISTORY = [
     id: "chat-2",
     sender: "user",
     timestamp: "09:45 AM",
-    text: "De hecho, acabo de registrar $45 para el almuerzo en Green Cafe.",
+    text: "De hecho, acabo de registrar S/ 45 para el almuerzo en Green Cafe.",
   },
   {
     id: "chat-3",
@@ -237,13 +237,13 @@ export const INITIAL_CHAT_HISTORY = [
       account: "Tarjeta Personal",
       type: "expense",
     },
-    infoText: "Te quedan $75 en 'Comida fuera' para esta semana.",
+    infoText: "Te quedan S/ 75 en 'Comida fuera' para esta semana.",
   },
   {
     id: "chat-4",
     sender: "user",
     timestamp: "09:47 AM",
-    text: "También acabo de recibir un pago de $150 por consultoría. Registra eso por favor.",
+    text: "También acabo de recibir un pago de S/ 150 por consultoría. Registra eso por favor.",
   },
   {
     id: "chat-5",
@@ -259,7 +259,7 @@ export const INITIAL_CHAT_HISTORY = [
       account: "Depósito Directo",
       type: "income",
     },
-    infoText: "Tus ingresos totales de esta semana han aumentado a $3,350.00.",
+    infoText: "Tus ingresos totales de esta semana han aumentado a S/ 3.350,00.",
     actionChips: [
       { text: "Ver Estadísticas", actionId: "ask_view_limits" },
     ],
@@ -268,14 +268,14 @@ export const INITIAL_CHAT_HISTORY = [
     id: "chat-6",
     sender: "user",
     timestamp: "09:49 AM",
-    text: "Creo que gastaré más esta semana en Compras. Sube mi límite de presupuesto de Compras a $300.",
+    text: "Creo que gastaré más esta semana en Compras. Sube mi límite de presupuesto de Compras a S/ 300.",
   },
   {
     id: "chat-7",
     sender: "ai",
     timestamp: "09:49 AM",
-    text: "He ajustado tu límite semanal para la categoría **Compras** de $200.00 a **$300.00**.",
-    infoText: "Presupuesto actualizado: Compras (Límite: $300.00, Gastado: $85.00).",
+    text: "He ajustado tu límite semanal para la categoría **Compras** de S/ 200,00 a **S/ 300,00**.",
+    infoText: "Presupuesto actualizado: Compras (Límite: S/ 300,00, Gastado: S/ 85,00).",
     actionChips: [
       { text: "Ver presupuestos", actionId: "ask_view_limits" },
     ],

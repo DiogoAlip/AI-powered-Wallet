@@ -32,7 +32,7 @@ import {
   getBudgets,
   getSavings,
 } from "./src/db.js";
-import { chat, generateBudgetTips } from "./src/gemini.js";
+import { chat, generateBudgetTips, formatCurrencyBackend } from "./src/gemini.js";
 
 // Load environment variables
 dotenv.config();
@@ -43,7 +43,7 @@ const dbPath = process.env.DATABASE_PATH || "./data/finances.db";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const frontendDistPath = process.env.DIST_PATH || path.join(__dirname, "../frontend/dist");
+const frontendDistPath = path.join(__dirname, process.env.DIST_PATH || "../frontend/dist");
 
 // Initialize SQLite database
 initDb(dbPath);
@@ -252,15 +252,15 @@ app.post("/api/finances/chat/new-with-prompt", authMiddleware, async (req, res) 
     const transactions = getTransactions(email);
 
     const budgetsContext = budgets
-      .map((b) => `- **${b.category}**: Gastado $${b.spent.toFixed(2)} de un límite de $${b.limit.toFixed(2)}`)
+      .map((b) => `- **${b.category}**: Gastado ${formatCurrencyBackend(b.spent)} de un límite de ${formatCurrencyBackend(b.limit)}`)
       .join("\n");
 
     const savingsContext = savings.name
-      ? `Meta de ahorro activa: "${savings.name}", acumulado $${savings.current.toFixed(2)} de un objetivo de $${savings.target.toFixed(2)}.`
+      ? `Meta de ahorro activa: "${savings.name}", acumulado ${formatCurrencyBackend(savings.current)} de un objetivo de ${formatCurrencyBackend(savings.target)}.`
       : "No tengo una meta de ahorro activa configurada actualmente.";
 
     const recentTxContext = transactions.length > 0
-      ? transactions.slice(0, 10).map(t => `- [${t.type === "expense" ? "Gasto" : "Ingreso"}] $${t.amount.toFixed(2)} en **${t.merchant}** (${t.category}, Fecha: ${t.date})`).join("\n")
+      ? transactions.slice(0, 10).map(t => `- [${t.type === "expense" ? "Gasto" : "Ingreso"}] ${formatCurrencyBackend(t.amount)} en **${t.merchant}** (${t.category}, Fecha: ${t.date})`).join("\n")
       : "No tengo transacciones recientes.";
 
     prompt = `Hola FinancIA!, analicemos mi situación de presupuestos.

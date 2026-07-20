@@ -410,7 +410,7 @@ export function initializeUser(email, name = "Socio FinancIA!", password = null)
     }
     db.prepare(
       "INSERT OR IGNORE INTO savings (user_email, name, target, current) VALUES (?, ?, ?, ?)"
-    ).run(cleanEmail, "Fondo de Emergencia", 5000.0, 0.0);
+    ).run(cleanEmail, null, 0.0, 0.0);
 
     db.prepare(
       "INSERT OR IGNORE INTO chat_messages (id, user_email, chat_id, sender, timestamp, text, transaction_detail, action_chips, info_text) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"

@@ -309,7 +309,7 @@ export function Goals() {
 
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
-                      Monto Objetivo ($)
+                      Monto Objetivo (S/)
                     </label>
                     <input
                       type="number"
