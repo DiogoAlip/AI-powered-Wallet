@@ -34,10 +34,17 @@
 \lhead{}
 \renewcommand{\headrulewidth}{0pt} % Elimina la línea horizontal del encabezado
 
-% --- Configuración de Títulos estilo APA 7 (Evita duplicidad de numeración) ---
-\titleformat{\section}{\normalfont\normalsize\bfseries\centering}{}{0pt}{}
+% --- Configuración de Títulos con Numeración Románica Dinámica ---
+\renewcommand{\thesection}{\Roman{section}}
+\titleformat{\section}{\normalfont\normalsize\bfseries\centering}{\thesection.}{0.5em}{}
 \titleformat{\subsection}{\normalfont\normalsize\bfseries}{}{0pt}{}
 \titleformat{\subsubsection}{\normalfont\normalsize\bfseries\itshape}{}{0pt}{}
+
+% --- Ajuste del Ancho de Numeración en el Índice (TOC) ---
+\usepackage[titles]{tocloft}
+\setlength{\cftsecnumwidth}{3.2em} % Aumenta el espacio para que números romanos como VII y VIII no se choquen con el título
+\setlength{\cftsubsecnumwidth}{3.8em} % Aumenta el espacio para numeración heredada como VIII.1
+\setlength{\cftsubsubsecnumwidth}{4.5em}
 
 % Ajustes de sangría de párrafos (0.5 pulgadas)
 \setlength{\parindent}{0.5in}
@@ -71,54 +78,92 @@
     \setstretch{1.1}
     
     {\fontsize{14pt}{16pt}\selectfont\bfseries UNIVERSIDAD NACIONAL AGRARIA DE LA SELVA} \\
-    \vspace{0.3cm}
+    \vspace{0.2cm}
     {\fontsize{12pt}{14pt}\selectfont\bfseries FACULTAD DE INGENIERÍA EN INFORMÁTICA Y SISTEMAS} \\
-    \vspace{0.3cm}
-    {\fontsize{12pt}{14pt}\selectfont\bfseries ESCUELA PROFESIONAL DE INGENIERÍA EN INFORMÁTICA Y SISTEMAS} \\
+    \vspace{0.2cm}
+    {\fontsize{11pt}{13pt}\selectfont\bfseries ESCUELA PROFESIONAL DE INGENIERÍA EN INFORMÁTICA Y SISTEMAS} \\
     
-    \vspace{1.0cm}
+    \vspace{1.2cm}
     % Logos institucionales
     \begin{minipage}{0.8\textwidth}
         \centering
-        \includegraphics[width=3.5cm]{unas.png}  
-        \hspace{0.8cm}  
-        \includegraphics[width=3.5cm]{fiis_unas.jpg}
+        \includegraphics[width=3.2cm]{unas.png}  
+        \hspace{1.2cm}  
+        \includegraphics[width=3.2cm]{fiis_unas.jpg}
         \vspace{0.5cm}
     \end{minipage}
     
-    \vspace{1.0cm}
-    {\fontsize{14pt}{16pt}\selectfont\bfseries INFORME FINAL DEL PROYECTO DE INNOVACIÓN Y TECNOLOGÍA} \\
-    \vspace{0.6cm}
-    {\fontsize{12pt}{14pt}\selectfont\bfseries ``SISTEMA DE GESTIÓN FINANCIERA CON INTELIGENCIA ARTIFICIAL - FINANCIA!''} \\
+    \vspace{1.2cm}
+    \rule{\textwidth}{1.6pt} \\ [0.4cm]
+    {\fontsize{13pt}{15pt}\selectfont\bfseries INFORME FINAL DEL PROYECTO DE INNOVACIÓN Y TECNOLOGÍA} \\ [0.4cm]
+    {\fontsize{15pt}{17pt}\selectfont\bfseries ``SISTEMA DE GESTIÓN FINANCIERA CON INTELIGENCIA ARTIFICIAL - FINANCIA!''} \\ [0.4cm]
+    \rule{\textwidth}{0.4pt} \\
     
-    \vspace{1.5cm}
-    \begin{flushleft}
-        \fontsize{12pt}{14pt}\selectfont
+    \vspace{2.0cm}
+    \begin{minipage}[t]{0.48\textwidth}
+        \flushleft
+        \fontsize{11pt}{13pt}\selectfont
         \textbf{Presentado por:} \\
         \vspace{0.2cm}
-        \hspace{0.5cm} Fabrizzio Fabiano Esquivel Mori \\
-        \hspace{0.5cm} Diogo Aarón Alipázaga Bazán \\
-        \hspace{0.5cm} Sergio Wilson Miranda Murrieta \\
-        \hspace{0.5cm} Andrew Roy Ildefonso Sotelo \\
-        \vspace{0.4cm}
-        \textbf{Curso:} Innovación e Emprendimiento \\
-        \vspace{0.4cm}
-        \textbf{Docente:} Michael Mariño Gamboa \\
-        \vspace{0.4cm}
-        \textbf{Fecha:} 19 de julio de 2026
-    \end{flushleft}
+        \hspace{0.2cm} Esquivel Mori, Fabrizzio Fabiano \\
+        \hspace{0.2cm} Alipázaga Bazán, Diogo Aarón \\
+        \hspace{0.2cm} Miranda Murrieta, Sergio Wilson \\
+        \hspace{0.2cm} Ildefonso Sotelo, Andrew Roy
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \flushleft
+        \fontsize{11pt}{13pt}\selectfont
+        \textbf{Curso:} \\
+        \hspace{0.2cm} Innovación e Emprendimiento \\
+        \vspace{0.3cm}
+        \textbf{Docente:} \\
+        \hspace{0.2cm} Michael Mariño Gamboa \\
+        \vspace{0.3cm}
+        \textbf{Fecha:} \\
+        \hspace{0.2cm} 19 de julio de 2026
+    \end{minipage}
     
     \vfill
-    {\fontsize{12pt}{14pt}\selectfont TINGO MARÍA – PERÚ \\ 2026}
+    {\fontsize{11pt}{13pt}\selectfont\bfseries TINGO MARÍA – PERÚ} \\
+    {\fontsize{10pt}{12pt}\selectfont 2026}
     
 \end{titlepage}
 
 \newpage
 
 % ==========================================
-% II. DETECCIÓN Y ANÁLISIS DEL PROBLEMA
+% ÍNDICE GENERAL
 % ==========================================
-\section{II. DETECCIÓN Y ANÁLISIS DEL PROBLEMA}
+\renewcommand{\contentsname}{ÍNDICE}
+\tableofcontents
+\newpage
+
+% ==========================================
+% INTRODUCCIÓN
+% ==========================================
+\section{INTRODUCCIÓN}
+En el contexto socioeconómico actual, la gestión efectiva de las finanzas personales se ha convertido en una competencia esencial para garantizar la estabilidad económica individual. Sin embargo, una gran parte de la población, en especial los estudiantes universitarios y jóvenes profesionales, experimenta serias dificultades para llevar un control riguroso de sus ingresos y egresos diarios. La principal causa de este fenómeno radica en la alta fricción cognitiva asociada a los métodos de registro tradicionales; la necesidad de anotar manualmente cada transacción (montos, categorías, establecimientos y fechas) en libretas o aplicaciones convencionales genera pereza y frustración, derivando inevitablemente en el abandono del control financiero.
+
+Para dar respuesta a esta problemática dentro de la comunidad de la Universidad Nacional Agraria de la Selva (UNAS), se concibió y desarrolló \textbf{FinancIA!}, un asistente inteligente de gestión financiera personal. A diferencia de las aplicaciones tradicionales, FinancIA! aprovecha las capacidades de la Inteligencia Artificial generativa mediante el modelo Google Gemini para procesar el lenguaje natural. Esto permite que los usuarios registren sus movimientos cotidianos a través de comandos de texto libre o dictado por voz, eliminando los extensos formularios de entrada y reduciendo la fricción a su mínima expresión.
+
+El presente informe final documenta de manera detallada todo el proceso de innovación, diseño e implementación del sistema. El documento se organiza de la siguiente manera:
+\begin{itemize}
+    \item La primera sección expone el diagnóstico del problema en el entorno de la UNAS, su priorización frente a otras problemáticas y la caracterización de los principales grupos afectados.
+    \item La segunda sección describe el Producto Mínimo Viable (MVP) desarrollado, delimitando sus objetivos y alcance.
+    \item La tercera sección detalla el diseño de interfaz de usuario (UI/UX) y el flujo de actividades operativo del software.
+    \item La cuarta sección aborda la arquitectura técnica del sistema, incluyendo el modelo de datos relacional en SQLite y la inyección dinámica de contexto en la IA.
+    \item La quinta sección proporciona el manual de instalación y ejecución en entornos de desarrollo y producción.
+    \item Las secciones sexta, séptima y octava documentan la metodología de validación del MVP con los \textit{early adopters}, los resultados de satisfacción cuantitativos, la retroalimentación cualitativa obtenida y las mejoras propuestas.
+    \item Finalmente, se presentan las conclusiones transversales del proyecto y las directrices para el trabajo futuro.
+\end{itemize}
+
+\newpage
+
+% ==========================================
+% DETECCIÓN Y ANÁLISIS DEL PROBLEMA
+% ==========================================
+\section{DETECCIÓN Y ANÁLISIS DEL PROBLEMA}
 
 \subsection{Detección del Problema en la UNAS (Paso 1: Observar)}
 El proceso de innovación comenzó con una fase de observación dentro de los diferentes entornos de la Universidad Nacional Agraria de la Selva (UNAS), incluyendo aulas, oficinas académicas, laboratorios, facultades y la cafetería. En esta etapa se identificó una lista de 10 problemas críticos que afectan de manera cotidiana a estudiantes, docentes y personal administrativo. La Tabla \ref{tab:problemas_detectados} resume los problemas detectados, su localización física y el grupo de interés impactado durante el diagnóstico inicial de Mayo de 2026.
@@ -217,9 +262,9 @@ Como validación cuantitativa del problema en la comunidad de Tingo María, se r
 \newpage
 
 % ==========================================
-% III. DESCRIPCIÓN DEL MVP
+% DESCRIPCIÓN DEL MVP
 % ==========================================
-\section{III. DESCRIPCIÓN DEL MVP}
+\section{DESCRIPCIÓN DEL MVP}
 
 \subsection{Nombre del MVP}
 FinancIA! — Sistema de Gestión Financiera con Inteligencia Artificial.
@@ -244,9 +289,53 @@ Las capturas de pantalla de la interfaz gráfica y los módulos del MVP (Chat co
 \newpage
 
 % ==========================================
-% IV. ARQUITECTURA Y DISEÑO TÉCNICO DEL SISTEMA
+% DISEÑO DE INTERFAZ (UI/UX) Y FLUJO DE ACTIVIDADES
 % ==========================================
-\section{IV. ARQUITECTURA Y DISEÑO TÉCNICO DEL SISTEMA}
+\section{DISEÑO DE INTERFAZ (UI/UX) Y FLUJO DE ACTIVIDADES}
+
+\subsection{Arquitectura de Vistas (Diseño Visual y Componentes)}
+La interfaz de usuario de FinancIA! fue diseñada con un enfoque responsivo (adaptable de escritorio a móvil) centrado en reducir el esfuerzo cognitivo del usuario mediante una jerarquía visual clara y un esquema de colores armónico. El diseño se divide en tres componentes visuales principales:
+\begin{enumerate}
+    \item \textbf{Panel Lateral (Sidebar / Drawer):} En dispositivos de escritorio, se mantiene fijo a la izquierda utilizando un tema oscuro que contrasta con la zona principal. En dispositivos móviles, se convierte en un menú lateral deslizable (Drawer) accesible mediante un ícono de hamburguesa. Este panel contiene:
+    \begin{itemize}
+        \item \textbf{Botón de Acción Principal (CTA):} Acceso rápido para añadir transacciones manualmente.
+        \item \textbf{Sección Analytics:} Tarjetas de métricas clave que resumen los gastos totales, el promedio por transacción y la cantidad total de transacciones realizadas, permitiendo una lectura financiera rápida y acumulada.
+        \item \textbf{Sección Filters:} Menú desplegable para filtrar los datos mostrados según períodos temporales específicos (ej: "Este mes").
+    \end{itemize}
+    \item \textbf{Vista Principal (Dashboard):} Un área de trabajo limpia de tema claro y minimalista que muestra los balances generales y las metas de ahorro. Si el usuario no ha registrado transacciones, se presenta un estado vacío (\textit{Empty State}) con un ícono ilustrativo y el mensaje de guía ``No expenses yet'', orientando al usuario hacia la primera acción.
+    \item \textbf{Barra de Captura Conversacional y Multimodal (Bottom Bar):} Situada en la parte inferior de la pantalla de chat, es el núcleo interactivo con la IA. Permite la digitación de texto libre, e integra un botón de dictado de voz (micrófono) y un botón de adjuntos (clip de papel) que representa la funcionalidad de OCR de imágenes de recibos.
+    \item \textbf{Control de Dictado de Voz Flotante (Widget de Grabación):} Cuando se activa el dictado por voz, aparece un panel superpuesto dinámico con un visualizador de ondas de volumen en tiempo real basado en la Web Audio API y una caja de transcripción de texto instantánea en español, ofreciendo una experiencia inmersiva y de retroalimentación inmediata.
+\end{enumerate}
+
+\subsection{Flujo de Procesos y Recorrido del Usuario (User Journey)}
+El flujo operativo del software está diseñado para automatizar las entradas financieras reduciendo el tiempo de digitación a segundos. El recorrido del usuario consta de las siguientes fases:
+\begin{enumerate}
+    \item \textbf{Inicialización y Onboarding:} El usuario accede a la plataforma y visualiza el Dashboard inicial. Si es un usuario nuevo, el sistema presenta un Dashboard con estados vacíos en transacciones y presupuestos que dirigen la atención visual a la interacción principal (el chatbot o el botón manual).
+    \item \textbf{Ingreso de Datos Multimodal:} El usuario introduce el gasto mediante el método más cómodo según su contexto de movilidad:
+    \begin{itemize}
+        \item \textbf{Texto:} Escribe un mensaje corto en lenguaje natural (ej: \textit{``Gasté \$12 en comida fuera en Green Cafe''}).
+        \item \textbf{Voz:} Activa el micrófono y dicta la transacción en voz alta.
+        \item \textbf{Imagen:} Captura una foto de una boleta de compra.
+    \end{itemize}
+    \item \textbf{Procesamiento Inteligente y Orquestación:} La aplicación transmite el input al servidor backend, donde el motor de Gemini procesa la información mediante \textit{Function Calling} para extraer los parámetros estructurados (monto, comercio, categoría, tipo) y actualiza de inmediato la base de datos relacional SQLite.
+    \item \textbf{Actualización Reactiva de la Interfaz:} El backend responde con el nuevo estado del usuario. El frontend actualiza de inmediato el almacenamiento de Zustand, reemplazando el \textit{Empty State} por el historial de transacciones y recalculando de manera dinámica las tarjetas de Analytics, los límites de presupuesto con alerta semafórica y la barra de progreso de metas de ahorro en un solo ciclo de renderizado.
+\end{enumerate}
+
+El flujo general de actividades se representa en la Figura \ref{fig:flujo_actividades}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{flujo_actividades.png}
+    \caption{Diagrama de Flujo de Actividades y Procesamiento del Software.}
+    \label{fig:flujo_actividades}
+\end{figure}
+
+\newpage
+
+% ==========================================
+% ARQUITECTURA Y DISEÑO TÉCNICO DEL SISTEMA
+% ==========================================
+\section{ARQUITECTURA Y DISEÑO TÉCNICO DEL SISTEMA}
 
 \subsection{Arquitectura General de la Aplicación}
 La arquitectura de FinancIA! ha sido diseñada siguiendo un patrón cliente-servidor estructurado en capas desacopladas, lo que permite la modularidad del código y facilita la escalabilidad. El sistema consta de:
@@ -403,9 +492,9 @@ POST & /api/finances/chat & \{text, chatId\} & \{success: true, response, state\
 \newpage
 
 % ==========================================
-% V. MANUAL DE INSTALACIÓN, CONFIGURACIÓN Y EJECUCIÓN
+% MANUAL DE INSTALACIÓN, CONFIGURACIÓN Y EJECUCIÓN
 % ==========================================
-\section{V. MANUAL DE INSTALACIÓN, CONFIGURACIÓN Y EJECUCIÓN}
+\section{MANUAL DE INSTALACIÓN, CONFIGURACIÓN Y EJECUCIÓN}
 
 \subsection{Requisitos Previos del Sistema}
 Para asegurar el correcto funcionamiento del servidor local de FinancIA! es indispensable contar con:
@@ -467,9 +556,9 @@ Para entornos de despliegue consolidado que sirvan la aplicación desde un puert
 \newpage
 
 % ==========================================
-% VI. EARLY ADOPTERS
+% EARLY ADOPTERS
 % ==========================================
-\section{VI. EARLY ADOPTERS}
+\section{EARLY ADOPTERS}
 
 De acuerdo con las especificaciones del diseño del proyecto, en la Tabla \ref{tab:early_adopters} se presenta la caracterización de los usuarios seleccionados como \textit{early adopters} para las pruebas de usabilidad y validación del MVP. Cada perfil ha sido seleccionado estratégicamente para evaluar la reducción de fricción en diferentes hábitos de gestión financiera.
 
@@ -498,9 +587,9 @@ Usuario 5 \newline Jennifer Esquivel & Emprendedora / Comerciante (38 años, F).
 \newpage
 
 % ==========================================
-% VII. VALIDACIÓN DEL MVP
+% VALIDACIÓN DEL MVP
 % ==========================================
-\section{VII. VALIDACIÓN DEL MVP}
+\section{VALIDACIÓN DEL MVP}
 
 \subsection{Metodología}
 La validación del MVP se estructuró para evaluar la usabilidad, la fricción del usuario y el cumplimiento del objetivo principal del sistema mediante un cuestionario estandarizado.
@@ -549,9 +638,9 @@ Como soporte de las pruebas de validación realizadas, las respuestas individual
 \newpage
 
 % ==========================================
-% VIII. RETROALIMENTACIÓN Y MEJORAS
+% RETROALIMENTACIÓN Y MEJORAS
 % ==========================================
-\section{VIII. RETROALIMENTACIÓN Y MEJORAS}
+\section{RETROALIMENTACIÓN Y MEJORAS}
 
 En la Tabla \ref{tab:retroalimentacion_mejoras} se detallan los datos recolectados de cada uno de los cinco early adopters durante las pruebas de usabilidad y su respectiva propuesta de mejora para el sistema.
 
@@ -580,15 +669,30 @@ Usuario 5 \newline Jennifer Esquivel & El simulador de ahorros incrementa el tot
 \newpage
 
 % ==========================================
-% IX. CONCLUSIONES Y TRABAJO FUTURO
+% CONCLUSIONES Y TRABAJO FUTURO
 % ==========================================
-\section{IX. CONCLUSIONES Y TRABAJO FUTURO}
+\section{CONCLUSIONES Y TRABAJO FUTURO}
 
-\subsection{Conclusiones}
+\subsection{Conclusiones del Diagnóstico del Problema}
 \begin{itemize}
-    \item \textbf{Conclusión 1:} La validación del MVP de FinancIA! demuestra que la adopción de interfaces conversacionales y procesamiento de lenguaje natural simplifica dramáticamente el registro de transacciones, reduciendo la fricción principal que causa el abandono de las aplicaciones de finanzas personales tradicionales.
-    \item \textbf{Conclusión 2:} La incorporación de elementos visuales dinámicos de semaforización presupuestaria y barras de progreso gamificadas para el ahorro promueve el autocontrol del gasto y facilita una lectura rápida del estado financiero, logrando una excelente aceptación por parte del grupo de early adopters.
-    \item \textbf{Conclusión 3:} La retroalimentación detallada provista por los usuarios constituye una guía clara de prioridades de desarrollo para futuras iteraciones de producto, destacando la necesidad de incorporar flujos de corrección ágiles, categorías configurables y la automatización mediante la conexión a cuentas bancarias del usuario.
+    \item \textbf{Fricción del registro manual como causa raíz:} Se identificó que la incomodidad del registro manual es la causa raíz de la desorganización financiera de la comunidad universitaria, superando a la falta de ingresos por sí misma, ya que el esfuerzo cognitivo requerido compite con el tiempo de estudio y descanso.
+    \item \textbf{Impacto transversal y choque de autonomía:} El desbalance financiero afecta de forma transversal en la UNAS, pero se manifiesta con severidad crítica en los estudiantes nuevos debido a su falta de experiencia previa gestionando presupuestos de manera autónoma lejos de sus hogares.
+    \item \textbf{Oportunidad tecnológica:} Existe una oportunidad tecnológica clara para desarrollar una herramienta digital inteligente que elimine el registro manual, integrándose de forma orgánica en la rutina diaria de los usuarios mediante entradas conversacionales.
+\end{itemize}
+
+\subsection{Conclusiones del Diseño Visual y Arquitectura}
+\begin{itemize}
+    \item \textbf{Valor del canal conversacional:} La implementación de una barra de captura conversacional y multimodal (texto, audio y simulación de imagen) constituye el principal valor del sistema FinancIA!, al delegar la carga cognitiva de la entrada de datos a la inteligencia artificial de Gemini.
+    \item \textbf{Modularidad y sincronización reactiva:} La clara separación arquitectónica entre el panel lateral de métricas (Analytics) y la vista principal de transacciones permite una sincronización reactiva en tiempo real del estado global en el cliente (Zustand) tras procesar cada gasto en el backend (SQLite y Express).
+    \item \textbf{Usabilidad responsiva:} El diseño responsivo que transforma el panel lateral fijo en escritorio a un menú lateral deslizable en móvil, junto con la disposición inferior de los controles de captura, garantiza una usabilidad óptima adaptada al contexto de movilidad de los estudiantes.
+    \item \textbf{Curva de aprendizaje nula:} El uso del \textit{Empty State} en el Dashboard inicial y un diseño minimalista dirigen la atención visual del usuario de manera inmediata a la acción de registro, garantizando una curva de adopción prácticamente nula.
+\end{itemize}
+
+\subsection{Conclusiones de la Validación del MVP}
+\begin{itemize}
+    \item \textbf{Reducción de fatiga en el registro:} La validación del MVP demuestra que la adopción de interfaces conversacionales y procesamiento de lenguaje natural simplifica dramáticamente el registro de transacciones, reduciendo la fricción principal que causa el abandono de las aplicaciones de finanzas personales tradicionales.
+    \item \textbf{Efectividad de indicadores gamificados:} La incorporación de elementos visuales dinámicos de semaforización presupuestaria y barras de progreso para el ahorro promueve el autocontrol del gasto y facilita una lectura rápida del estado financiero, logrando una excelente aceptación por parte del grupo de early adopters (4.6/5.0 de satisfacción general).
+    \item \textbf{Guía para el desarrollo comercial futuro:} La retroalimentación detallada provista por los early adopters constituye una guía clara de prioridades de desarrollo para futuras iteraciones de producto, destacando la necesidad de incorporar flujos de corrección ágiles, categorías configurables y la automatización mediante la conexión a cuentas bancarias del usuario.
 \end{itemize}
 
 \subsection{Trabajo Futuro}
@@ -603,9 +707,9 @@ Para la evolución del sistema FinancIA! en fases comerciales posteriores, se pr
 \newpage
 
 % ==========================================
-% X. ANEXOS
+% ANEXOS
 % ==========================================
-\section{X. ANEXOS}
+\section{ANEXOS}
 
 \subsection{Anexo A: Evidencias Gráficas del MVP}
 En esta sección se presentan las capturas de pantalla de la interfaz de usuario web interactiva desarrollada para el MVP del sistema FinancIA!:
@@ -640,7 +744,40 @@ En esta sección se presentan las capturas de pantalla de la interfaz de usuario
 
 \newpage
 
-\subsection{Anexo B: Enlaces de Acceso y Recursos del Proyecto}
+\subsection{Anexo B: Prototipo de Alta Fidelidad en Figma (Diseño Conceptual Inicial)}
+En esta sección se presentan las capturas del prototipo interactivo de alta fidelidad diseñado inicialmente en Figma durante la fase de concepción de la solución (Entregable 2):
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{figma_chat_movil.png}
+    \caption{Prototipo de Figma: Vista de chat para dispositivos móviles.}
+    \label{fig:figma_chat_movil}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{figma_sidebar_movil.png}
+    \caption{Prototipo de Figma: Vista de la barra lateral para dispositivos móviles.}
+    \label{fig:figma_sidebar_movil}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figma_chat_desktop.png}
+    \caption{Prototipo de Figma: Vista de chat para dispositivos de escritorio.}
+    \label{fig:figma_chat_desktop}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figma_stats_desktop.png}
+    \caption{Prototipo de Figma: Vista de estadísticas para dispositivos de escritorio.}
+    \label{fig:figma_stats_desktop}
+\end{figure}
+
+\newpage
+
+\subsection{Anexo C: Enlaces de Acceso y Recursos del Proyecto}
 
 \textbf{Diseño y Estructura del Formulario de Validación:} \\
 El cuestionario de validación utilizado para evaluar y recopilar la retroalimentación de los \textit{early adopters} puede ser consultado en el siguiente enlace oficial de Microsoft Forms: \\
