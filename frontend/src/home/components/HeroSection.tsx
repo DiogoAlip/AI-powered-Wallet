@@ -43,7 +43,7 @@ export function HeroSection() {
             to="auth/register"
             className="w-full sm:w-auto px-8 py-3.5 bg-[#131b2e] hover:bg-black text-white font-sans text-sm font-bold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
           >
-            Comenzar Gratis
+            Registrarse Gratis
             <IconArrowNarrowRight className="w-4 h-4" />
           </Link>
           <button
@@ -90,7 +90,7 @@ export function HeroSection() {
               </span>
             </div>
             <span className="font-display font-extrabold text-xl text-[#0b1c30]">
-              $242.50
+              S/ 242.50
             </span>
           </div>
 
@@ -110,7 +110,7 @@ export function HeroSection() {
                   </span>
                 </div>
               </div>
-              <span className="text-xs font-bold text-red-600">-$34.20</span>
+              <span className="text-xs font-bold text-red-600">-S/ 34.20</span>
             </div>
 
             {/* Proactive AI Insight Banner */}
@@ -125,7 +125,7 @@ export function HeroSection() {
                 Tu gasto en café ha subido un{" "}
                 <strong className="text-teal-800">12%</strong> esta semana.
                 Encontramos una suscripción que podría ahorrarte{" "}
-                <strong className="text-teal-800">$40/mes</strong>.
+                <strong className="text-teal-800">S/ 40/mes</strong>.
               </p>
             </div>
           </div>

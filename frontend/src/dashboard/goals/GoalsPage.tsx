@@ -12,6 +12,7 @@ import {
   IconTrendingUp,
 } from "@tabler/icons-react";
 import { useFinancesStore } from "../../store/finances.store";
+import { formatCurrency, formatNumber } from "../../utils/format";
 import { MarkdownText } from "../chat/components/MarkdownText";
 
 export function Goals() {
@@ -60,10 +61,7 @@ export function Goals() {
     if (!isNaN(amount) && amount > 0) {
       depositSavings(amount);
       setSuccessMessage(
-        `¡Has depositado $${amount.toLocaleString("es-ES", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })} con éxito!`
+        `¡Has depositado ${formatCurrency(amount)} con éxito!`
       );
       setDepositAmount("");
       setTimeout(() => setSuccessMessage(null), 3000);
@@ -148,14 +146,7 @@ export function Goals() {
               <div className="flex justify-between items-baseline text-xs">
                 <span className="font-sans text-gray-400">Progreso acumulado</span>
                 <span className="font-display font-bold text-[#0b1c30]">
-                  $
-                  {savings.current.toLocaleString("es-ES", {
-                    minimumFractionDigits: 2,
-                  })}{" "}
-                  / $
-                  {savings.target.toLocaleString("es-ES", {
-                    minimumFractionDigits: 2,
-                  })}
+                  {formatCurrency(savings.current)} / {formatCurrency(savings.target)}
                 </span>
               </div>
               <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
@@ -169,10 +160,7 @@ export function Goals() {
                 <span>
                   {savings.target > savings.current ? (
                     <>
-                      Restan $
-                      {(savings.target - savings.current).toLocaleString("es-ES", {
-                        minimumFractionDigits: 2,
-                      })}
+                      Restan {formatCurrency(savings.target - savings.current)}
                     </>
                   ) : (
                     "¡Meta superada con éxito!"
@@ -324,10 +312,7 @@ export function Goals() {
                       
                       <div className="flex items-center gap-2.5 shrink-0">
                         <span className="text-xs font-display font-bold text-emerald-600">
-                          +${log.amount.toLocaleString("es-ES", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
+                          +{formatCurrency(log.amount)}
                         </span>
                         <button
                           onClick={() => deleteSavingsLog(log.id)}
@@ -439,8 +424,7 @@ export function Goals() {
                       {milestone.label}
                     </span>
                     <span className="text-[10px] text-gray-400 block font-semibold">
-                      Objetivo: $
-                      {milestone.value.toLocaleString("es-ES", {
+                      Objetivo: S/ {formatNumber(milestone.value, {
                         maximumFractionDigits: 0,
                       })}
                     </span>

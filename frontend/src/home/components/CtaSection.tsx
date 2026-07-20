@@ -21,7 +21,7 @@ export function CtaSection() {
             to="auth/register"
             className="w-full sm:w-auto px-8 py-4 bg-black hover:bg-gray-900 text-white font-sans text-sm font-bold rounded-xl shadow-md transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 mx-auto"
           >
-            Comenzar Gratis
+            Registrarse Gratis
             <IconArrowNarrowRight className="w-4 h-4 text-teal-400" />
           </Link>
         </div>

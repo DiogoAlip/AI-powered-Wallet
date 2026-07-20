@@ -34,10 +34,10 @@ export function LandingHeader() {
           Iniciar Sesión
         </Link>
         <Link
-          to="auth/login"
+          to="auth/register"
           className="bg-[#0b1c30] hover:bg-black text-white font-sans text-xs font-bold px-4 py-2 rounded-full shadow-sm transition-all transform hover:scale-105"
         >
-          Comenzar
+          Registrarse
         </Link>
       </div>
     </header>

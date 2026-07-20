@@ -96,7 +96,7 @@ export function AddTransactionModal({ onClose, onSubmit }: AddTransactionModalPr
           {/* Amount */}
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1">
-              Importe ($)
+              Importe (S/)
             </label>
             <input
               type="number"

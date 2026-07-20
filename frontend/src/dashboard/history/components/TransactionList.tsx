@@ -1,4 +1,5 @@
 import { IconTag, IconCreditCard, IconCalendarWeek, IconTrash } from "@tabler/icons-react";
+import { formatCurrency } from "../../../utils/format";
 import { getCategoryIcon } from "../../helpers/getCategoryIcon.tsx";
 import type { Transaction } from "../../types/ChatTypes.ts";
 
@@ -61,11 +62,8 @@ export function TransactionList({
                     tx.type === "expense" ? "text-red-600" : "text-emerald-600"
                   }`}
                 >
-                  {tx.type === "expense" ? "-" : "+"}$
-                  {tx.amount.toLocaleString("es-ES", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                  {tx.type === "expense" ? "-" : "+"}
+                  {formatCurrency(tx.amount)}
                 </span>
                 <button
                   onClick={() => deleteTransaction(tx.id)}

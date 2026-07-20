@@ -17,7 +17,7 @@ export function PricingSection() {
             <h3 className="text-xl font-bold text-gray-800">Plan Gratuito</h3>
             <div className="mt-4 flex items-baseline">
               <span className="text-4xl font-bold tracking-tight text-gray-800">
-                $0
+                S/ 0
               </span>
               <span className="ml-1 text-lg font-medium text-gray-400">
                 /mes
@@ -94,7 +94,7 @@ export function PricingSection() {
           </ul>
 
           <button className="w-full py-3 px-4 rounded-xl border-2 border-gray-800 text-base font-semibold text-[#1e293b] bg-white hover:bg-slate-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">
-            Comenzar
+            Registrarse gratis
           </button>
         </div>
 
@@ -108,7 +108,7 @@ export function PricingSection() {
             <h3 className="text-xl font-bold text-gray-800">Plan Premium</h3>
             <div className="mt-4 flex items-baseline">
               <span className="text-4xl font-bold tracking-tight text-gray-800">
-                $12
+                S/ 45
               </span>
               <span className="ml-1 text-lg font-medium text-gray-400">
                 /mes

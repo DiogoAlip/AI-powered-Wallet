@@ -14,6 +14,7 @@ import { useFinancesStore } from "../../../store/finances.store.ts";
 import { ChatInput } from "../components/ChatInput.tsx";
 import { MarkdownText } from "../components/MarkdownText.tsx";
 import type { ChatMessage } from "../../types/ChatTypes.ts";
+import { formatCurrency } from "../../../utils/format";
 import defaultAvatar from "../../../assets/default-avatar.svg";
 
 export function Chat() {
@@ -148,11 +149,8 @@ export function Chat() {
                           : "text-emerald-600"
                       }`}
                     >
-                      {msg.transactionDetail.type === "expense" ? "-" : "+"}$
-                      {msg.transactionDetail.amount.toLocaleString("es-ES", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
+                      {msg.transactionDetail.type === "expense" ? "-" : "+"}
+                      {formatCurrency(msg.transactionDetail.amount)}
                     </span>
                   </div>
                 )}

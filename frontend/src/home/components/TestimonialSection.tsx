@@ -18,7 +18,7 @@ export function TestimonialSection() {
 
         <blockquote className="font-display font-extrabold text-xl md:text-3xl lg:text-4xl text-gray-100 leading-relaxed">
           "FinancIA! transformó mi relación con el dinero. Las perspectivas de la IA
-          identificaron $200 en fugas mensuales que no sabía que existían. Es como
+          identificaron S/ 200 en fugas mensuales que no sabía que existían. Es como
           tener un asesor financiero en el bolsillo las 24 horas, los 7 días de la semana."
         </blockquote>
 

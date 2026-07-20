@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { formatCurrency, formatNumber } from "../../../utils/format";
 import {
   IconPencil,
   IconCheck,
@@ -111,22 +112,14 @@ export function BudgetItemCard({
         <div className="mt-4 flex justify-between items-baseline">
           <div>
             <span className="font-display font-bold text-lg text-[#0b1c30]">
-              $
-              {budget.spent.toLocaleString("es-ES", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
+              {formatCurrency(budget.spent)}
             </span>
             <span className="font-sans text-xs text-gray-400 ml-1">
-              consumidos de $
-              {budget.limit.toLocaleString("es-ES", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
+              consumidos de {formatCurrency(budget.limit)}
             </span>
           </div>
           <span className={`font-sans text-xs font-bold ${textColor}`}>
-            {percent.toLocaleString("es-ES", { maximumFractionDigits: 0 })}%
+            {formatNumber(percent, { maximumFractionDigits: 0 })}%
           </span>
         </div>
 
@@ -147,11 +140,7 @@ export function BudgetItemCard({
             <span className="font-sans text-xs text-red-800">
               ¡Has superado el límite por{" "}
               <strong>
-                $
-                {(budget.spent - budget.limit).toLocaleString("es-ES", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
+                {formatCurrency(budget.spent - budget.limit)}
               </strong>
               !
             </span>
@@ -169,11 +158,7 @@ export function BudgetItemCard({
             <span className="font-sans text-xs text-teal-800">
               Excelente ritmo. Te quedan{" "}
               <strong>
-                $
-                {(budget.limit - budget.spent).toLocaleString("es-ES", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
+                {formatCurrency(budget.limit - budget.spent)}
               </strong>
               .
             </span>

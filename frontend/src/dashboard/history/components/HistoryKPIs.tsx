@@ -1,4 +1,5 @@
 import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
+import { formatCurrency } from "../../../utils/format";
 
 interface HistoryKPIsProps {
   totalExpense: number;
@@ -20,11 +21,7 @@ export function HistoryKPIs({ totalExpense, totalIncome, netBalance }: HistoryKP
               netBalance >= 0 ? "text-[#0b1c30]" : "text-red-600"
             }`}
           >
-            $
-            {netBalance.toLocaleString("es-ES", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
+            {formatCurrency(netBalance)}
           </span>
         </div>
         <span className="text-xs text-gray-400 mt-1 block">
@@ -42,11 +39,7 @@ export function HistoryKPIs({ totalExpense, totalIncome, netBalance }: HistoryKP
         </div>
         <div className="flex items-baseline gap-1 mt-2">
           <span className="text-2xl font-bold font-display text-red-700">
-            -$
-            {totalExpense.toLocaleString("es-ES", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
+            -{formatCurrency(totalExpense)}
           </span>
         </div>
         <span className="text-xs text-red-500/60 mt-1 block">
@@ -64,11 +57,7 @@ export function HistoryKPIs({ totalExpense, totalIncome, netBalance }: HistoryKP
         </div>
         <div className="flex items-baseline gap-1 mt-2">
           <span className="text-2xl font-bold font-display text-emerald-700">
-            +$
-            {totalIncome.toLocaleString("es-ES", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
+            +{formatCurrency(totalIncome)}
           </span>
         </div>
         <span className="text-xs text-emerald-500/60 mt-1 block">

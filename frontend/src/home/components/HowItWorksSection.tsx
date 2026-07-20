@@ -25,7 +25,7 @@ export function HowItWorksSection() {
             {
               num: "2",
               title: "Registra Gastos por Chat",
-              desc: 'Simplemente escribe "Cena de $45 en Green Cafe" o envía una nota de voz de tu compra de café. La IA se encarga del resto.',
+              desc: 'Simplemente escribe "Cena de S/ 45 en Green Cafe" o envía una nota de voz de tu compra de café. La IA se encarga del resto.',
             },
             {
               num: "3",

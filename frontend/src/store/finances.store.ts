@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { useAuthStore } from "./auth.store.ts";
+import { formatCurrency } from "../utils/format";
 import type {
   Transaction,
   Budget,
@@ -352,10 +353,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
         });
         const savingsData = await apiFetch("/api/finances");
         const currentSavingsName = savingsData.state.savings.name;
-        confirmText = `¡Listo! He transferido $${transferAmount.toLocaleString("es-ES", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })} a tu ahorro '${currentSavingsName}'.`;
+        confirmText = `¡Listo! He transferido ${formatCurrency(transferAmount)} a tu ahorro '${currentSavingsName}'.`;
       } else if (actionId === "ignore") {
         confirmText = "De acuerdo, he ignorado la sugerencia.";
       } else if (actionId === "ask_record_expense") {

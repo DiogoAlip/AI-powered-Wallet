@@ -17,7 +17,6 @@ export const RegisterPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const register = useAuthStore((state) => state.register);
-  const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -163,25 +162,8 @@ export const RegisterPage = () => {
 
 
 
-          {/* Demo Accounts Section */}
-          <div className="mt-8 pt-6 border-t border-gray-100 space-y-3">
-            <h4 className="text-center text-xs font-bold text-gray-400 uppercase tracking-wider">
-              Probar con datos de demostración
-            </h4>
-            <button
-              type="button"
-              onClick={() => {
-                login("demo@financia.com");
-                navigate("/dashboard/chat");
-              }}
-              className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 bg-teal-50 border border-teal-100 hover:bg-teal-100 text-teal-800 rounded-xl text-xs font-bold cursor-pointer transition-all transform hover:scale-[1.01]"
-            >
-              Usuario Demo
-            </button>
-          </div>
-
           {/* Signup Link */}
-          <p className="text-center text-xs text-gray-500 mt-8">
+          <p className="text-center text-base text-gray-500 mt-8">
             ¿Ya tienes una cuenta?{" "}
             <Link
               to="/auth/login"

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { Transaction } from "../../types/ChatTypes.ts";
+import { formatCurrency, formatNumber } from "../../../utils/format";
 import { IconTrendingUp, IconTrendingDown } from "@tabler/icons-react";
 
 interface HistoryChartsProps {
@@ -349,7 +350,7 @@ export function HistoryCharts({ transactions, categories }: HistoryChartsProps) 
                   <div className="flex justify-between text-xs font-sans">
                     <span className="font-semibold text-gray-600">{category}</span>
                     <span className="text-gray-500 font-semibold">
-                      ${amount.toFixed(2)}{" "}
+                      {formatCurrency(amount)}{" "}
                       <span className="text-gray-400 font-normal">({percentage}%)</span>
                     </span>
                   </div>
@@ -364,7 +365,7 @@ export function HistoryCharts({ transactions, categories }: HistoryChartsProps) 
               
               <div className="pt-2 border-t border-gray-100 flex justify-between text-xs font-semibold text-gray-700 font-sans">
                 <span>Gasto Total</span>
-                <span>${totalExpense.toFixed(2)}</span>
+                <span>{formatCurrency(totalExpense)}</span>
               </div>
             </div>
           )}
@@ -434,7 +435,7 @@ export function HistoryCharts({ transactions, categories }: HistoryChartsProps) 
                         textAnchor="end"
                         className="fill-gray-400 font-sans text-[8px] font-semibold"
                       >
-                        ${Math.round(gridVal)}
+                        S/ {formatNumber(Math.round(gridVal))}
                       </text>
                     </g>
                   );
@@ -576,8 +577,8 @@ export function HistoryCharts({ transactions, categories }: HistoryChartsProps) 
                         hoveredPoint.type === "income" ? "bg-emerald-400" : "bg-red-400"
                       }`}
                     />
-                    {hoveredPoint.type === "income" ? "Ingreso" : "Gasto"}: $
-                    {hoveredPoint.amount.toFixed(2)}
+                    {hoveredPoint.type === "income" ? "Ingreso" : "Gasto"}:{" "}
+                    {formatCurrency(hoveredPoint.amount)}
                   </span>
                 </div>
               )}

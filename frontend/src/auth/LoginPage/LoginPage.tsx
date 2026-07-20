@@ -130,7 +130,7 @@ export const LoginPage = () => {
           </form>
 
           {/* Signup Link */}
-          <p className="text-center text-xs text-gray-500 mt-8">
+          <p className="text-center text-base text-gray-500 mt-8">
             ¿No tienes una cuenta?{" "}
             <Link
               to="/auth/register"
