@@ -136,7 +136,7 @@ export const LoginPage = () => {
               to="/auth/register"
               className="font-semibold text-teal-600 hover:underline"
             >
-              Comenzar
+              Registrate gratis
             </Link>
           </p>
         </div>
