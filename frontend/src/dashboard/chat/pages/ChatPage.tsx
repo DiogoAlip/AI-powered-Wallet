@@ -170,12 +170,7 @@ export function Chat() {
                       <button
                         key={chip.actionId}
                         onClick={() => handleActionClick(chip.actionId, msg.id)}
-                        className={`font-sans text-xs font-semibold px-4 py-2 rounded-full border transition-all ${
-                          chip.actionId === "move_to_savings" ||
-                          chip.actionId === "move_to_savings_quick"
-                            ? "text-teal-700 bg-teal-50 border-teal-200 hover:bg-teal-100"
-                            : "text-gray-600 border-gray-200 hover:bg-gray-50"
-                        }`}
+                        className="font-sans text-xs font-semibold px-4 py-2 rounded-full border transition-all text-gray-600 border-gray-200 hover:bg-gray-50"
                       >
                         {chip.text}
                       </button>

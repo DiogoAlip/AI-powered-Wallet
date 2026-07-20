@@ -14,6 +14,7 @@ import {
   IconShieldLock,
   IconInfoCircle,
   IconPig,
+  IconChartBar,
 } from "@tabler/icons-react";
 import { NavLink, useLocation, useNavigate } from "react-router";
 import { useAuthStore } from "../../store/auth.store";
@@ -29,6 +30,7 @@ interface SideBarProps {
 
 const routes = [
   { id: "limits", label: "Estadísticas y Límites", icon: IconTrendingUp },
+  { id: "analytics", label: "Análisis Visual", icon: IconChartBar },
   { id: "history", label: "Historial de Gastos", icon: IconWallet },
   { id: "goals", label: "Metas de Ahorro", icon: IconPig },
 ];

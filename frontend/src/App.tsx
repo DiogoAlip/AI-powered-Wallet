@@ -9,6 +9,7 @@ import { Chat } from "./dashboard/chat/pages/ChatPage.tsx";
 import { NewChat } from "./dashboard/chat/pages/NewChatPage.tsx";
 import { Limits } from "./dashboard/limits/LimitsPage.tsx";
 import { History } from "./dashboard/history/HistoryPage.tsx";
+import { AnalyticsPage } from "./dashboard/analytics/AnalyticsPage.tsx";
 import { Goals } from "./dashboard/goals/GoalsPage.tsx";
 import { ProfilePage } from "./dashboard/user/ProfilePage.tsx";
 import { PrivacyPage } from "./dashboard/user/PrivacyPage.tsx";
@@ -55,6 +56,10 @@ const router = createBrowserRouter([
       {
         path: "history",
         element: <History />,
+      },
+      {
+        path: "analytics",
+        element: <AnalyticsPage />,
       },
       { path: "goals", element: <Goals /> },
       { path: "profile", element: <ProfilePage /> },

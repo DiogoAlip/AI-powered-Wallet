@@ -1,70 +1,63 @@
-import { IconSparkles, IconRefresh } from "@tabler/icons-react";
+import { useNavigate } from "react-router";
+import { IconSparkles, IconArrowRight, IconLoader } from "@tabler/icons-react";
 import { useFinancesStore } from "../../../store/finances.store.ts";
 
 export function BudgetAiTips() {
-  const { budgetTips, loadingTips, refreshBudgetTips } = useFinancesStore();
+  const { startChatWithPrompt, loadingTips } = useFinancesStore();
+  const navigate = useNavigate();
 
-  // Split tips by newline and clean up any bullet points or numbering that the AI might have returned
-  const tipsArray = budgetTips
-    ? budgetTips
-        .split("\n")
-        .map((tip) => tip.replace(/^[-*•\d.\s]+/, "").trim())
-        .filter(Boolean)
-    : [];
+  const handleStartChat = async () => {
+    try {
+      const chatId = await startChatWithPrompt("budget_tips");
+      if (chatId) {
+        navigate(`/dashboard/chat/${chatId}`);
+      }
+    } catch (error) {
+      console.error("Error creating budget tips chat:", error);
+    }
+  };
 
   return (
-    <div className="bg-[#131b2e] text-white p-6 rounded-2xl shadow-md space-y-4 relative overflow-hidden group">
-      <div className="absolute right-0 bottom-0 translate-x-10 translate-y-10 w-36 h-36 bg-teal-500/10 rounded-full blur-2xl group-hover:bg-teal-500/20 transition-all duration-500" />
+    <div className="bg-[#131b2e] text-white p-6 md:p-8 rounded-3xl shadow-xl space-y-6 relative overflow-hidden group border border-teal-500/10 hover:border-teal-500/20 transition-all duration-300">
+      {/* Decorative glowing gradient elements */}
+      <div className="absolute right-0 bottom-0 translate-x-6 translate-y-6 w-48 h-48 bg-gradient-to-br from-teal-500/10 to-teal-500/20 rounded-full blur-3xl group-hover:from-teal-500/20 group-hover:to-teal-500/30 transition-all duration-500 pointer-events-none" />
+      <div className="absolute -left-12 -top-12 w-32 h-32 bg-teal-500/5 rounded-full blur-2xl pointer-events-none" />
 
-      <div className="flex items-center justify-between relative z-10">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-teal-500/20 flex items-center justify-center text-teal-300">
-            <IconSparkles className="w-4 h-4" />
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+        <div className="space-y-3 max-w-xl">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-300 border border-teal-500/20 shadow-inner">
+              <IconSparkles className="w-5 h-5 animate-pulse" />
+            </div>
+            <h3 className="font-display font-bold text-base text-white tracking-wide">
+              Consejos de Presupuesto con IA
+            </h3>
           </div>
-          <h3 className="font-display font-bold text-sm">
-            Consejos de Presupuesto con IA
-          </h3>
+          
+          <p className="font-sans text-xs md:text-sm text-gray-300 leading-relaxed">
+            Inicia una sesión de consultoría financiera inteligente con <strong className="text-teal-300 font-semibold">FinancIA!</strong>. 
+            Analizaremos tus límites semanales, metas de ahorro activas y transacciones recientes para darte recomendaciones personalizadas y accionables directamente en una nueva conversación interactiva.
+          </p>
         </div>
-        
+
         <button
-          onClick={refreshBudgetTips}
+          onClick={handleStartChat}
           disabled={loadingTips}
-          className={`p-2 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/20 hover:border-teal-500/30 transition-all cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed`}
-          title="Actualizar consejos"
+          className="px-6 py-3.5 bg-gradient-to-r from-teal-400 to-teal-500 hover:from-teal-300 hover:to-teal-400 text-[#0b1c30] font-sans text-xs md:text-sm font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg hover:shadow-teal-500/10 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:transform-none shrink-0"
         >
-          <IconRefresh className={`w-4 h-4 ${loadingTips ? "animate-spin" : ""}`} />
+          {loadingTips ? (
+            <>
+              <IconLoader className="w-4 h-4 md:w-5 h-5 animate-spin" />
+              <span>Analizando finanzas...</span>
+            </>
+          ) : (
+            <>
+              <span>Obtener Consejos en el Chat</span>
+              <IconArrowRight className="w-4 h-4 md:w-5 h-5 transition-transform group-hover:translate-x-1" />
+            </>
+          )}
         </button>
       </div>
-
-      {loadingTips ? (
-        <div className="space-y-3 animate-pulse relative z-10">
-          {[1, 2, 3].map((n) => (
-            <div key={n} className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-teal-500/40 mt-1.5 flex-shrink-0" />
-              <div className="h-3 bg-teal-500/10 rounded w-full animate-pulse" />
-            </div>
-          ))}
-        </div>
-      ) : tipsArray.length > 0 ? (
-        <ul className="space-y-3 font-sans text-xs text-gray-300 relative z-10">
-          {tipsArray.map((tip, idx) => (
-            <li key={idx} className="flex items-start gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-400 mt-1.5 flex-shrink-0" />
-              <span>{tip}</span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <div className="text-xs text-gray-400 text-center py-4 relative z-10 flex flex-col items-center gap-2">
-          <span>No hay consejos de presupuesto generados aún.</span>
-          <button
-            onClick={refreshBudgetTips}
-            className="text-xs text-teal-300 hover:text-teal-200 underline font-semibold transition-colors cursor-pointer"
-          >
-            Generar consejos ahora
-          </button>
-        </div>
-      )}
     </div>
   );
 }

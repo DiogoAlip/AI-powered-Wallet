@@ -3,17 +3,19 @@ import {
   getBudgets,
   getSavings,
   addTransaction,
-  depositSavings,
   updateBudgetLimit,
   updateTransaction,
   deleteTransaction,
   addCategory,
   updateCategory,
   deleteCategory,
-  resetSavings,
-  deleteSavingsLog,
   updateSavingsGoal,
   updateBudgetSpent,
+  getCategories,
+  getWeeklySavingsHistory,
+  getTransaction,
+  getUserBudgetTips,
+  getTransactionsInDateRange,
 } from "./db.js";
 
 const FINANCIAL_TOOLS = [
@@ -48,24 +50,6 @@ const FINANCIAL_TOOLS = [
             }
           },
           required: ["merchant", "category", "amount", "type"]
-        }
-      },
-      {
-        name: "deposit_savings",
-        description: "Deposita una cantidad de dinero en la meta de ahorro actual del usuario (ej: Fondo de Emergencia). Usa esta herramienta cuando el usuario mencione que quiere ahorrar o guardar dinero.",
-        parameters: {
-          type: "OBJECT",
-          properties: {
-            amount: {
-              type: "NUMBER",
-              description: "El monto a ahorrar en dólares."
-            },
-            note: {
-              type: "STRING",
-              description: "El concepto, motivo o descripción del ahorro (ej: 'Ahorro de almuerzo', 'Excedente de transporte', 'Premio'). Opcional."
-            }
-          },
-          required: ["amount"]
         }
       },
       {
@@ -150,7 +134,7 @@ const FINANCIAL_TOOLS = [
       },
       {
         name: "update_savings_goal",
-        description: "Actualiza el nombre o la cantidad objetivo de la meta de ahorro actual del usuario.",
+        description: "Actualiza los detalles de la meta de ahorro del usuario (nombre, objetivo, fecha de inicio y fecha límite opcional).",
         parameters: {
           type: "OBJECT",
           properties: {
@@ -161,6 +145,14 @@ const FINANCIAL_TOOLS = [
             target: {
               type: "NUMBER",
               description: "La nueva cantidad objetivo en dólares. Opcional."
+            },
+            start_date: {
+              type: "STRING",
+              description: "La fecha de inicio de la meta en formato YYYY-MM-DD. Opcional."
+            },
+            deadline: {
+              type: "STRING",
+              description: "La fecha límite de la meta en formato YYYY-MM-DD o null si no tiene. Opcional."
             }
           },
           required: []
@@ -213,29 +205,6 @@ const FINANCIAL_TOOLS = [
         }
       },
       {
-        name: "reset_savings",
-        description: "Reinicia el progreso acumulado de la meta de ahorro a cero dólares y vacía los registros correspondientes. Úsala cuando el usuario quiera empezar de nuevo o borrar su progreso de ahorro.",
-        parameters: {
-          type: "OBJECT",
-          properties: {},
-          required: []
-        }
-      },
-      {
-        name: "delete_savings_log",
-        description: "Elimina una entrada de registro de ahorro específica usando su ID. Úsala cuando el usuario quiera deshacer un depósito de ahorro específico.",
-        parameters: {
-          type: "OBJECT",
-          properties: {
-            id: {
-              type: "STRING",
-              description: "El ID del registro de ahorro que se desea eliminar."
-            }
-          },
-          required: ["id"]
-        }
-      },
-      {
         name: "update_budget_spent",
         description: "Sobrescribe o actualiza directamente la cantidad gastada de una categoría de presupuesto específica. Úsala cuando el usuario pida ajustar o corregir lo gastado en un presupuesto.",
         parameters: {
@@ -252,9 +221,87 @@ const FINANCIAL_TOOLS = [
           },
           required: ["category", "spent"]
         }
+      },
+      {
+        name: "list_budgets",
+        description: "Obtiene la lista de presupuestos por categoría del usuario, incluyendo el límite establecido y la cantidad gastada.",
+        parameters: {
+          type: "OBJECT",
+          properties: {},
+          required: []
+        }
+      },
+      {
+        name: "get_savings",
+        description: "Obtiene la información y estado actual de la meta de ahorro del usuario.",
+        parameters: {
+          type: "OBJECT",
+          properties: {},
+          required: []
+        }
+      },
+      {
+        name: "list_categories",
+        description: "Obtiene la lista de todas las categorías de gasto disponibles en el sistema del usuario.",
+        parameters: {
+          type: "OBJECT",
+          properties: {},
+          required: []
+        }
+      },
+      {
+        name: "get_weekly_savings_history",
+        description: "Obtiene el historial de ahorros semanales calculados de manera automática del usuario.",
+        parameters: {
+          type: "OBJECT",
+          properties: {},
+          required: []
+        }
+      },
+      {
+        name: "get_transaction",
+        description: "Obtiene los detalles de una transacción financiera específica utilizando su ID único.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            id: {
+              type: "STRING",
+              description: "El identificador único (ID) de la transacción que se desea consultar."
+            }
+          },
+          required: ["id"]
+        }
+      },
+      {
+        name: "get_budget_tips",
+        description: "Obtiene los últimos consejos de presupuesto y recomendaciones financieras guardadas para el usuario.",
+        parameters: {
+          type: "OBJECT",
+          properties: {},
+          required: []
+        }
+      },
+      {
+        name: "get_transactions_in_date_range",
+        description: "Obtiene la lista de transacciones del usuario que se encuentran dentro de un rango de fechas opcional.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            start_date: {
+              type: "STRING",
+              description: "La fecha de inicio (formato YYYY-MM-DD o relativo como 'Hace 7 días' o 'Ayer'). Opcional."
+            },
+            end_date: {
+              type: "STRING",
+              description: "La fecha de fin (formato YYYY-MM-DD o relativo como 'Hoy'). Opcional."
+            }
+          },
+          required: []
+        }
       }
     ]
   }
+
 ];
 
 function getSystemInstruction(transactions, budgets, savings) {
@@ -270,12 +317,19 @@ function getSystemInstruction(transactions, budgets, savings) {
     )
     .join("\n");
 
+  const savingsContext = savings.name
+    ? `  Meta: "${savings.name}"
+  Acumulado: $${savings.current.toFixed(2)} de un objetivo de $${savings.target.toFixed(2)}
+  Fecha de inicio: ${savings.start_date || 'No definida'}
+  Fecha límite: ${savings.deadline || 'No definida'}`
+    : `  Sin meta configurada actualmente.`;
+
   return `Eres FinancIA!, un asistente financiero virtual altamente inteligente, amable y proactivo. Tu objetivo es ayudar al usuario a registrar gastos, ingresos, gestionar presupuestos y alcanzar sus metas de ahorro.
 
 Aquí está el estado financiero actual del usuario en tiempo real:
 - **Ahorros**:
-  Meta: "${savings.name}"
-  Acumulado: $${savings.current.toFixed(2)} de un objetivo de $${savings.target.toFixed(2)}
+${savingsContext}
+  (Los ahorros se calculan de manera 100% automática en base a los límites sobrantes de cada semana completada transcurrida desde la fecha de inicio.)
 
 - **Límites de Presupuesto Semanales**:
 ${budgetsContext}
@@ -286,19 +340,17 @@ ${recentTxContext}
 Instrucciones de comportamiento:
 1. Responde siempre en español, de manera concisa, amable y empática.
 2. Si el usuario te indica que gastó o recibió dinero (ej: "gasté 15 en taxi", "me pagaron 100"), utiliza la herramienta 'add_transaction' para registrar la transacción. Elige la categoría correcta entre las disponibles: 'Comida fuera', 'Transporte', 'Supermercado', 'Facturas', 'Compras', 'Otros', o 'Ingresos'.
-3. Si el usuario quiere guardar dinero en sus ahorros, utiliza la herramienta 'deposit_savings'.
+3. Los ahorros se calculan automáticamente a partir de los excedentes presupuestarios de cada semana completada. El usuario NO puede hacer aportes manuales, depósitos, ni reinicios manuales de ahorros. Si el usuario te pregunta sobre depositar o iniciar ahorros de forma manual, explícale con amabilidad que el sistema lo calcula dinámicamente de forma automática al finalizar cada semana.
 4. Si el usuario quiere ajustar el límite de un presupuesto, utiliza la herramienta 'update_budget_limit'.
 5. Si el usuario quiere ver su historial de transacciones o movimientos financieros, utiliza la herramienta 'list_transactions'.
 6. Si el usuario quiere modificar, corregir o cambiar los detalles de una transacción existente (por ejemplo, cambiar el monto, la fecha, el establecimiento o la categoría), utiliza la herramienta 'update_transaction'. Primero identifica el ID de la transacción basándote en su descripción o el historial, y luego realiza el cambio.
 7. Si el usuario quiere borrar o eliminar una transacción, utiliza la herramienta 'delete_transaction' con el ID correspondiente.
-8. Si el usuario quiere actualizar o modificar la configuración de su meta de ahorro (el nombre de la meta o la cantidad del objetivo), utiliza la herramienta 'update_savings_goal'.
+8. Si el usuario quiere configurar, actualizar o modificar los parámetros de su única meta de ahorro (su nombre, cantidad objetivo, fecha de inicio o fecha límite), utiliza la herramienta 'update_savings_goal'. Si no tiene una meta configurada y quiere ahorrar, indícale amablemente que debe establecer la meta (incluyendo su fecha de inicio) para que el sistema empiece a contar sus ahorros semanales automáticos.
 9. Si el usuario quiere crear/añadir una nueva categoría de gasto, utiliza la herramienta 'add_category'. Si quiere renombrar una existente, utiliza 'update_category'. Si quiere borrar una categoría de gasto, utiliza 'delete_category'.
-10. Si el usuario quiere reiniciar por completo todo el progreso acumulado de sus ahorros (empezar desde cero), utiliza la herramienta 'reset_savings'.
-11. Si el usuario quiere eliminar un depósito de ahorro específico de su registro por su ID, utiliza la herramienta 'delete_savings_log'.
-12. Si el usuario quiere cambiar o corregir manualmente la cantidad gastada acumulada en un presupuesto, utiliza la herramienta 'update_budget_spent'.
-13. Cuando ejecutes una acción, explica brevemente qué registraste, modificaste o eliminaste y cómo afecta a las finanzas del usuario (ej: saldo restante, avance del ahorro).
-14. Si un presupuesto ha sido excedido o está al 75% o más de su capacidad, adviérteselo amablemente al usuario con recomendaciones constructivas.
-15. Nunca menciones la palabra "wallet" ni "billetera". Refiérete a la aplicación como "sistema de gestión financiera" o simplemente "FinancIA!".`;
+10. Si el usuario quiere cambiar o corregir manualmente la cantidad gastada acumulada en un presupuesto, utiliza la herramienta 'update_budget_spent'.
+11. Cuando ejecutes una acción, explica brevemente qué registraste, modificaste o eliminaste y cómo afecta a las finanzas del usuario (ej: saldo restante, avance del ahorro).
+12. Si un presupuesto ha sido excedido o está al 75% o más de su capacidad, adviérteselo amablemente al usuario con recomendaciones constructivas.
+13. Nunca menciones la palabra "wallet" ni "billetera". Refiérete a la aplicación como "sistema de gestión financiera" o simplemente "FinancIA!".`;
 }
 
 async function makeApiRequest(model, apiKey, payload) {
@@ -400,14 +452,6 @@ export async function chat(userText, chatHistory, email) {
         }
       }
       functionResult = { status: "success", transaction: newTx };
-    } else if (name === "deposit_savings") {
-      const amount = parseFloat(args.amount) || 0;
-      const note = args.note || "Aporte desde chat";
-      depositSavings(cleanEmail, amount, note);
-      functionResult = {
-        status: "success",
-        message: `Depositados $${amount.toFixed(2)} en la meta de ahorro con concepto: '${note}'.`
-      };
     } else if (name === "update_budget_limit") {
       const updateArgs = args;
       const limit = parseFloat(updateArgs.limit) || 0;
@@ -478,10 +522,12 @@ export async function chat(userText, chatHistory, email) {
       const currentSavings = getSavings(cleanEmail);
       const goalName = updateArgs.name !== undefined ? updateArgs.name : currentSavings.name;
       const target = updateArgs.target !== undefined ? parseFloat(updateArgs.target) : currentSavings.target;
-      updateSavingsGoal(cleanEmail, goalName, target);
+      const startDate = updateArgs.start_date !== undefined ? updateArgs.start_date : (currentSavings.start_date || new Date().toISOString().slice(0, 10));
+      const deadline = updateArgs.deadline !== undefined ? updateArgs.deadline : currentSavings.deadline;
+      updateSavingsGoal(cleanEmail, goalName, target, startDate, deadline);
       functionResult = {
         status: "success",
-        message: `Meta de ahorro actualizada a '${goalName}' con un objetivo de $${target.toFixed(2)}.`
+        message: `Meta de ahorro actualizada a '${goalName}' con un objetivo de $${target.toFixed(2)}, fecha de inicio ${startDate}${deadline ? ` y fecha límite ${deadline}` : ''}.`
       };
     } else if (name === "add_category") {
       const catArgs = args;
@@ -504,26 +550,6 @@ export async function chat(userText, chatHistory, email) {
         status: "success",
         message: `Categoría '${catArgs.name}' eliminada correctamente.`
       };
-    } else if (name === "reset_savings") {
-      resetSavings(cleanEmail);
-      functionResult = {
-        status: "success",
-        message: "Se ha reiniciado el progreso acumulado de tus ahorros y vaciado los registros de aportes."
-      };
-    } else if (name === "delete_savings_log") {
-      const logArgs = args;
-      const deletedLog = deleteSavingsLog(cleanEmail, logArgs.id);
-      if (deletedLog) {
-        functionResult = {
-          status: "success",
-          message: `Registro de ahorro con ID '${logArgs.id}' de $${deletedLog.amount.toFixed(2)} eliminado correctamente.`
-        };
-      } else {
-        functionResult = {
-          status: "error",
-          message: `No se encontró el registro de ahorro con ID '${logArgs.id}'.`
-        };
-      }
     } else if (name === "update_budget_spent") {
       const budgetArgs = args;
       const spent = parseFloat(budgetArgs.spent) || 0;
@@ -532,7 +558,57 @@ export async function chat(userText, chatHistory, email) {
         status: "success",
         message: `Gasto de la categoría '${budgetArgs.category}' actualizado manualmente a $${spent.toFixed(2)}.`
       };
+    } else if (name === "list_budgets") {
+      const budgets = getBudgets(cleanEmail);
+      functionResult = {
+        status: "success",
+        budgets
+      };
+    } else if (name === "get_savings") {
+      const savings = getSavings(cleanEmail);
+      functionResult = {
+        status: "success",
+        savings
+      };
+    } else if (name === "list_categories") {
+      const categories = getCategories(cleanEmail);
+      functionResult = {
+        status: "success",
+        categories
+      };
+    } else if (name === "get_weekly_savings_history") {
+      const history = getWeeklySavingsHistory(cleanEmail);
+      functionResult = {
+        status: "success",
+        history
+      };
+    } else if (name === "get_transaction") {
+      const tx = getTransaction(cleanEmail, args.id);
+      if (tx) {
+        functionResult = {
+          status: "success",
+          transaction: tx
+        };
+      } else {
+        functionResult = {
+          status: "error",
+          message: `No se encontró la transacción con ID '${args.id}'.`
+        };
+      }
+    } else if (name === "get_budget_tips") {
+      const tips = getUserBudgetTips(cleanEmail);
+      functionResult = {
+        status: "success",
+        tips
+      };
+    } else if (name === "get_transactions_in_date_range") {
+      const txs = getTransactionsInDateRange(cleanEmail, args.start_date, args.end_date);
+      functionResult = {
+        status: "success",
+        transactions: txs
+      };
     }
+
 
     const updatedContents = [
       ...contents,

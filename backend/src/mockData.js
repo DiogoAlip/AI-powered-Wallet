@@ -213,7 +213,7 @@ export const INITIAL_CHAT_HISTORY = [
     timestamp: "09:41 AM",
     text: "¡Buenos días! He analizado tus transacciones recientes. Actualmente estás $120 por debajo del presupuesto para 'Comida fuera' esta semana. ¿Te gustaría que lo transfiera a tu meta de ahorro?",
     actionChips: [
-      { text: "Transferir a Ahorros", actionId: "move_to_savings" },
+      { text: "Ver Estadísticas", actionId: "ask_view_limits" },
       { text: "Ignorar", actionId: "ignore" },
     ],
   },
@@ -261,7 +261,6 @@ export const INITIAL_CHAT_HISTORY = [
     },
     infoText: "Tus ingresos totales de esta semana han aumentado a $3,350.00.",
     actionChips: [
-      { text: "Ahorrar $50 de esto", actionId: "move_to_savings_quick" },
       { text: "Ver Estadísticas", actionId: "ask_view_limits" },
     ],
   },
@@ -280,18 +279,5 @@ export const INITIAL_CHAT_HISTORY = [
     actionChips: [
       { text: "Ver presupuestos", actionId: "ask_view_limits" },
     ],
-  },
-  {
-    id: "chat-8",
-    sender: "user",
-    timestamp: "09:50 AM",
-    text: "Genial. Ahora deposita $80 en mi Fondo de Emergencia.",
-  },
-  {
-    id: "chat-9",
-    sender: "ai",
-    timestamp: "09:50 AM",
-    text: "¡Entendido! He depositado **$80.00** en tu **Fondo de Emergencia**.",
-    infoText: "Nuevo balance de Fondo de Emergencia: $530.00 acumulados.",
   },
 ];

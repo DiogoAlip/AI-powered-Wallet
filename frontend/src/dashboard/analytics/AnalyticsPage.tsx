@@ -1,12 +1,7 @@
 import { useState } from "react";
-import type { Transaction } from "../../types/ChatTypes.ts";
-import { formatCurrency, formatNumber } from "../../../utils/format";
+import { useFinancesStore } from "../../store/finances.store.ts";
+import { formatCurrency, formatNumber } from "../../utils/format";
 import { IconTrendingUp, IconTrendingDown } from "@tabler/icons-react";
-
-interface HistoryChartsProps {
-  transactions: Transaction[];
-  categories: string[];
-}
 
 function getDaysAgo(dateStr: string): number {
   if (!dateStr) return 0;
@@ -44,7 +39,8 @@ interface TrendPoint {
   daysAgo?: number;
 }
 
-export function HistoryCharts({ transactions, categories }: HistoryChartsProps) {
+export function AnalyticsPage() {
+  const { transactions, categories } = useFinancesStore();
   const [period, setPeriod] = useState<"7d" | "1m" | "3m" | "6m" | "1y" | "all">("7d");
   const [hoveredPoint, setHoveredPoint] = useState<{
     dayLabel: string;
@@ -289,7 +285,7 @@ export function HistoryCharts({ transactions, categories }: HistoryChartsProps) 
   const expensePaths = generatePaths("expense");
 
   return (
-    <div className="space-y-6">
+    <div className="flex-1 p-5 md:p-8 overflow-y-auto no-scrollbar space-y-6 animate-fade-in-up">
       {/* Title & Period Selector */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-gray-100 p-5 rounded-2xl shadow-sm">
         <div>

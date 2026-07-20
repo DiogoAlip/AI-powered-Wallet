@@ -27,23 +27,23 @@ export interface ChatMessage {
 }
 
 export interface SavingsGoal {
-  name: string;
+  name: string | null;
   target: number;
   current: number;
-  recommendations?: string | null;
+  start_date: string | null;
+  deadline: string | null;
 }
 
-export interface SavingsLog {
-  id: string;
-  amount: number;
-  date: string;
-  note: string;
+export interface WeeklySavings {
+  weekStart: string;
+  weekEnd: string;
+  total: number;
+  categories: { category: string; limit: number; spent: number; surplus: number }[];
 }
 
 export interface AppState {
   transactions: Transaction[];
   budgets: Budget[];
   savings: SavingsGoal;
-  savingsLogs: SavingsLog[];
   chatHistory: ChatMessage[];
 }

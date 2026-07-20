@@ -1,25 +1,24 @@
 import { create } from "zustand";
 import { useAuthStore } from "./auth.store.ts";
-import { formatCurrency } from "../utils/format";
 import type {
   Transaction,
   Budget,
   ChatMessage,
   SavingsGoal,
-  SavingsLog,
+  WeeklySavings,
 } from "../dashboard/types/ChatTypes.ts";
 
 export interface UseFinancesState {
   transactions: Transaction[];
   budgets: Budget[];
   savings: SavingsGoal;
-  savingsLogs: SavingsLog[];
+  savingsHistory: WeeklySavings[];
   chatHistory: ChatMessage[];
   chatSessions: string[];
   categories: string[];
   isGenerating: boolean;
   dbReady: boolean;
-  loadingRecommendations: boolean;
+  activeChatId: string | null;
 
   // Actions
   loadUserDatabase: (email: string) => Promise<void>;
@@ -29,9 +28,6 @@ export interface UseFinancesState {
   deleteTransaction: (id: string) => Promise<void>;
   updateBudgetLimit: (category: string, limit: number) => Promise<void>;
   updateBudgetSpent: (category: string, spent: number) => Promise<void>;
-  depositSavings: (amount: number, note?: string) => Promise<void>;
-  deleteSavingsLog: (id: string) => Promise<void>;
-  resetSavings: () => Promise<void>;
   addChatMessage: (msg: ChatMessage) => Promise<void>;
   setChatHistory: (history: ChatMessage[]) => Promise<void>;
   sendMessage: (text: string, chatId?: string) => Promise<void>;
@@ -46,13 +42,13 @@ export interface UseFinancesState {
   updateCategory: (oldName: string, newName: string) => Promise<void>;
   deleteCategory: (name: string) => Promise<void>;
   deleteChatMessage: (messageId: string, chatId?: string) => Promise<void>;
-  updateSavingsGoal: (name: string, target: number) => Promise<void>;
+  updateSavingsGoal: (name: string, target: number, start_date: string, deadline?: string | null) => Promise<void>;
+  deleteSavingsGoal: () => Promise<void>;
+  loadSavingsHistory: () => Promise<void>;
   deleteUserAccount: () => Promise<void>;
-  loadSavingsRecommendations: () => Promise<string>;
-  applySavingsRecommendation: () => Promise<void>;
   budgetTips: string;
   loadingTips: boolean;
-  refreshBudgetTips: () => Promise<void>;
+  startChatWithPrompt: (type?: string, customPrompt?: string) => Promise<string | undefined>;
 }
 
 const getEmail = () => {
@@ -80,16 +76,16 @@ const apiFetch = async (url: string, options: RequestInit = {}) => {
 export const useFinancesStore = create<UseFinancesState>((set, get) => ({
   transactions: [],
   budgets: [],
-  savings: { name: "Fondo de Emergencia", target: 5000, current: 0 },
-  savingsLogs: [],
+  savings: { name: null, target: 0, current: 0, start_date: null, deadline: null },
+  savingsHistory: [],
   chatHistory: [],
   chatSessions: [],
   categories: ["Comida fuera", "Transporte", "Supermercado", "Facturas", "Compras", "Otros"],
   isGenerating: false,
   dbReady: false,
-  loadingRecommendations: false,
   budgetTips: "",
   loadingTips: false,
+  activeChatId: null,
 
   loadUserDatabase: async (_email) => {
     set({ dbReady: false });
@@ -102,11 +98,11 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
           transactions: data.state.transactions,
           budgets: data.state.budgets,
           savings: data.state.savings,
-          savingsLogs: data.state.savingsLogs || [],
           chatHistory: data.state.chatHistory,
           chatSessions: data.state.chatSessions,
           categories: data.state.categories,
           budgetTips: data.state.budgetTips || "",
+          activeChatId: data.state.activeChatId || null,
           dbReady: true,
         });
       }
@@ -115,8 +111,8 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
       set({
         transactions: [],
         budgets: [],
-        savings: { name: "Fondo de Emergencia", target: 5000, current: 0 },
-        savingsLogs: [],
+        savings: { name: null, target: 0, current: 0, start_date: null, deadline: null },
+        savingsHistory: [],
         chatHistory: [],
         chatSessions: [],
         categories: ["Comida fuera", "Transporte", "Supermercado", "Facturas", "Compras", "Otros"],
@@ -130,13 +126,14 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
     set({
       transactions: [],
       budgets: [],
-      savings: { name: "Fondo de Emergencia", target: 5000, current: 0 },
-      savingsLogs: [],
+      savings: { name: null, target: 0, current: 0, start_date: null, deadline: null },
+      savingsHistory: [],
       chatHistory: [],
       chatSessions: [],
       categories: ["Comida fuera", "Transporte", "Supermercado", "Facturas", "Compras", "Otros"],
       budgetTips: "",
       dbReady: false,
+      activeChatId: null,
     });
   },
 
@@ -218,58 +215,9 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
     }
   },
 
-  depositSavings: async (amount, note) => {
-    try {
-      const data = await apiFetch("/api/finances/savings/deposit", {
-        method: "POST",
-        body: JSON.stringify({ amount, note }),
-      });
-      if (data.success && data.state) {
-        set({
-          savings: data.state.savings,
-          savingsLogs: data.state.savingsLogs || [],
-        });
-      }
-    } catch (err) {
-      console.error("Failed to deposit savings:", err);
-    }
-  },
-
-  deleteSavingsLog: async (id) => {
-    try {
-      const data = await apiFetch(`/api/finances/savings/logs/${id}`, {
-        method: "DELETE",
-      });
-      if (data.success && data.state) {
-        set({
-          savings: data.state.savings,
-          savingsLogs: data.state.savingsLogs || [],
-        });
-      }
-    } catch (err) {
-      console.error("Failed to delete savings log:", err);
-    }
-  },
-
-  resetSavings: async () => {
-    try {
-      const data = await apiFetch("/api/finances/savings/reset", {
-        method: "POST",
-      });
-      if (data.success && data.state) {
-        set({
-          savings: data.state.savings,
-          savingsLogs: data.state.savingsLogs || [],
-        });
-      }
-    } catch (err) {
-      console.error("Failed to reset savings:", err);
-    }
-  },
-
   addChatMessage: async (msg) => {
     try {
-      const activeChatId = get().chatHistory[0]?.id || "chat-welcome";
+      const activeChatId = get().activeChatId || "chat-welcome";
       const data = await apiFetch("/api/finances/chat-messages", {
         method: "POST",
         body: JSON.stringify({ message: msg, chatId: activeChatId }),
@@ -287,7 +235,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
 
   setChatHistory: async (history) => {
     try {
-      const activeChatId = get().chatHistory[0]?.id || "chat-welcome";
+      const activeChatId = get().activeChatId || "chat-welcome";
       // Clear history on backend
       await apiFetch(`/api/finances/chat-messages?chatId=${activeChatId}`, {
         method: "DELETE",
@@ -312,8 +260,29 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
   },
 
   sendMessage: async (text, chatId) => {
-    const activeChatId = chatId || get().chatHistory[0]?.id || "chat-welcome";
-    set({ isGenerating: true });
+    const activeChatId = chatId || get().activeChatId || "chat-welcome";
+    const userMsg: ChatMessage = {
+      id: `chat-${Date.now()}`,
+      sender: "user",
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      text,
+    };
+
+    if (activeChatId === get().activeChatId) {
+      set({
+        chatHistory: [...get().chatHistory, userMsg],
+        isGenerating: true,
+      });
+    } else {
+      set({
+        activeChatId,
+        chatHistory: [userMsg],
+        isGenerating: true,
+      });
+    }
 
     try {
       const data = await apiFetch("/api/finances/chat", {
@@ -322,15 +291,24 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
       });
 
       if (data.success && data.state) {
-        set({
-          transactions: data.state.transactions,
-          budgets: data.state.budgets,
-          savings: data.state.savings,
-          savingsLogs: data.state.savingsLogs || [],
-          chatHistory: data.state.chatHistory,
-          chatSessions: data.state.chatSessions,
-          isGenerating: false,
-        });
+        if (activeChatId === get().activeChatId) {
+          set({
+            transactions: data.state.transactions,
+            budgets: data.state.budgets,
+            savings: data.state.savings,
+            chatHistory: data.state.chatHistory,
+            chatSessions: data.state.chatSessions,
+            isGenerating: false,
+          });
+        } else {
+          set({
+            transactions: data.state.transactions,
+            budgets: data.state.budgets,
+            savings: data.state.savings,
+            chatSessions: data.state.chatSessions,
+            isGenerating: false,
+          });
+        }
       }
     } catch (error: any) {
       console.error("Failed to send chat message:", error);
@@ -338,10 +316,16 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
       try {
         const data = await apiFetch("/api/finances");
         if (data.success && data.state) {
-          set({
-            chatHistory: data.state.chatHistory,
-            chatSessions: data.state.chatSessions,
-          });
+          if (activeChatId === get().activeChatId) {
+            set({
+              chatHistory: data.state.chatHistory,
+              chatSessions: data.state.chatSessions,
+            });
+          } else {
+            set({
+              chatSessions: data.state.chatSessions,
+            });
+          }
         }
       } catch (e) {
         console.error("Failed to recover finances state:", e);
@@ -351,7 +335,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
   },
 
   applyAction: async (actionId, messageId, chatId) => {
-    const activeChatId = chatId || get().chatHistory[0]?.id || "chat-welcome";
+    const activeChatId = chatId || get().activeChatId || "chat-welcome";
     let navigateTo: string | undefined;
     let focusInput: boolean | undefined;
 
@@ -363,16 +347,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
 
       // 2. Perform target actions
       let confirmText = "";
-      if (actionId === "move_to_savings" || actionId === "move_to_savings_quick") {
-        const transferAmount = actionId === "move_to_savings" ? 120 : 50;
-        await apiFetch("/api/finances/savings/deposit", {
-          method: "POST",
-          body: JSON.stringify({ amount: transferAmount }),
-        });
-        const savingsData = await apiFetch("/api/finances");
-        const currentSavingsName = savingsData.state.savings.name;
-        confirmText = `¡Listo! He transferido ${formatCurrency(transferAmount)} a tu ahorro '${currentSavingsName}'.`;
-      } else if (actionId === "ignore") {
+      if (actionId === "ignore") {
         confirmText = "De acuerdo, he ignorado la sugerencia.";
       } else if (actionId === "ask_record_expense") {
         confirmText = "Perfecto. Dime qué compraste y cuánto costó. Por ejemplo: 'Compré un café por 4.50'.";
@@ -411,8 +386,8 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
         set({
           chatHistory: data.state.chatHistory,
           savings: data.state.savings,
-          savingsLogs: data.state.savingsLogs || [],
           chatSessions: data.state.chatSessions,
+          activeChatId: data.state.activeChatId || null,
         });
       }
       return { success: true, navigateTo, focusInput };
@@ -423,10 +398,15 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
   },
 
   loadChatHistory: async (chatId) => {
+    if (chatId !== get().activeChatId) {
+      set({ activeChatId: chatId, chatHistory: [] });
+    }
     try {
       const data = await apiFetch(`/api/finances/chat-history?chatId=${chatId}`);
       if (data.success) {
-        set({ chatHistory: data.chatHistory });
+        if (chatId === get().activeChatId) {
+          set({ chatHistory: data.chatHistory });
+        }
       }
     } catch (err) {
       console.error("Failed to load chat history:", err);
@@ -534,6 +514,7 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
           chatSessions: data.state.chatSessions,
           transactions: data.state.transactions,
           budgets: data.state.budgets,
+          activeChatId: targetChatId,
         });
       }
     } catch (err) {
@@ -541,17 +522,41 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
     }
   },
 
-  updateSavingsGoal: async (name, target) => {
+  updateSavingsGoal: async (name, target, start_date, deadline) => {
     try {
       const data = await apiFetch("/api/finances/savings", {
         method: "PUT",
-        body: JSON.stringify({ name, target }),
+        body: JSON.stringify({ name, target, start_date, deadline: deadline || null }),
       });
       if (data.success && data.state) {
         set({ savings: data.state.savings });
       }
     } catch (err) {
       console.error("Failed to update savings goal:", err);
+    }
+  },
+
+  deleteSavingsGoal: async () => {
+    try {
+      const data = await apiFetch("/api/finances/savings", {
+        method: "DELETE",
+      });
+      if (data.success && data.state) {
+        set({ savings: data.state.savings, savingsHistory: [] });
+      }
+    } catch (err) {
+      console.error("Failed to delete savings goal:", err);
+    }
+  },
+
+  loadSavingsHistory: async () => {
+    try {
+      const data = await apiFetch("/api/finances/savings/history");
+      if (data.success) {
+        set({ savingsHistory: data.history || [] });
+      }
+    } catch (err) {
+      console.error("Failed to load savings history:", err);
     }
   },
 
@@ -566,61 +571,31 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
     }
   },
 
-  loadSavingsRecommendations: async () => {
-    set({ loadingRecommendations: true });
-    try {
-      const data = await apiFetch("/api/finances/savings/recommendations");
-      if (data.success) {
-        set({ savings: data.state.savings, loadingRecommendations: false });
-        return data.recommendations;
-      }
-    } catch (err) {
-      console.error("Failed to load savings recommendations:", err);
-    }
-    set({ loadingRecommendations: false });
-    return "";
-  },
 
-  applySavingsRecommendation: async () => {
-    set({ loadingRecommendations: true });
-    try {
-      const data = await apiFetch("/api/finances/savings/apply-recommendation", {
-        method: "POST",
-      });
-      if (data.success && data.state) {
-        set({
-          savings: data.state.savings,
-          savingsLogs: data.state.savingsLogs || [],
-          budgets: data.state.budgets,
-          chatHistory: data.state.chatHistory,
-          loadingRecommendations: false,
-        });
-      }
-    } catch (err) {
-      console.error("Failed to apply savings recommendation:", err);
-    }
-    set({ loadingRecommendations: false });
-  },
 
-  refreshBudgetTips: async () => {
+
+  startChatWithPrompt: async (type, customPrompt) => {
     set({ loadingTips: true });
     try {
-      const data = await apiFetch("/api/finances/budgets/tips/refresh", {
-        method: "POST"
+      const data = await apiFetch("/api/finances/chat/new-with-prompt", {
+        method: "POST",
+        body: JSON.stringify({ type, customPrompt }),
       });
       if (data.success) {
         set({
-          budgetTips: data.budgetTips || "",
           transactions: data.state.transactions,
           budgets: data.state.budgets,
           savings: data.state.savings,
-          savingsLogs: data.state.savingsLogs || [],
           chatHistory: data.state.chatHistory,
+          chatSessions: data.state.chatSessions,
+          activeChatId: data.chatId || null,
         });
+        return data.chatId;
       }
     } catch (err) {
-      console.error("Failed to refresh budget tips:", err);
+      console.error("Failed to start chat with prompt:", err);
+    } finally {
+      set({ loadingTips: false });
     }
-    set({ loadingTips: false });
   },
 }));

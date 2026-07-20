@@ -8,6 +8,153 @@ import {
   INITIAL_CHAT_HISTORY,
 } from "./mockData.js";
 
+// ── Date helpers for dynamic savings calculation ──
+
+/**
+ * Parses relative date strings ("Hoy", "Ayer", "Hace N días", "09:45 AM", etc.)
+ * and ISO dates into a Date object anchored to the user's registration moment.
+ */
+export function parseDateString(dateStr) {
+  if (!dateStr) return null;
+
+  // ISO format (e.g. "2026-07-15" or "2026-07-15T...")
+  if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+    return new Date(dateStr);
+  }
+
+  // DD/MM/YYYY format (from savings_logs or locale dates)
+  const dmyMatch = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+  if (dmyMatch) {
+    return new Date(parseInt(dmyMatch[3]), parseInt(dmyMatch[2]) - 1, parseInt(dmyMatch[1]));
+  }
+
+  const now = new Date();
+  const lower = dateStr.toLowerCase().trim();
+
+  if (lower === "hoy" || /^\d{1,2}:\d{2}/.test(lower)) {
+    return now;
+  }
+  if (lower === "ayer") {
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+  }
+
+  // "Hace N días"
+  const daysMatch = lower.match(/hace\s+(\d+)\s*d[ií]as?/);
+  if (daysMatch) {
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate() - parseInt(daysMatch[1]));
+  }
+
+  // Fallback: treat as today
+  return now;
+}
+
+/** Returns the Monday (start of ISO week) as a YYYY-MM-DD string. */
+export function getMondayStr(date) {
+  const d = new Date(date);
+  const day = d.getDay(); // 0=Sun .. 6=Sat
+  const diff = day === 0 ? 6 : day - 1; // distance to Monday
+  d.setDate(d.getDate() - diff);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Returns a YYYY-MM-DD string for a Date. */
+function toDateStr(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+/**
+ * Dynamically calculates weekly savings between startDate and deadline
+ * by grouping expense transactions into ISO weeks and computing
+ * (budgetLimit - weeklySpent) per category per week.
+ *
+ * Returns { totalSaved, weeks: [{ weekStart, weekEnd, total, categories: [{category, limit, spent, surplus}] }] }
+ */
+export function calculateDynamicSavings(email, startDate, deadline) {
+  const db = getDb();
+  const cleanEmail = email.toLowerCase();
+
+  if (!startDate) return { totalSaved: 0, weeks: [] };
+
+  // Determine the range of completed weeks
+  const start = new Date(startDate);
+  const now = new Date();
+  const currentMonday = getMondayStr(now);
+
+  // Get budgets for the user (we use current limits for all weeks)
+  const budgets = getBudgets(cleanEmail);
+  const limitMap = {};
+  for (const b of budgets) {
+    limitMap[b.category] = b.limit;
+  }
+
+  // Get all expense transactions
+  const allTx = db.prepare(
+    "SELECT category, amount, date FROM transactions WHERE user_email = ? AND type = 'expense'"
+  ).all(cleanEmail);
+
+  // Parse dates and group expenses by week (Monday string)
+  const weekExpenses = {}; // { weekMonday: { category: totalSpent } }
+  for (const tx of allTx) {
+    const txDate = parseDateString(tx.date);
+    if (!txDate) continue;
+    const monday = getMondayStr(txDate);
+    if (!weekExpenses[monday]) weekExpenses[monday] = {};
+    if (!weekExpenses[monday][tx.category]) weekExpenses[monday][tx.category] = 0;
+    weekExpenses[monday][tx.category] += tx.amount;
+  }
+
+  // Enumerate completed weeks from startDate to before current week
+  const startMonday = getMondayStr(start);
+  const deadlineStr = deadline || null;
+
+  const weeks = [];
+  let totalSaved = 0;
+
+  // Iterate week by week from startMonday
+  let weekDate = new Date(startMonday);
+  while (true) {
+    const wMonday = toDateStr(weekDate);
+    // Stop if we've reached the current (incomplete) week
+    if (wMonday >= currentMonday) break;
+    // Stop if past the deadline
+    if (deadlineStr && wMonday > deadlineStr) break;
+
+    const wSunday = new Date(weekDate);
+    wSunday.setDate(wSunday.getDate() + 6);
+    const wSundayStr = toDateStr(wSunday);
+
+    const expenses = weekExpenses[wMonday] || {};
+    const categories = [];
+    let weekTotal = 0;
+
+    for (const [cat, limit] of Object.entries(limitMap)) {
+      if (limit <= 0) continue;
+      const spent = expenses[cat] || 0;
+      const surplus = Math.max(0, limit - spent);
+      if (surplus > 0) {
+        categories.push({ category: cat, limit, spent: Math.round(spent * 100) / 100, surplus: Math.round(surplus * 100) / 100 });
+        weekTotal += surplus;
+      }
+    }
+
+    weekTotal = Math.round(weekTotal * 100) / 100;
+
+    weeks.push({
+      weekStart: wMonday,
+      weekEnd: wSundayStr,
+      total: weekTotal,
+      categories,
+    });
+    totalSaved += weekTotal;
+
+    // Move to next week
+    weekDate.setDate(weekDate.getDate() + 7);
+  }
+
+  totalSaved = Math.round(totalSaved * 100) / 100;
+  return { totalSaved, weeks };
+}
+
 const DEFAULT_CATEGORIES = [
   "Comida fuera",
   "Transporte",
@@ -97,6 +244,18 @@ export function initDb(dbPath = "./data/finances.db") {
     // Already exists
   }
 
+  try {
+    db.exec("ALTER TABLE savings ADD COLUMN start_date TEXT;");
+  } catch (e) {
+    // Already exists
+  }
+
+  try {
+    db.exec("ALTER TABLE savings ADD COLUMN deadline TEXT;");
+  } catch (e) {
+    // Already exists
+  }
+
   db.exec(`
     CREATE TABLE IF NOT EXISTS chat_messages (
       id TEXT PRIMARY KEY,
@@ -121,6 +280,13 @@ export function initDb(dbPath = "./data/finances.db") {
     );
   `);
 
+  // Initialize/reset demo account on startup
+  try {
+    initializeUser("demo@financia.com");
+  } catch (err) {
+    console.error("Failed to auto-initialize demo user:", err);
+  }
+
   return db;
 }
 
@@ -142,9 +308,19 @@ export function initializeUser(email, name = "Socio FinancIA!", password = null)
   const db = getDb();
   const cleanEmail = email.toLowerCase();
   const existing = getUser(cleanEmail);
+  const isDemo = cleanEmail === "demo@financia.com";
 
-  if (existing && existing.initialized) {
+  if (existing && existing.initialized && !isDemo) {
     return existing;
+  }
+
+  if (isDemo) {
+    db.prepare("DELETE FROM transactions WHERE user_email = ?").run(cleanEmail);
+    db.prepare("DELETE FROM budgets WHERE user_email = ?").run(cleanEmail);
+    db.prepare("DELETE FROM savings WHERE user_email = ?").run(cleanEmail);
+    db.prepare("DELETE FROM savings_logs WHERE user_email = ?").run(cleanEmail);
+    db.prepare("DELETE FROM chat_messages WHERE user_email = ?").run(cleanEmail);
+    db.prepare("DELETE FROM categories WHERE user_email = ?").run(cleanEmail);
   }
 
   // Create user
@@ -163,7 +339,6 @@ export function initializeUser(email, name = "Socio FinancIA!", password = null)
     );
   }
 
-  const isDemo = cleanEmail === "demo@financia.com";
   if (isDemo) {
     // Seed default data
     db.prepare("UPDATE users SET budget_tips = ? WHERE email = ?").run(
@@ -180,9 +355,25 @@ export function initializeUser(email, name = "Socio FinancIA!", password = null)
         "INSERT OR IGNORE INTO budgets (user_email, category, spent, limit_val, icon, color) VALUES (?, ?, ?, ?, ?, ?)"
       ).run(cleanEmail, b.category, b.spent, b.limit, b.icon, b.color);
     }
+
+    const demoStartDate = new Date();
+    demoStartDate.setDate(demoStartDate.getDate() - 30);
+    const demoStartDateStr = demoStartDate.toISOString().slice(0, 10);
+
+    const demoDeadline = new Date();
+    demoDeadline.setDate(demoDeadline.getDate() + 60);
+    const demoDeadlineStr = demoDeadline.toISOString().slice(0, 10);
+
     db.prepare(
-      "INSERT OR IGNORE INTO savings (user_email, name, target, current) VALUES (?, ?, ?, ?)"
-    ).run(cleanEmail, INITIAL_SAVINGS.name, INITIAL_SAVINGS.target, INITIAL_SAVINGS.current);
+      "INSERT OR IGNORE INTO savings (user_email, name, target, current, start_date, deadline) VALUES (?, ?, ?, ?, ?, ?)"
+    ).run(
+      cleanEmail,
+      INITIAL_SAVINGS.name,
+      INITIAL_SAVINGS.target,
+      INITIAL_SAVINGS.current,
+      demoStartDateStr,
+      demoDeadlineStr
+    );
 
     const mockLogs = [
       { id: "sl-1", amount: 150.0, date: "Hace 15 días", note: "Aporte inicial" },
@@ -335,50 +526,22 @@ export function updateBudgetSpent(email, category, spent) {
 export function getSavings(email) {
   const db = getDb();
   const row = db.prepare(
-    "SELECT name, target, current, recommendations FROM savings WHERE user_email = ?"
+    "SELECT name, target, current, start_date, deadline FROM savings WHERE user_email = ?"
   ).get(email.toLowerCase());
 
-  if (row) {
+  if (row && row.name && row.target > 0) {
+    // Dynamically calculate current savings from weekly surpluses
+    const { totalSaved } = calculateDynamicSavings(email, row.start_date, row.deadline);
     return {
       name: row.name,
       target: row.target,
-      current: row.current,
-      recommendations: row.recommendations || null,
+      current: totalSaved,
+      start_date: row.start_date || null,
+      deadline: row.deadline || null,
     };
   }
-  return INITIAL_SAVINGS;
-}
-
-export function depositSavings(email, amount, note = "Aporte manual") {
-  const db = getDb();
-  const cleanEmail = email.toLowerCase();
-  db.prepare(
-    "UPDATE savings SET current = current + ? WHERE user_email = ?"
-  ).run(amount, cleanEmail);
-
-  const id = `sl-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-  const date = new Date().toLocaleDateString("es-ES", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-  db.prepare(
-    "INSERT INTO savings_logs (id, user_email, amount, date, note) VALUES (?, ?, ?, ?, ?)"
-  ).run(id, cleanEmail, amount, date, note);
-}
-
-export function resetSavings(email) {
-  const db = getDb();
-  const cleanEmail = email.toLowerCase();
-  db.prepare(
-    "UPDATE savings SET current = 0 WHERE user_email = ?"
-  ).run(cleanEmail);
-  db.prepare(
-    "DELETE FROM savings_logs WHERE user_email = ?"
-  ).run(cleanEmail);
+  // No active goal
+  return { name: null, target: 0, current: 0, start_date: null, deadline: null };
 }
 
 export function getCategories(email) {
@@ -504,31 +667,6 @@ export function deleteChatMessage(messageId) {
   db.prepare("DELETE FROM chat_messages WHERE id = ?").run(messageId);
 }
 
-export function getSavingsLogs(email) {
-  const db = getDb();
-  const rows = db.prepare(
-    "SELECT id, amount, date, note FROM savings_logs WHERE user_email = ? ORDER BY rowid DESC"
-  ).all(email.toLowerCase());
-  return rows.map((r) => ({
-    id: r.id,
-    amount: r.amount,
-    date: r.date,
-    note: r.note,
-  }));
-}
-
-export function deleteSavingsLog(email, id) {
-  const db = getDb();
-  const cleanEmail = email.toLowerCase();
-  const log = db.prepare("SELECT amount FROM savings_logs WHERE id = ? AND user_email = ?").get(id, cleanEmail);
-  if (log) {
-    db.prepare("DELETE FROM savings_logs WHERE id = ? AND user_email = ?").run(id, cleanEmail);
-    db.prepare("UPDATE savings SET current = MAX(0, current - ?) WHERE user_email = ?").run(log.amount, cleanEmail);
-    return log;
-  }
-  return null;
-}
-
 export function getUserState(email) {
   const cleanEmail = email.toLowerCase();
   const activeChatId = getLastActiveChatId(cleanEmail);
@@ -536,7 +674,6 @@ export function getUserState(email) {
     transactions: getTransactions(cleanEmail),
     budgets: getBudgets(cleanEmail),
     savings: getSavings(cleanEmail),
-    savingsLogs: getSavingsLogs(cleanEmail),
     categories: getCategories(cleanEmail),
     chatSessions: getChatSessions(cleanEmail),
     activeChatId,
@@ -545,28 +682,29 @@ export function getUserState(email) {
   };
 }
 
-export function updateSavingsGoal(email, name, target) {
+export function updateSavingsGoal(email, name, target, startDate, deadline) {
   const db = getDb();
-  db.prepare("UPDATE savings SET name = ?, target = ? WHERE user_email = ?").run(
+  db.prepare("UPDATE savings SET name = ?, target = ?, start_date = ?, deadline = ? WHERE user_email = ?").run(
     name,
     target,
+    startDate || null,
+    deadline || null,
     email.toLowerCase()
   );
 }
 
-export function saveSavingsRecommendations(email, recommendationsMarkdown) {
+export function deleteSavingsGoal(email) {
   const db = getDb();
-  db.prepare("UPDATE savings SET recommendations = ? WHERE user_email = ?").run(
-    recommendationsMarkdown,
+  db.prepare("UPDATE savings SET name = NULL, target = 0, current = 0, start_date = NULL, deadline = NULL, recommendations = NULL WHERE user_email = ?").run(
     email.toLowerCase()
   );
 }
 
-export function clearSavingsRecommendations(email) {
-  const db = getDb();
-  db.prepare("UPDATE savings SET recommendations = NULL WHERE user_email = ?").run(
-    email.toLowerCase()
-  );
+export function getWeeklySavingsHistory(email) {
+  const savings = getSavings(email);
+  if (!savings || !savings.start_date) return [];
+  const { weeks } = calculateDynamicSavings(email, savings.start_date, savings.deadline);
+  return weeks;
 }
 
 export function deleteUserAccount(email) {
@@ -657,5 +795,38 @@ export function updateTransaction(email, id, updatedFields) {
     account,
     type
   };
+}
+
+export function getTransactionsInDateRange(email, startDateStr, endDateStr) {
+  const cleanEmail = email.toLowerCase();
+  
+  // Parse input range boundaries
+  const rangeStart = startDateStr ? parseDateString(startDateStr) : null;
+  const rangeEnd = endDateStr ? parseDateString(endDateStr) : null;
+
+  // Get all transactions for the user
+  const allTx = getTransactions(cleanEmail);
+
+  // Filter them based on parsed dates
+  return allTx.filter((tx) => {
+    const txDate = parseDateString(tx.date);
+    if (!txDate) return false;
+
+    if (rangeStart) {
+      const d1 = new Date(txDate);
+      d1.setHours(0, 0, 0, 0);
+      const dStart = new Date(rangeStart);
+      dStart.setHours(0, 0, 0, 0);
+      if (d1 < dStart) return false;
+    }
+    if (rangeEnd) {
+      const d1 = new Date(txDate);
+      d1.setHours(0, 0, 0, 0);
+      const dEnd = new Date(rangeEnd);
+      dEnd.setHours(23, 59, 59, 999);
+      if (d1 > dEnd) return false;
+    }
+    return true;
+  });
 }
 
