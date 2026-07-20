@@ -259,11 +259,6 @@ Como validación cuantitativa del problema en la comunidad de Tingo María, se r
     \item Se obtuvo una aceptación de 6.29/10 hacia una solución de chatbot basada en inteligencia artificial, y de 6.21/10 para la automatización mediante lectura de notificaciones, ratificando la viabilidad de proponer FinancIA! como alternativa tecnológica.
 \end{itemize}
 
-\newpage
-
-% ==========================================
-% DESCRIPCIÓN DEL MVP
-% ==========================================
 \section{DESCRIPCIÓN DEL MVP}
 
 \subsection{Nombre del MVP}
@@ -274,14 +269,16 @@ Facilitar el registro, control y planificación de las finanzas personales media
 
 \subsection{Funcionalidades mínimas implementadas}
 \begin{enumerate}
-    \item \textbf{Asistente de IA (Chat):} Un módulo interactivo de chat donde el usuario escribe un mensaje simple (ej. \textit{``Gasté \$25 en Uber Trip hoy''}). La aplicación interpreta el texto en lenguaje natural, extrae automáticamente el monto, el establecimiento y la categoría de gasto, y lo registra sin intervención manual adicional.
-    \item \textbf{Historial de Movimientos:} Panel integral que muestra el balance neto, los ingresos totales y los egresos acumulados en tiempo real. Incluye un historial detallado de transacciones con un buscador por establecimiento y filtros por categoría o tipo de flujo, además de permitir el registro manual.
-    \item \textbf{Límites de Presupuesto:} Control de gastos por categorías con alertas de consumo progresivo utilizando un código de colores (verde para saludable, amarillo para advertencia al llegar al 75\%, y rojo al sobrepasar el 100\%). Incluye una línea temporal semanal para comparar el ritmo de gasto frente al avance de la semana.
-    \item \textbf{Metas de Ahorro:} Rastreador de metas (ej. \textit{Fondo de Emergencia}) con barra de progreso interactiva, simulador de depósitos rápidos para ingresar montos ficticios y configuraciones mediante interruptores (\textit{toggles}) para recibir informes proactivos de la IA.
+    \item \textbf{Asistente de IA (Chat Inteligente Multiturno):} Un módulo interactivo de chat integrado con la API de Google Gemini (`gemini-3.5-flash`) mediante llamadas a funciones nativas (\textit{Function Calling}). Interpreta comandos en lenguaje natural para realizar operaciones CRUD completas directamente en la base de datos (adición, lectura, edición y borrado de transacciones, límites presupuestarios, categorías personalizadas y metas de ahorro).
+    \item \textbf{Historial de Movimientos Persistente:} Panel integral que muestra el balance neto, los ingresos totales y los egresos acumulados en tiempo real. Permite visualizar, buscar y realizar el registro, edición o eliminación de transacciones de forma manual y limpia en sincronización con la base de datos SQLite.
+    \item \textbf{Límites de Presupuesto con Alertas Dinámicas:} Módulo de control de egresos por categorías con barras de progreso coloreadas bajo un código semáforo de advertencia (verde para saludable, amarillo para advertencia al llegar al 75\%, y rojo al sobrepasar el 100\%). Incluye un gráfico lineal de ritmo semanal e integra la funcionalidad de acceso directo (\textit{shortcut}) para generar una sesión de chat analítica con la IA en busca de 3 consejos personalizados.
+    \item \textbf{Metas de Ahorro y Acumulación Automática:} Registro de una meta de ahorro (nombre, monto objetivo, fecha de inicio y fecha límite opcional) con porcentaje de progreso y visualización de hitos alcanzados. El dinero acumulado se calcula y añade automáticamente al finalizar cada semana (lunes a domingo) a partir de los excedentes no gastados de los presupuestos configurados.
+    \item \textbf{Control de Categorías Personalizadas:} Herramienta de gestión para crear, renombrar o eliminar categorías financieras, recalculando dinámicamente presupuestos y transacciones afectadas.
+    \item \textbf{Gestión de Cuentas y Seguridad:} Acceso seguro al sistema mediante registro de usuarios, inicio de sesión cifrado, actualización de credenciales de acceso y eliminación permanente de cuenta, garantizando el aislamiento de datos por correo electrónico.
 \end{enumerate}
 
 \subsection{Alcance del MVP}
-El alcance de este MVP se centra en el desarrollo de la interfaz de usuario web responsiva (implementada con React, TypeScript y Tailwind CSS/CSS vanilla) con un almacenamiento de datos en el estado local de la aplicación (\textit{local storage} / \textit{store}). Muestra de forma funcional los flujos completos de interacción de chat, visualización de balances, cálculo dinámico de presupuestos por categoría y simulación de ahorros sin necesidad de una infraestructura de base de datos en la nube o pasarelas de pago.
+El alcance de este MVP comprende una arquitectura distribuida de pila completa (Full-Stack). El frontend responsivo y adaptable está desarrollado en React, TypeScript y estilos estilizados con CSS Vanilla. El backend consta de un servidor REST en Node.js y Express con un motor de persistencia relacional local SQLite mediante la API nativa `node:sqlite` de Node.js v22. La inteligencia artificial conversacional se integra a través de llamadas seguras a la API de Google Gemini. El alcance incluye el registro seguro, aislamiento de bases de datos por usuario, procesamiento asíncrono y visualización instantánea del estado financiero en la interfaz.
 
 \subsection{Evidencias Gráficas del MVP}
 Las capturas de pantalla de la interfaz gráfica y los módulos del MVP (Chat con Asistente de IA, Historial de Movimientos, Límites de Presupuesto y Metas de Ahorro) se han organizado detalladamente en la sección de \textbf{Anexos} al final del documento (ver Figuras 1, 2, 3 y 4 en el Anexo A).
@@ -294,31 +291,26 @@ Las capturas de pantalla de la interfaz gráfica y los módulos del MVP (Chat co
 \section{DISEÑO DE INTERFAZ (UI/UX) Y FLUJO DE ACTIVIDADES}
 
 \subsection{Arquitectura de Vistas (Diseño Visual y Componentes)}
-La interfaz de usuario de FinancIA! fue diseñada con un enfoque responsivo (adaptable de escritorio a móvil) centrado en reducir el esfuerzo cognitivo del usuario mediante una jerarquía visual clara y un esquema de colores armónico. El diseño se divide en tres componentes visuales principales:
+La interfaz de usuario de FinancIA! fue diseñada con un enfoque responsivo (adaptable de escritorio a móvil) centrado en reducir el esfuerzo cognitivo del usuario mediante una jerarquía visual clara y un esquema de colores armónico. El diseño se divide en los siguientes componentes y vistas principales:
 \begin{enumerate}
-    \item \textbf{Panel Lateral (Sidebar / Drawer):} En dispositivos de escritorio, se mantiene fijo a la izquierda utilizando un tema oscuro que contrasta con la zona principal. En dispositivos móviles, se convierte en un menú lateral deslizable (Drawer) accesible mediante un ícono de hamburguesa. Este panel contiene:
-    \begin{itemize}
-        \item \textbf{Botón de Acción Principal (CTA):} Acceso rápido para añadir transacciones manualmente.
-        \item \textbf{Sección Analytics:} Tarjetas de métricas clave que resumen los gastos totales, el promedio por transacción y la cantidad total de transacciones realizadas, permitiendo una lectura financiera rápida y acumulada.
-        \item \textbf{Sección Filters:} Menú desplegable para filtrar los datos mostrados según períodos temporales específicos (ej: "Este mes").
-    \end{itemize}
-    \item \textbf{Vista Principal (Dashboard):} Un área de trabajo limpia de tema claro y minimalista que muestra los balances generales y las metas de ahorro. Si el usuario no ha registrado transacciones, se presenta un estado vacío (\textit{Empty State}) con un ícono ilustrativo y el mensaje de guía ``No expenses yet'', orientando al usuario hacia la primera acción.
-    \item \textbf{Barra de Captura Conversacional y Multimodal (Bottom Bar):} Situada en la parte inferior de la pantalla de chat, es el núcleo interactivo con la IA. Permite la digitación de texto libre, e integra un botón de dictado de voz (micrófono) y un botón de adjuntos (clip de papel) que representa la funcionalidad de OCR de imágenes de recibos.
+    \item \textbf{Panel Lateral de Navegación Inteligente (Sidebar / Drawer):} En dispositivos de escritorio, se mantiene como una barra lateral retráctil a la izquierda en color azul claro (`\#eff4ff`). En dispositivos móviles, se convierte en un menú lateral deslizable (Drawer) accesible mediante un ícono de hamburguesa. Este panel contiene el encabezado de marca de la aplicación, el botón ``Nuevo Chat'' para iniciar nuevas conversaciones, una sección dinámica que recopila el historial histórico de sesiones de chat ordenado cronológicamente, accesos directos al resto de vistas del sistema y un panel inferior del perfil de usuario para acceder a su configuración de perfil, seguridad o cerrar sesión.
+    \item \textbf{Vista de Módulo de Chat Conversacional:} Área interactiva principal que despliega el historial de mensajes de la sesión activa. Muestra un estado de bienvenida dinámico con chips de acción rápida en caso de no registrarse mensajes previos. Posee una barra de entrada (Bottom Bar) con área de escritura de altura adaptativa, botón para dictado de voz y botón para adjuntar imágenes de comprobantes. Las burbujas de diálogo de la IA despliegan tarjetas estructuradas para transacciones guardadas, alertas presupuestarias e interactivos chips para atajos de navegación y edición.
+    \item \textbf{Vista de Estadísticas y Límites de Presupuesto:} Interfaz donde el usuario visualiza sus presupuestos por categoría mediante barras de progreso y colores informativos (semáforo). Integra la gráfica del ritmo de gasto semanal comparada con el avance de la semana y el botón de atajo conversacional para consejos analíticos con IA.
+    \item \textbf{Vista de Historial de Gastos:} Una tabla interactiva de transacciones financieras con campos ordenables, buscador textual de comercios, filtros rápidos por categoría, tipo de transacción y período de tiempo, además de botones de edición y eliminación manual directa para cada fila.
+    \item \textbf{Vista de Análisis Visual (Gráficos):} Rinde reportes de análisis visual mediante gráficos de distribución de egresos por categoría (gráfico de dona), gráficos temporales de evolución del gasto mensual y tarjetas de resumen que destacan indicadores del comportamiento financiero.
+    \item \textbf{Vista de Metas de Ahorro:} Permite configurar, editar o eliminar una meta de ahorro. Muestra el avance porcentual acumulado, estadísticas del objetivo, un desglose interactivo tipo acordeón del historial de ahorros semanales (detallando el excedente acumulado de cada categoría) y un panel interactivo de hitos desbloqueados (25\%, 50\%, 75\% y 100\%).
+    \item \textbf{Vistas de Configuración y Seguridad (Mi Perfil):} Formularios específicos para actualizar los datos personales, renovar la contraseña de acceso o realizar la eliminación total de la cuenta del usuario.
     \item \textbf{Control de Dictado de Voz Flotante (Widget de Grabación):} Cuando se activa el dictado por voz, aparece un panel superpuesto dinámico con un visualizador de ondas de volumen en tiempo real basado en la Web Audio API y una caja de transcripción de texto instantánea en español, ofreciendo una experiencia inmersiva y de retroalimentación inmediata.
 \end{enumerate}
 
 \subsection{Flujo de Procesos y Recorrido del Usuario (User Journey)}
 El flujo operativo del software está diseñado para automatizar las entradas financieras reduciendo el tiempo de digitación a segundos. El recorrido del usuario consta de las siguientes fases:
 \begin{enumerate}
-    \item \textbf{Inicialización y Onboarding:} El usuario accede a la plataforma y visualiza el Dashboard inicial. Si es un usuario nuevo, el sistema presenta un Dashboard con estados vacíos en transacciones y presupuestos que dirigen la atención visual a la interacción principal (el chatbot o el botón manual).
-    \item \textbf{Ingreso de Datos Multimodal:} El usuario introduce el gasto mediante el método más cómodo según su contexto de movilidad:
-    \begin{itemize}
-        \item \textbf{Texto:} Escribe un mensaje corto en lenguaje natural (ej: \textit{``Gasté \$12 en comida fuera en Green Cafe''}).
-        \item \textbf{Voz:} Activa el micrófono y dicta la transacción en voz alta.
-        \item \textbf{Imagen:} Captura una foto de una boleta de compra.
-    \end{itemize}
-    \item \textbf{Procesamiento Inteligente y Orquestación:} La aplicación transmite el input al servidor backend, donde el motor de Gemini procesa la información mediante \textit{Function Calling} para extraer los parámetros estructurados (monto, comercio, categoría, tipo) y actualiza de inmediato la base de datos relacional SQLite.
-    \item \textbf{Actualización Reactiva de la Interfaz:} El backend responde con el nuevo estado del usuario. El frontend actualiza de inmediato el almacenamiento de Zustand, reemplazando el \textit{Empty State} por el historial de transacciones y recalculando de manera dinámica las tarjetas de Analytics, los límites de presupuesto con alerta semafórica y la barra de progreso de metas de ahorro en un solo ciclo de renderizado.
+    \item \textbf{Autenticación e Inicio de Sesión:} El usuario ingresa al portal de acceso y digita sus credenciales. El servidor backend valida la sesión, inicializa de forma aislada la base de datos SQLite correspondiente y carga el entorno de trabajo del usuario.
+    \item \textbf{Sincronización Inicial del Frontend:} El frontend solicita el estado del usuario en un solo ciclo asíncrono y alimenta el almacenamiento Zustand local con las transacciones, metas, chat y límites existentes para un renderizado inmediato.
+    \item \textbf{Ingreso de Datos Multimodal:} El usuario introduce un movimiento en lenguaje natural de la forma que prefiera según su comodidad (digitando texto en el chat o dictando una orden por voz con transcripción integrada).
+    \item \textbf{Procesamiento Inteligente y Orquestación:} El backend transmite la orden al servidor, el cual analiza el texto mediante Gemini `gemini-3.5-flash` y su capa de \textit{Function Calling}. La IA llama dinámicamente a las herramientas del backend, las cuales ejecutan la consulta estructurada en SQLite y retornan los resultados al modelo de lenguaje para generar una respuesta final empática y amigable en español.
+    \item \textbf{Actualización Reactiva de la Interfaz:} El backend responde con el mensaje conversacional y el estado financiero estructurado resultante. El store de Zustand sincroniza atómicamente el estado del cliente, lo que actualiza de inmediato el historial de chat, recalcula dinámicamente el avance de los límites de presupuesto con colores de advertencia, actualiza los gráficos estadísticos y ajusta las metas de ahorro.
 \end{enumerate}
 
 El flujo general de actividades se representa en la Figura \ref{fig:flujo_actividades}.
@@ -460,7 +452,8 @@ El backend expone un conjunto de endpoints RESTful bajo el prefijo `/api` proteg
 \singlespacing
 \caption{Endpoints y Especificaciones del Servidor REST Backend}
 \label{tab:endpoints}
-\begin{tabular}{p{1.2cm}p{4.7cm}p{3.8cm}p{4.8cm}}
+\footnotesize
+\begin{tabular}{p{1.8cm}p{4.4cm}p{3.8cm}p{4.5cm}}
 \toprule
 \textbf{Método} & \textbf{Ruta de la API} & \textbf{Cuerpo / Parámetros} & \textbf{Respuesta Esperada} \\
 \midrule
@@ -474,17 +467,29 @@ GET & /api/finances & Header: x-user-email & \{success: true, state\} \\
 \addlinespace
 GET & /api/finances/chat-history & ?chatId & \{success: true, chatHistory\} \\
 \addlinespace
-POST & /api/finances/transactions & \{merchant, category, amount, type\} & \{success: true, transaction, state\} \\
+POST & /api/finances/chat & \{text, chatId\} & \{success: true, response, state\} \\
 \addlinespace
-DELETE & /api/finances/transactions/:id & ID de Transacción & \{success: true, state\} \\
+POST & /api/finances/chat/new-with-prompt & \{type, customPrompt\} & \{success: true, chatId, state\} \\
+\addlinespace
+GET / POST & /api/finances/transactions & POST: \{merchant, category, amount, type\} & GET: \{success: true, transactions\} \newline POST: \{success: true, transaction, state\} \\
+\addlinespace
+GET / PUT / DELETE & /api/finances/transactions/:id & PUT: Campos a actualizar \newline (Parámetro ID en URL) & GET: \{success: true, transaction\} \newline PUT/DELETE: \{success: true, state\} \\
 \addlinespace
 PUT & /api/finances/budgets & \{category, limit, spent\} & \{success: true, state\} \\
 \addlinespace
-POST & /api/finances/savings/deposit & \{amount, note\} & \{success: true, state\} \\
+PUT / DELETE & /api/finances/savings & PUT: \{name, target, start\_date, deadline\} & \{success: true, state\} \\
 \addlinespace
-POST & /api/finances/savings/apply-recommendation & Ninguno & \{success: true, state\} \\
+GET & /api/finances/savings/history & Ninguno & \{success: true, history\} \\
 \addlinespace
-POST & /api/finances/chat & \{text, chatId\} & \{success: true, response, state\} \\
+POST / PUT / DELETE & /api/finances/categories & POST: \{name\} \newline PUT: \{oldName, newName\} \newline DELETE: ?name & \{success: true, state\} \\
+\addlinespace
+POST / DELETE & /api/finances/chat-messages & POST: \{message, chatId\} \newline DELETE: ?chatId & \{success: true, state\} \\
+\addlinespace
+DELETE & /api/finances/chat-messages/:id & Parámetro ID en URL & \{success: true, state\} \\
+\addlinespace
+PUT & /api/finances/chat-messages/:id/remove-action-chips & Parámetro ID en URL & \{success: true, state\} \\
+\addlinespace
+DELETE & /api/finances/account & Ninguno & \{success: true\} \\
 \bottomrule
 \end{tabular}
 \end{table}
