@@ -25,6 +25,7 @@ export interface UseFinancesState {
   loadUserDatabase: (email: string) => Promise<void>;
   clearUserDatabase: () => void;
   addTransaction: (tx: Omit<Transaction, "id" | "date">) => Promise<void>;
+  updateTransaction: (id: string, tx: Partial<Transaction>) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
   updateBudgetLimit: (category: string, limit: number) => Promise<void>;
   updateBudgetSpent: (category: string, spent: number) => Promise<void>;
@@ -153,6 +154,23 @@ export const useFinancesStore = create<UseFinancesState>((set, get) => ({
       }
     } catch (err) {
       console.error("Failed to add transaction:", err);
+    }
+  },
+
+  updateTransaction: async (id, tx) => {
+    try {
+      const data = await apiFetch(`/api/finances/transactions/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(tx),
+      });
+      if (data.success && data.state) {
+        set({
+          transactions: data.state.transactions,
+          budgets: data.state.budgets,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to update transaction:", err);
     }
   },
 

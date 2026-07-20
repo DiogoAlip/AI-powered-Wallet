@@ -10,6 +10,9 @@ import {
   getChatHistory,
   addTransaction,
   deleteTransaction,
+  getTransaction,
+  updateTransaction,
+  getTransactions,
   updateBudgetLimit,
   updateBudgetSpent,
   depositSavings,
@@ -158,6 +161,30 @@ app.get("/api/finances/chat-history", authMiddleware, (req, res) => {
 });
 
 // 3. Transactions CRUD
+app.get("/api/finances/transactions", authMiddleware, (req, res) => {
+  try {
+    const txs = getTransactions(req.userEmail);
+    res.json({ success: true, transactions: txs });
+  } catch (error) {
+    console.error("Error fetching transactions:", error);
+    res.status(500).json({ error: "Failed to fetch transactions" });
+  }
+});
+
+app.get("/api/finances/transactions/:id", authMiddleware, (req, res) => {
+  try {
+    const tx = getTransaction(req.userEmail, req.params.id);
+    if (tx) {
+      res.json({ success: true, transaction: tx });
+    } else {
+      res.status(404).json({ error: "Transaction not found" });
+    }
+  } catch (error) {
+    console.error("Error fetching transaction:", error);
+    res.status(500).json({ error: "Failed to fetch transaction" });
+  }
+});
+
 app.post("/api/finances/transactions", authMiddleware, (req, res) => {
   try {
     const tx = addTransaction(req.userEmail, req.body);
@@ -165,6 +192,20 @@ app.post("/api/finances/transactions", authMiddleware, (req, res) => {
   } catch (error) {
     console.error("Error adding transaction:", error);
     res.status(500).json({ error: "Failed to add transaction" });
+  }
+});
+
+app.put("/api/finances/transactions/:id", authMiddleware, (req, res) => {
+  try {
+    const updated = updateTransaction(req.userEmail, req.params.id, req.body);
+    if (updated) {
+      res.json({ success: true, transaction: updated, state: getUserState(req.userEmail) });
+    } else {
+      res.status(404).json({ error: "Transaction not found" });
+    }
+  } catch (error) {
+    console.error("Error updating transaction:", error);
+    res.status(500).json({ error: "Failed to update transaction" });
   }
 });
 

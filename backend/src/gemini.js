@@ -5,6 +5,15 @@ import {
   addTransaction,
   depositSavings,
   updateBudgetLimit,
+  updateTransaction,
+  deleteTransaction,
+  addCategory,
+  updateCategory,
+  deleteCategory,
+  resetSavings,
+  deleteSavingsLog,
+  updateSavingsGoal,
+  updateBudgetSpent,
 } from "./db.js";
 
 const FINANCIAL_TOOLS = [
@@ -76,6 +85,173 @@ const FINANCIAL_TOOLS = [
           },
           required: ["category", "limit"]
         }
+      },
+      {
+        name: "list_transactions",
+        description: "Obtiene la lista completa de transacciones financieras registradas del usuario. Utilízala cuando el usuario quiera ver sus movimientos, historial o cuando necesites encontrar el ID de una transacción para actualizarla o eliminarla.",
+        parameters: {
+          type: "OBJECT",
+          properties: {},
+          required: []
+        }
+      },
+      {
+        name: "update_transaction",
+        description: "Actualiza o edita una transacción financiera existente usando su ID. Utiliza esta herramienta cuando el usuario te pida corregir, modificar o cambiar algún detalle de un gasto o ingreso ya registrado.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            id: {
+              type: "STRING",
+              description: "El identificador único (ID) de la transacción que se desea actualizar."
+            },
+            merchant: {
+              type: "STRING",
+              description: "El nuevo nombre del establecimiento o concepto. Opcional."
+            },
+            category: {
+              type: "STRING",
+              description: "La nueva categoría. Debe ser una de las siguientes: 'Comida fuera', 'Transporte', 'Supermercado', 'Facturas', 'Compras', 'Otros' para gastos; o 'Ingresos' para entradas de dinero. Opcional."
+            },
+            amount: {
+              type: "NUMBER",
+              description: "El nuevo monto de la transacción en dólares. Opcional."
+            },
+            type: {
+              type: "STRING",
+              enum: ["expense", "income"],
+              description: "Si es un gasto (expense) o un ingreso (income). Opcional."
+            },
+            account: {
+              type: "STRING",
+              description: "La nueva cuenta de origen o destino. Opcional."
+            },
+            date: {
+              type: "STRING",
+              description: "La nueva fecha o texto de la fecha (ej: 'Hoy', 'Ayer', 'Hace 2 días'). Opcional."
+            }
+          },
+          required: ["id"]
+        }
+      },
+      {
+        name: "delete_transaction",
+        description: "Elimina una transacción financiera registrada usando su ID. Utiliza esta herramienta cuando el usuario pida borrar, quitar, eliminar o cancelar un gasto o ingreso.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            id: {
+              type: "STRING",
+              description: "El identificador único (ID) de la transacción que se desea eliminar."
+            }
+          },
+          required: ["id"]
+        }
+      },
+      {
+        name: "update_savings_goal",
+        description: "Actualiza el nombre o la cantidad objetivo de la meta de ahorro actual del usuario.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            name: {
+              type: "STRING",
+              description: "El nuevo nombre para la meta de ahorro. Opcional."
+            },
+            target: {
+              type: "NUMBER",
+              description: "La nueva cantidad objetivo en dólares. Opcional."
+            }
+          },
+          required: []
+        }
+      },
+      {
+        name: "add_category",
+        description: "Crea o añade una nueva categoría de gasto en el sistema del usuario.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            name: {
+              type: "STRING",
+              description: "El nombre de la nueva categoría a crear."
+            }
+          },
+          required: ["name"]
+        }
+      },
+      {
+        name: "update_category",
+        description: "Modifica o renombra una categoría de gasto existente en el sistema del usuario.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            oldName: {
+              type: "STRING",
+              description: "El nombre actual de la categoría que se desea modificar."
+            },
+            newName: {
+              type: "STRING",
+              description: "El nuevo nombre que se le asignará a la categoría."
+            }
+          },
+          required: ["oldName", "newName"]
+        }
+      },
+      {
+        name: "delete_category",
+        description: "Elimina una categoría de gasto existente en el sistema del usuario.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            name: {
+              type: "STRING",
+              description: "El nombre de la categoría a eliminar."
+            }
+          },
+          required: ["name"]
+        }
+      },
+      {
+        name: "reset_savings",
+        description: "Reinicia el progreso acumulado de la meta de ahorro a cero dólares y vacía los registros correspondientes. Úsala cuando el usuario quiera empezar de nuevo o borrar su progreso de ahorro.",
+        parameters: {
+          type: "OBJECT",
+          properties: {},
+          required: []
+        }
+      },
+      {
+        name: "delete_savings_log",
+        description: "Elimina una entrada de registro de ahorro específica usando su ID. Úsala cuando el usuario quiera deshacer un depósito de ahorro específico.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            id: {
+              type: "STRING",
+              description: "El ID del registro de ahorro que se desea eliminar."
+            }
+          },
+          required: ["id"]
+        }
+      },
+      {
+        name: "update_budget_spent",
+        description: "Sobrescribe o actualiza directamente la cantidad gastada de una categoría de presupuesto específica. Úsala cuando el usuario pida ajustar o corregir lo gastado en un presupuesto.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            category: {
+              type: "STRING",
+              description: "La categoría del presupuesto a modificar (ej: Comida fuera, Transporte, Supermercado, Facturas, Compras)."
+            },
+            spent: {
+              type: "NUMBER",
+              description: "La nueva cantidad gastada acumulada en dólares."
+            }
+          },
+          required: ["category", "spent"]
+        }
       }
     ]
   }
@@ -90,7 +266,7 @@ function getSystemInstruction(transactions, budgets, savings) {
     .slice(0, 5)
     .map(
       (t) =>
-        `- [${t.type === "expense" ? "Gasto" : "Ingreso"}] $${t.amount.toFixed(2)} en **${t.merchant}** (Categoría: ${t.category}, Fecha: ${t.date})`
+        `- [${t.type === "expense" ? "Gasto" : "Ingreso"}] $${t.amount.toFixed(2)} en **${t.merchant}** (Categoría: ${t.category}, Fecha: ${t.date}, ID: ${t.id})`
     )
     .join("\n");
 
@@ -112,9 +288,17 @@ Instrucciones de comportamiento:
 2. Si el usuario te indica que gastó o recibió dinero (ej: "gasté 15 en taxi", "me pagaron 100"), utiliza la herramienta 'add_transaction' para registrar la transacción. Elige la categoría correcta entre las disponibles: 'Comida fuera', 'Transporte', 'Supermercado', 'Facturas', 'Compras', 'Otros', o 'Ingresos'.
 3. Si el usuario quiere guardar dinero en sus ahorros, utiliza la herramienta 'deposit_savings'.
 4. Si el usuario quiere ajustar el límite de un presupuesto, utiliza la herramienta 'update_budget_limit'.
-5. Cuando ejecutes una acción, explica brevemente qué registraste y cómo afecta a las finanzas del usuario (ej: saldo restante, avance del ahorro).
-6. Si un presupuesto ha sido excedido o está al 75% o más de su capacidad, adviérteselo amablemente al usuario con recomendaciones constructivas.
-7. Nunca menciones la palabra "wallet" ni "billetera". Refiérete a la aplicación como "sistema de gestión financiera" o simplemente "FinancIA!".`;
+5. Si el usuario quiere ver su historial de transacciones o movimientos financieros, utiliza la herramienta 'list_transactions'.
+6. Si el usuario quiere modificar, corregir o cambiar los detalles de una transacción existente (por ejemplo, cambiar el monto, la fecha, el establecimiento o la categoría), utiliza la herramienta 'update_transaction'. Primero identifica el ID de la transacción basándote en su descripción o el historial, y luego realiza el cambio.
+7. Si el usuario quiere borrar o eliminar una transacción, utiliza la herramienta 'delete_transaction' con el ID correspondiente.
+8. Si el usuario quiere actualizar o modificar la configuración de su meta de ahorro (el nombre de la meta o la cantidad del objetivo), utiliza la herramienta 'update_savings_goal'.
+9. Si el usuario quiere crear/añadir una nueva categoría de gasto, utiliza la herramienta 'add_category'. Si quiere renombrar una existente, utiliza 'update_category'. Si quiere borrar una categoría de gasto, utiliza 'delete_category'.
+10. Si el usuario quiere reiniciar por completo todo el progreso acumulado de sus ahorros (empezar desde cero), utiliza la herramienta 'reset_savings'.
+11. Si el usuario quiere eliminar un depósito de ahorro específico de su registro por su ID, utiliza la herramienta 'delete_savings_log'.
+12. Si el usuario quiere cambiar o corregir manualmente la cantidad gastada acumulada en un presupuesto, utiliza la herramienta 'update_budget_spent'.
+13. Cuando ejecutes una acción, explica brevemente qué registraste, modificaste o eliminaste y cómo afecta a las finanzas del usuario (ej: saldo restante, avance del ahorro).
+14. Si un presupuesto ha sido excedido o está al 75% o más de su capacidad, adviérteselo amablemente al usuario con recomendaciones constructivas.
+15. Nunca menciones la palabra "wallet" ni "billetera". Refiérete a la aplicación como "sistema de gestión financiera" o simplemente "FinancIA!".`;
 }
 
 async function makeApiRequest(model, apiKey, payload) {
@@ -232,6 +416,121 @@ export async function chat(userText, chatHistory, email) {
       functionResult = {
         status: "success",
         message: `Presupuesto de '${category}' actualizado a un límite de $${limit.toFixed(2)}.`
+      };
+    } else if (name === "list_transactions") {
+      const txs = getTransactions(cleanEmail);
+      functionResult = {
+        status: "success",
+        transactions: txs
+      };
+    } else if (name === "update_transaction") {
+      const txArgs = args;
+      const updatedTx = updateTransaction(cleanEmail, txArgs.id, {
+        merchant: txArgs.merchant,
+        category: txArgs.category,
+        amount: txArgs.amount !== undefined ? parseFloat(txArgs.amount) : undefined,
+        type: txArgs.type,
+        account: txArgs.account,
+        date: txArgs.date
+      });
+
+      if (updatedTx) {
+        transactionDetail = updatedTx;
+        if (updatedTx.type === "expense") {
+          const updatedBudgets = getBudgets(cleanEmail);
+          const categoryBudget = updatedBudgets.find((b) => b.category === updatedTx.category);
+          if (categoryBudget) {
+            const spentAfter = categoryBudget.spent;
+            const remaining = categoryBudget.limit - spentAfter;
+            infoText =
+              remaining >= 0
+                ? `Te quedan $${remaining.toFixed(2)} de tu presupuesto para '${updatedTx.category}' después de la actualización.`
+                : `¡Alerta! Has excedido el presupuesto de '${updatedTx.category}' por $${Math.abs(remaining).toFixed(2)} tras la actualización.`;
+          }
+        }
+        functionResult = {
+          status: "success",
+          transaction: updatedTx,
+          message: `Transacción con ID '${txArgs.id}' actualizada con éxito.`
+        };
+      } else {
+        functionResult = {
+          status: "error",
+          message: `No se pudo actualizar la transacción: no se encontró la transacción con ID '${txArgs.id}'.`
+        };
+      }
+    } else if (name === "delete_transaction") {
+      const txArgs = args;
+      const deletedTx = deleteTransaction(cleanEmail, txArgs.id);
+      if (deletedTx) {
+        functionResult = {
+          status: "success",
+          message: `Transacción con ID '${txArgs.id}' eliminada con éxito.`
+        };
+      } else {
+        functionResult = {
+          status: "error",
+          message: `No se pudo eliminar la transacción: no se encontró la transacción con ID '${txArgs.id}'.`
+        };
+      }
+    } else if (name === "update_savings_goal") {
+      const updateArgs = args;
+      const currentSavings = getSavings(cleanEmail);
+      const goalName = updateArgs.name !== undefined ? updateArgs.name : currentSavings.name;
+      const target = updateArgs.target !== undefined ? parseFloat(updateArgs.target) : currentSavings.target;
+      updateSavingsGoal(cleanEmail, goalName, target);
+      functionResult = {
+        status: "success",
+        message: `Meta de ahorro actualizada a '${goalName}' con un objetivo de $${target.toFixed(2)}.`
+      };
+    } else if (name === "add_category") {
+      const catArgs = args;
+      addCategory(cleanEmail, catArgs.name);
+      functionResult = {
+        status: "success",
+        message: `Categoría '${catArgs.name}' añadida exitosamente.`
+      };
+    } else if (name === "update_category") {
+      const catArgs = args;
+      updateCategory(cleanEmail, catArgs.oldName, catArgs.newName);
+      functionResult = {
+        status: "success",
+        message: `Categoría renombrada de '${catArgs.oldName}' a '${catArgs.newName}' correctamente.`
+      };
+    } else if (name === "delete_category") {
+      const catArgs = args;
+      deleteCategory(cleanEmail, catArgs.name);
+      functionResult = {
+        status: "success",
+        message: `Categoría '${catArgs.name}' eliminada correctamente.`
+      };
+    } else if (name === "reset_savings") {
+      resetSavings(cleanEmail);
+      functionResult = {
+        status: "success",
+        message: "Se ha reiniciado el progreso acumulado de tus ahorros y vaciado los registros de aportes."
+      };
+    } else if (name === "delete_savings_log") {
+      const logArgs = args;
+      const deletedLog = deleteSavingsLog(cleanEmail, logArgs.id);
+      if (deletedLog) {
+        functionResult = {
+          status: "success",
+          message: `Registro de ahorro con ID '${logArgs.id}' de $${deletedLog.amount.toFixed(2)} eliminado correctamente.`
+        };
+      } else {
+        functionResult = {
+          status: "error",
+          message: `No se encontró el registro de ahorro con ID '${logArgs.id}'.`
+        };
+      }
+    } else if (name === "update_budget_spent") {
+      const budgetArgs = args;
+      const spent = parseFloat(budgetArgs.spent) || 0;
+      updateBudgetSpent(cleanEmail, budgetArgs.category, spent);
+      functionResult = {
+        status: "success",
+        message: `Gasto de la categoría '${budgetArgs.category}' actualizado manualmente a $${spent.toFixed(2)}.`
       };
     }
 

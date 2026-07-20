@@ -215,7 +215,7 @@ export function initializeUser(email, name = "Socio FinancIA!", password = null)
     for (const b of INITIAL_BUDGETS) {
       db.prepare(
         "INSERT OR IGNORE INTO budgets (user_email, category, spent, limit_val, icon, color) VALUES (?, ?, ?, ?, ?, ?)"
-      ).run(cleanEmail, b.category, 0, 0, b.icon, b.color);
+      ).run(cleanEmail, b.category, 0, 100, b.icon, b.color);
     }
     db.prepare(
       "INSERT OR IGNORE INTO savings (user_email, name, target, current) VALUES (?, ?, ?, ?)"
@@ -595,3 +595,67 @@ export function updatePassword(email, newPassword) {
     email.toLowerCase()
   );
 }
+
+export function getTransaction(email, id) {
+  const db = getDb();
+  const stmt = db.prepare(
+    "SELECT id, merchant, category, amount, date, account, type FROM transactions WHERE id = ? AND user_email = ?"
+  );
+  const row = stmt.get(id, email.toLowerCase());
+  return row ? {
+    id: row.id,
+    merchant: row.merchant,
+    category: row.category,
+    amount: row.amount,
+    date: row.date,
+    account: row.account,
+    type: row.type,
+  } : null;
+}
+
+export function updateTransaction(email, id, updatedFields) {
+  const db = getDb();
+  const cleanEmail = email.toLowerCase();
+
+  const oldTx = db.prepare("SELECT type, category, amount, merchant, date, account FROM transactions WHERE id = ? AND user_email = ?").get(id, cleanEmail);
+  if (!oldTx) return null;
+
+  // 1. Revert budget impact of the old transaction if it was an expense
+  if (oldTx.type === "expense") {
+    db.prepare(
+      "UPDATE budgets SET spent = MAX(0, spent - ?) WHERE user_email = ? AND category = ?"
+    ).run(oldTx.amount, cleanEmail, oldTx.category);
+  }
+
+  // 2. Perform update
+  const merchant = updatedFields.merchant !== undefined ? updatedFields.merchant : oldTx.merchant;
+  const category = updatedFields.category !== undefined ? updatedFields.category : oldTx.category;
+  const amount = updatedFields.amount !== undefined ? parseFloat(updatedFields.amount) : oldTx.amount;
+  const date = updatedFields.date !== undefined ? updatedFields.date : oldTx.date;
+  const account = updatedFields.account !== undefined ? updatedFields.account : oldTx.account;
+  const type = updatedFields.type !== undefined ? updatedFields.type : oldTx.type;
+
+  db.prepare(`
+    UPDATE transactions
+    SET merchant = ?, category = ?, amount = ?, date = ?, account = ?, type = ?
+    WHERE id = ? AND user_email = ?
+  `).run(merchant, category, amount, date, account, type, id, cleanEmail);
+
+  // 3. Apply budget impact of the updated transaction if it is an expense
+  if (type === "expense") {
+    db.prepare(
+      "UPDATE budgets SET spent = spent + ? WHERE user_email = ? AND category = ?"
+    ).run(amount, cleanEmail, category);
+  }
+
+  return {
+    id,
+    merchant,
+    category,
+    amount,
+    date,
+    account,
+    type
+  };
+}
+

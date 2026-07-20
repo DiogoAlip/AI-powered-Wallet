@@ -190,7 +190,15 @@ export const INITIAL_BUDGETS = [
     icon: "Tag",
     color: "#EC4899", // Pink
   },
+  {
+    category: "Otros",
+    spent: 0.0,
+    limit: 100.0,
+    icon: "HelpCircle",
+    color: "#6B7280",
+  },
 ];
+
 
 export const INITIAL_SAVINGS = {
   name: "Fondo de Emergencia",
