@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Outlet, Navigate } from "react-router";
 import { SideBar } from "../components/SideBar";
+import { NavBar } from "../components/NavBar";
 import { useAuthStore } from "../../store/auth.store";
 import { useFinancesStore } from "../../store/finances.store";
 
@@ -49,6 +50,7 @@ export const DashboardLayout = () => {
 
   return (
     <>
+      <NavBar toggleSideBar={toggleMobile} sidebarExpanded={sidebarExpanded} />
       <SideBar
         isOpen={mobileOpen}
         expanded={sidebarExpanded}

@@ -384,7 +384,7 @@ export function SideBar({ isOpen, expanded, toggleSideBar, toggleExpanded }: Sid
 
       {/* ── Desktop permanent sidebar ─────────────────────────────────── */}
       <aside
-        className={`hidden md:flex flex-col fixed inset-y-0 left-0 z-40 border-r border-gray-200 shadow-sm transition-all duration-300 ease-in-out ${
+        className={`hidden md:flex flex-col fixed inset-y-0 left-0 z-52 border-r border-gray-200 shadow-sm transition-all duration-300 ease-in-out ${
           expanded ? "w-64" : "w-16"
         }`}
       >
