@@ -43,7 +43,7 @@ const dbPath = process.env.DATABASE_PATH || "./data/finances.db";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const frontendDistPath = path.join(__dirname, "../frontend/dist");
+const frontendDistPath = process.env.DIST_PATH || path.join(__dirname, "../frontend/dist");
 
 // Initialize SQLite database
 initDb(dbPath);
@@ -255,7 +255,7 @@ app.post("/api/finances/chat/new-with-prompt", authMiddleware, async (req, res) 
       .map((b) => `- **${b.category}**: Gastado $${b.spent.toFixed(2)} de un límite de $${b.limit.toFixed(2)}`)
       .join("\n");
 
-    const savingsContext = savings.name 
+    const savingsContext = savings.name
       ? `Meta de ahorro activa: "${savings.name}", acumulado $${savings.current.toFixed(2)} de un objetivo de $${savings.target.toFixed(2)}.`
       : "No tengo una meta de ahorro activa configurada actualmente.";
 
@@ -520,7 +520,7 @@ app.post("/api/finances/chat", authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error("Chat orchestration error:", error);
-    
+
     // Persist error message in DB to show user
     const errorMsg = {
       id: `chat-${Date.now()}`,
@@ -531,7 +531,7 @@ app.post("/api/finances/chat", authMiddleware, async (req, res) => {
       }),
       text: `⚠️ Error de configuración: ${error.message || error}`,
     };
-    
+
     try {
       persistChatMessage(req.userEmail, errorMsg, chatId);
     } catch (persistErr) {
